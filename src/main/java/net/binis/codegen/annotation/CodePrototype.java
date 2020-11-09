@@ -14,6 +14,8 @@ public @interface CodePrototype {
     boolean generateModifier() default false;
     boolean base() default false;
     boolean interfaceSetters() default true;
+    boolean classGetters() default true;
+    boolean classSetters() default true;
     Class<?> baseModifierClass() default void.class;
     Class<?> creatorClass() default void.class;
     boolean creatorModifier() default false;
