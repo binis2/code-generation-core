@@ -2,12 +2,9 @@ package net.binis.codegen.factory;
 
 import lombok.Builder;
 import lombok.Data;
-import net.binis.codegen.exception.GenericCodeGenException;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
 
 public class CodeFactory {
 
@@ -36,37 +33,7 @@ public class CodeFactory {
 
     }
 
-    private static Supplier<Object> tryGenerateCreator(Class<?> implClass) {
-        return () -> {
-            try {
-                return implClass.getDeclaredConstructor().newInstance();
-            } catch (Exception e) {
-                throw new GenericCodeGenException(e);
-            }
-        };
-    }
-
-    private static BiFunction<Object, Object, Object> tryGenerateModifier(Class<?> modifierClass, Class<?> entityClass) {
-        try {
-            var constructor = modifierClass.getDeclaredConstructor(Object.class, entityClass);
-            constructor.setAccessible(true);
-
-            return (parent, entity) -> {
-                try {
-                    return constructor.newInstance(parent, entity);
-                } catch (Exception e) {
-                    throw new GenericCodeGenException(e);
-                }
-            };
-
-        } catch (Exception e) {
-            throw new GenericCodeGenException(e);
-        }
-
-    }
-
-
-    public static void registerEmbeddableType(Class<?> intf, ObjectFactory impl, EmbeddedObjectFactory modifier) {
+    public static void registerType(Class<?> intf, ObjectFactory impl, EmbeddedObjectFactory modifier) {
         registry.put(intf, RegistryEntry.builder().implClass(impl).modifierClass(modifier).build());
     }
 
