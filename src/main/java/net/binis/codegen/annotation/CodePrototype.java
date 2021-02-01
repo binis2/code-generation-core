@@ -21,5 +21,6 @@ public @interface CodePrototype {
     boolean creatorModifier() default false;
     Class<?> mixInClass() default void.class;
     String implementationPackage() default "";
+    String basePath() default "";
 
 }
