@@ -23,4 +23,6 @@ public @interface CodePrototype {
     String implementationPackage() default "";
     String basePath() default "";
 
+    Class<?>[] enrichers() default {};
+
 }
