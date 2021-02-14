@@ -17,12 +17,11 @@ public @interface CodePrototype {
     boolean classGetters() default true;
     boolean classSetters() default true;
     Class<?> baseModifierClass() default void.class;
-    Class<?> creatorClass() default void.class;
-    boolean creatorModifier() default false;
     Class<?> mixInClass() default void.class;
     String implementationPackage() default "";
     String basePath() default "";
 
     Class<?>[] enrichers() default {};
+    Class<?>[] inheritedEnrichers() default {};
 
 }
