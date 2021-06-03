@@ -12,7 +12,6 @@ public @interface CodePrototype {
     boolean generateConstructor() default true;
     boolean generateImplementation() default true;
     boolean generateInterface() default true;
-    boolean generateModifier() default false;
     boolean base() default false;
     boolean interfaceSetters() default true;
     boolean classGetters() default true;
