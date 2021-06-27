@@ -10,4 +10,8 @@ public class GenericCodeGenException extends RuntimeException {
         super(e);
     }
 
+    public GenericCodeGenException(String s, Exception e) {
+        super(s, e);
+    }
+
 }
