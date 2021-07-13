@@ -12,6 +12,14 @@ public class Reflection {
 
     }
 
+    public static Class<?> loadClass(String className) {
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
+
     @SneakyThrows
     public static <T> T instantiate(Class<T> cls) {
         return cls.getDeclaredConstructor().newInstance();
