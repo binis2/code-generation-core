@@ -9,9 +9,9 @@ package net.binis.codegen.factory;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,9 @@ package net.binis.codegen.factory;
 
 import lombok.Builder;
 import lombok.Data;
+import net.binis.codegen.exception.ValidationException;
+import net.binis.codegen.validation.Sanitizer;
+import net.binis.codegen.validation.Validator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -65,6 +68,34 @@ public class CodeFactory {
 
     public static void registerType(Class<?> intf, ObjectFactory impl, EmbeddedObjectFactory modifier) {
         registry.put(intf, RegistryEntry.builder().implFactory(impl).modifierFactory(modifier).build());
+    }
+
+    public static void validate(Object value, Class intf, String message, String... params) {
+        var entry = registry.get(intf);
+        if (entry != null) {
+            var obj = entry.getImplFactory().create();
+            if (obj instanceof Validator) {
+                ((Validator) obj).validate(value, message, params);
+            } else {
+                throw new ValidationException(intf.getCanonicalName() + " is not validator!");
+            }
+        } else {
+            throw new ValidationException(intf.getCanonicalName() + " is not registered!");
+        }
+    }
+
+    public static <T> T sanitize(T value, Class intf, String... params) {
+        var entry = registry.get(intf);
+        if (entry != null) {
+            var obj = entry.getImplFactory().create();
+            if (obj instanceof Sanitizer) {
+                return ((Sanitizer) obj).sanitize(value, params);
+            } else {
+                throw new ValidationException(intf.getCanonicalName() + " is not sanitizer!");
+            }
+        } else {
+            throw new ValidationException(intf.getCanonicalName() + " is not registered!");
+        }
     }
 
     @Data
