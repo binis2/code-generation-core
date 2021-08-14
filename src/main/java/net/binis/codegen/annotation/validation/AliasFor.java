@@ -21,15 +21,13 @@ package net.binis.codegen.annotation.validation;
  */
 
 import net.binis.codegen.annotation.CodeAnnotation;
-import net.binis.codegen.validation.Sanitizer;
+import net.binis.codegen.validation.Validator;
 
 import java.lang.annotation.*;
 
 @CodeAnnotation
-@Repeatable(Sanitizations.class)
-@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD})
+@Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Sanitize {
-    Class<? extends Sanitizer> value();
-    String[] params() default {};
+public @interface AliasFor {
+    String value();
 }

@@ -23,10 +23,12 @@ package net.binis.codegen.annotation.validation;
 import net.binis.codegen.annotation.CodeAnnotation;
 import net.binis.codegen.validation.Validator;
 
-import java.lang.annotation.Repeatable;
+import java.lang.annotation.*;
 
 @CodeAnnotation
 @Repeatable(Validations.class)
+@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Validate {
     Class<? extends Validator> value();
     String[] params() default {};
