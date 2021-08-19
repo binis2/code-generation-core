@@ -21,5 +21,5 @@ package net.binis.codegen.validation;
  */
 
 public interface Validator {
-    void validate(Object value, String message, String... params);
+    void validate(Object value, String message, Object... params);
 }

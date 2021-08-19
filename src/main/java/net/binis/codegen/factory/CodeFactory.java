@@ -70,7 +70,7 @@ public class CodeFactory {
         registry.put(intf, RegistryEntry.builder().implFactory(impl).modifierFactory(modifier).build());
     }
 
-    public static void validate(Object value, Class intf, String message, String... params) {
+    public static void validate(Object value, Class intf, String message, Object... params) {
         var entry = registry.get(intf);
         if (entry != null) {
             var obj = entry.getImplFactory().create();
@@ -84,7 +84,7 @@ public class CodeFactory {
         }
     }
 
-    public static <T> T sanitize(T value, Class intf, String... params) {
+    public static <T> T sanitize(T value, Class intf, Object... params) {
         var entry = registry.get(intf);
         if (entry != null) {
             var obj = entry.getImplFactory().create();

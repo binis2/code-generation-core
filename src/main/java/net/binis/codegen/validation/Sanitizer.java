@@ -22,6 +22,6 @@ package net.binis.codegen.validation;
 
 public interface Sanitizer {
 
-    <T> T sanitize(T value, String... params);
+    <T> T sanitize(T value, Object... params);
 
 }
