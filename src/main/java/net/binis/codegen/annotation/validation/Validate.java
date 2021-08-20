@@ -33,4 +33,5 @@ public @interface Validate {
     Class<? extends Validator> value();
     String[] params() default {};
     String message() default "";
+    String asCode() default "";
 }

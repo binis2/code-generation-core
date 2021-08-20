@@ -28,8 +28,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @CodeAnnotation
-@Target({ElementType.METHOD})
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface AliasFor {
-    String value();
+public @interface AsCode {
+    String value() default "%s";
 }

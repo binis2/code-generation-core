@@ -32,4 +32,5 @@ import java.lang.annotation.*;
 public @interface Sanitize {
     Class<? extends Sanitizer> value();
     String[] params() default {};
+    String asCode() default "";
 }
