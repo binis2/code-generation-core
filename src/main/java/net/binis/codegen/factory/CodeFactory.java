@@ -29,6 +29,8 @@ import net.binis.codegen.validation.Validator;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
+
 public class CodeFactory {
 
     private static final Map<Class<?>, RegistryEntry> registry = new HashMap<>();
@@ -68,6 +70,19 @@ public class CodeFactory {
 
     public static void registerType(Class<?> intf, ObjectFactory impl, EmbeddedObjectFactory modifier) {
         registry.put(intf, RegistryEntry.builder().implFactory(impl).modifierFactory(modifier).build());
+    }
+
+    public static void envelopType(Class<?> intf, EnvelopFactory impl, EmbeddedEnvelopFactory modifier) {
+        var reg = registry.get(intf);
+        var implFactory = reg.getImplFactory();
+
+        reg.setImplFactory(() -> impl.envelop(implFactory));
+        if (nonNull(reg.getModifierFactory())) {
+            var embeddedFactory = reg.getModifierFactory();
+            if (nonNull(embeddedFactory) && nonNull(modifier)) {
+                reg.setModifierFactory((parent, value) -> modifier.envelop(embeddedFactory, parent, value));
+            }
+        }
     }
 
     public static void validate(Object value, Class intf, String message, Object... params) {
