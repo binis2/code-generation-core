@@ -29,6 +29,7 @@ import net.binis.codegen.validation.Validator;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 public class CodeFactory {
@@ -90,7 +91,12 @@ public class CodeFactory {
         if (entry != null) {
             var obj = entry.getImplFactory().create();
             if (obj instanceof Validator) {
-                ((Validator) obj).validate(value, message, params);
+                if (!((Validator) obj).validate(value, params)) {
+                    if (isNull(message)) {
+                        message = "Validation failed!";
+                    }
+                    throw new ValidationException(String.format(message, params));
+                }
             } else {
                 throw new ValidationException(intf.getCanonicalName() + " is not validator!");
             }
