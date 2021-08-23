@@ -86,39 +86,6 @@ public class CodeFactory {
         }
     }
 
-    public static void validate(Object value, Class intf, String message, Object... params) {
-        var entry = registry.get(intf);
-        if (entry != null) {
-            var obj = entry.getImplFactory().create();
-            if (obj instanceof Validator) {
-                if (!((Validator) obj).validate(value, params)) {
-                    if (isNull(message)) {
-                        message = "Validation failed!";
-                    }
-                    throw new ValidationException(String.format(message, params));
-                }
-            } else {
-                throw new ValidationException(intf.getCanonicalName() + " is not validator!");
-            }
-        } else {
-            throw new ValidationException(intf.getCanonicalName() + " is not registered!");
-        }
-    }
-
-    public static <T> T sanitize(T value, Class intf, Object... params) {
-        var entry = registry.get(intf);
-        if (entry != null) {
-            var obj = entry.getImplFactory().create();
-            if (obj instanceof Sanitizer) {
-                return ((Sanitizer) obj).sanitize(value, params);
-            } else {
-                throw new ValidationException(intf.getCanonicalName() + " is not sanitizer!");
-            }
-        } else {
-            throw new ValidationException(intf.getCanonicalName() + " is not registered!");
-        }
-    }
-
     @Data
     @Builder
     private static class RegistryEntry {
