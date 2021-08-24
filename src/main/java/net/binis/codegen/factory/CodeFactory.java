@@ -22,7 +22,9 @@ package net.binis.codegen.factory;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import net.binis.codegen.exception.ValidationException;
+import net.binis.codegen.tools.Reflection;
 import net.binis.codegen.validation.Sanitizer;
 import net.binis.codegen.validation.Validator;
 
@@ -31,7 +33,9 @@ import java.util.Map;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static net.binis.codegen.tools.Reflection.initialize;
 
+@Slf4j
 public class CodeFactory {
 
     private static final Map<Class<?>, RegistryEntry> registry = new HashMap<>();
@@ -48,6 +52,23 @@ public class CodeFactory {
         }
         return null;
     }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T create(Class<T> cls, String defaultClass) {
+        var entry = registry.get(cls);
+        if (entry != null) {
+            return (T) entry.getImplFactory().create();
+        } else {
+            try {
+                initialize(defaultClass);
+                return create(cls);
+            } catch (Exception e) {
+                log.error("Can't find class: {}", defaultClass);
+            }
+        }
+        return null;
+    }
+
 
     @SuppressWarnings("unchecked")
     public static <M, T, P> M modify(P parent, T value) {

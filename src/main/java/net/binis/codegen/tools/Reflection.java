@@ -45,6 +45,11 @@ public class Reflection {
         return cls.getDeclaredConstructor().newInstance();
     }
 
+    @SneakyThrows
+    public static void initialize(String cls) {
+        instantiate(Class.forName(cls));
+    }
+
     public static Field findField(Class<?> cls, String name) {
         try {
             return cls.getDeclaredField(name);
