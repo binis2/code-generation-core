@@ -1,4 +1,4 @@
-package net.binis.codegen.creator;
+package net.binis.codegen.enrich;
 
 /*-
  * #%L
@@ -20,19 +20,9 @@ package net.binis.codegen.creator;
  * #L%
  */
 
-import net.binis.codegen.factory.CodeFactory;
+public interface Enrichers {
 
-public class EntityCreator {
-
-    private EntityCreator() {
-        //Do nothing
-    }
-
-    public static <T> T create(Class<T> cls) {
-        return CodeFactory.create(cls);
-    }
-    public static <T> T create(Class<T> cls, String defaultClass) {
-        return CodeFactory.create(cls, defaultClass);
-    }
+    Class<? extends Enricher>[] BUILDER = new Class[] {CreatorModifierEnricher.class, ModifierEnricher.class};
+    Class<? extends Enricher>[] VALIDATED_BUILDER = new Class[] {CreatorModifierEnricher.class, ModifierEnricher.class, ValidationEnricher.class};
 
 }

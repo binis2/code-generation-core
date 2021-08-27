@@ -1,4 +1,4 @@
-package net.binis.codegen.creator;
+package net.binis.codegen.enrich;
 
 /*-
  * #%L
@@ -20,19 +20,5 @@ package net.binis.codegen.creator;
  * #L%
  */
 
-import net.binis.codegen.factory.CodeFactory;
-
-public class EntityCreator {
-
-    private EntityCreator() {
-        //Do nothing
-    }
-
-    public static <T> T create(Class<T> cls) {
-        return CodeFactory.create(cls);
-    }
-    public static <T> T create(Class<T> cls, String defaultClass) {
-        return CodeFactory.create(cls, defaultClass);
-    }
-
+public interface Enricher {
 }

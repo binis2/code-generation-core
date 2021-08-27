@@ -20,6 +20,8 @@ package net.binis.codegen.annotation;
  * #L%
  */
 
+import net.binis.codegen.enrich.Enricher;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -41,7 +43,7 @@ public @interface CodePrototype {
     String implementationPackage() default "";
     String basePath() default "";
 
-    Class<?>[] enrichers() default {};
-    Class<?>[] inheritedEnrichers() default {};
+    Class<? extends Enricher>[] enrichers() default {};
+    Class<? extends Enricher>[] inheritedEnrichers() default {};
 
 }
