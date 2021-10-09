@@ -23,15 +23,10 @@ package net.binis.codegen.factory;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import net.binis.codegen.exception.ValidationException;
-import net.binis.codegen.tools.Reflection;
-import net.binis.codegen.validation.Sanitizer;
-import net.binis.codegen.validation.Validator;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static net.binis.codegen.tools.Reflection.initialize;
 
@@ -105,6 +100,10 @@ public class CodeFactory {
                 reg.setModifierFactory((parent, value) -> modifier.envelop(embeddedFactory, parent, value));
             }
         }
+    }
+
+    public static ObjectFactory singleton(Object object) {
+        return () -> object;
     }
 
     @Data
