@@ -86,8 +86,15 @@ public class CodeFactory {
     }
 
     public static void registerType(Class<?> intf, ObjectFactory impl, EmbeddedObjectFactory modifier) {
+        if (!registry.containsKey(intf)) {
+            registry.put(intf, RegistryEntry.builder().implFactory(impl).modifierFactory(modifier).build());
+        }
+    }
+
+    public static void forceRegisterType(Class<?> intf, ObjectFactory impl, EmbeddedObjectFactory modifier) {
         registry.put(intf, RegistryEntry.builder().implFactory(impl).modifierFactory(modifier).build());
     }
+
 
     public static void envelopType(Class<?> intf, EnvelopFactory impl, EmbeddedEnvelopFactory modifier) {
         var reg = registry.get(intf);
