@@ -95,7 +95,7 @@ public class CodeFactory {
         registry.put(intf, RegistryEntry.builder().implFactory(impl).modifierFactory(modifier).build());
     }
 
-
+    @SuppressWarnings("unchecked")
     public static void envelopType(Class<?> intf, EnvelopFactory impl, EmbeddedEnvelopFactory modifier) {
         var reg = registry.get(intf);
         var implFactory = reg.getImplFactory();

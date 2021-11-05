@@ -128,6 +128,7 @@ public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCod
         return collection.stream().filter(predicate).map(e -> (M) CodeFactory.modify(this, e)).findFirst();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<M> findAll(Predicate<T> predicate) {
         return collection.stream().filter(predicate).map(e -> (M) CodeFactory.modify(this, e)).collect(Collectors.toList());
