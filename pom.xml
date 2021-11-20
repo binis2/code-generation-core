@@ -7,6 +7,7 @@
     <version>0.1.0</version>
     <name>code-generator-core</name>
     <description>Binis Code Generation Core Classes</description>
+    <url>https://github.com/binis2/code-generation</url>
 
     <licenses>
         <license>
@@ -22,7 +23,33 @@
         <url>http://binis.dev/</url>
     </organization>
 
+    <developers>
+        <developer>
+            <id>binis</id>
+            <name>Binis Belev</name>
+            <email>binisbelev@gmail.com</email>
+        </developer>
+    </developers>
+
     <inceptionYear>2021</inceptionYear>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>biniscg</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>biniscg</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+    <scm>
+        <connection>scm:git:git://github.com/binis2/code-generation-core.git</connection>
+        <developerConnection>scm:git:git@github.com:binis2/code-generation-core.git</developerConnection>
+        <url>https://github.com/binis2/code-generation-core</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <properties>
         <java.version>11</java.version>
@@ -101,13 +128,6 @@
                         <mavenExecutorId>forked-path</mavenExecutorId>
                         <arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
                     </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.apache.maven.scm</groupId>
-                            <artifactId>maven-scm-provider-gitexe</artifactId>
-                            <version>1.9.5</version>
-                        </dependency>
-                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
@@ -116,14 +136,14 @@
                     <extensions>true</extensions>
                     <configuration>
                         <serverId>biniscg</serverId>
-                        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                        <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
                         <autoReleaseAfterClose>true</autoReleaseAfterClose>
                     </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>3.2.1</version>
                     <executions>
                         <execution>
                             <id>attach-sources</id>
@@ -133,28 +153,22 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.2.0</version>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>biniscg</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>biniscg</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/
-            </url>
-        </repository>
-    </distributionManagement>
-
-    <scm>
-        <connection>scm:git:git://github.com/binis2/code-generation-core.git</connection>
-        <developerConnection>scm:git:git@github.com:binis2/code-generation-core.git</developerConnection>
-        <url>https://github.com/binis2/code-generation-core</url>
-        <tag>HEAD</tag>
-    </scm>
 
     <profiles>
         <!-- GPG Signature on release -->
