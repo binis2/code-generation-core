@@ -23,10 +23,12 @@ package net.binis.codegen.factory;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import net.binis.codegen.annotation.Default;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static net.binis.codegen.tools.Reflection.initialize;
 
@@ -34,6 +36,7 @@ import static net.binis.codegen.tools.Reflection.initialize;
 public class CodeFactory {
 
     private static final Map<Class<?>, RegistryEntry> registry = new HashMap<>();
+    private static EnvelopingObjectFactory envelopingFactory;
 
     private CodeFactory() {
         //Do nothing
@@ -43,25 +46,33 @@ public class CodeFactory {
     public static <T> T create(Class<T> cls) {
         var entry = registry.get(cls);
         if (entry != null) {
-            return (T) entry.getImplFactory().create();
+            return internalEnvelop((T) entry.getImplFactory().create());
+        } else {
+            var parent = cls.getDeclaringClass();
+            if (nonNull(parent)) {
+                return (T) defaultCreate(cls, parent);
+            } else {
+                return defaultCreate(cls, cls);
+            }
         }
-        return null;
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T create(Class<T> cls, String defaultClass) {
         var entry = registry.get(cls);
+        Object obj = null;
         if (entry != null) {
-            return (T) entry.getImplFactory().create();
+            obj = entry.getImplFactory().create();
         } else {
             try {
                 initialize(defaultClass);
-                return create(cls);
+                obj = internalCreate(cls);
             } catch (Exception e) {
                 log.error("Can't find class: {}", defaultClass);
             }
         }
-        return null;
+
+        return internalEnvelop((T) obj);
     }
 
 
@@ -69,7 +80,12 @@ public class CodeFactory {
     public static <M, T, P> M modify(P parent, T value) {
         var entry = registry.get(value.getClass());
         if (entry != null) {
-            return (M) entry.getModifierFactory().create(parent, value);
+            var obj = entry.getModifierFactory().create(parent, value);
+            if (isNull(envelopingFactory)) {
+                return (M) obj;
+            } else {
+                return (M) envelopingFactory.envelop(obj);
+            }
         }
         return null;
     }
@@ -87,12 +103,12 @@ public class CodeFactory {
 
     public static void registerType(Class<?> intf, ObjectFactory impl, EmbeddedObjectFactory modifier) {
         if (!registry.containsKey(intf)) {
-            registry.put(intf, RegistryEntry.builder().implFactory(impl).modifierFactory(modifier).build());
+            registry.put(intf, RegistryEntry.builder().implFactory(impl).modifierFactory(modifier).orgModifierFactory(modifier).build());
         }
     }
 
     public static void forceRegisterType(Class<?> intf, ObjectFactory impl, EmbeddedObjectFactory modifier) {
-        registry.put(intf, RegistryEntry.builder().implFactory(impl).modifierFactory(modifier).build());
+        registry.put(intf, RegistryEntry.builder().implFactory(impl).modifierFactory(modifier).orgModifierFactory(modifier).build());
     }
 
     @SuppressWarnings("unchecked")
@@ -109,9 +125,56 @@ public class CodeFactory {
         }
     }
 
+    public static void clearEnvelopedType(Class<?> intf, EnvelopFactory impl, EmbeddedEnvelopFactory modifier) {
+        var reg = registry.get(intf);
+        var implFactory = reg.getImplFactory();
+
+        reg.setImplFactory(() -> impl.envelop(implFactory));
+        if (nonNull(reg.getModifierFactory())) {
+            var embeddedFactory = reg.getModifierFactory();
+            if (nonNull(embeddedFactory) && nonNull(modifier)) {
+                reg.setModifierFactory(reg.orgModifierFactory);
+            }
+        }
+    }
+
+    public static void envelopFactory(EnvelopingObjectFactory factory) {
+        envelopingFactory = factory;
+    }
+
+    public static void clearEnvelopingFactory() {
+        envelopingFactory = null;
+    }
+
     public static ObjectFactory singleton(Object object) {
         return () -> object;
     }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T defaultCreate(Class<?> impl, Class<T> cls) {
+        var ann = cls.getDeclaredAnnotation(Default.class);
+        if (nonNull(ann)) {
+            return (T) create(impl, ann.value());
+        }
+        return internalEnvelop(null);
+    }
+
+    private static <T> T internalCreate(Class<T> cls) {
+        var entry = registry.get(cls);
+        if (entry != null) {
+            return (T) entry.getImplFactory().create();
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T internalEnvelop(T instance) {
+        if (nonNull(envelopingFactory)) {
+            return (T) envelopingFactory.envelop(instance);
+        }
+        return instance;
+    }
+
 
     @Data
     @Builder
@@ -119,5 +182,6 @@ public class CodeFactory {
         private Class<?> implClass;
         private ObjectFactory implFactory;
         private EmbeddedObjectFactory modifierFactory;
+        private EmbeddedObjectFactory orgModifierFactory;
     }
 }

@@ -1,4 +1,4 @@
-package net.binis.codegen.annotation;
+package net.binis.codegen.factory;
 
 /*-
  * #%L
@@ -20,16 +20,9 @@ package net.binis.codegen.annotation;
  * #L%
  */
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+@FunctionalInterface
+public interface EnvelopingObjectFactory {
 
-@CodeAnnotation
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.TYPE})
-public @interface Default {
-
-    String value();
+    Object envelop(Object instance);
 
 }
