@@ -159,6 +159,7 @@ public class CodeFactory {
         return internalEnvelop(null);
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> T internalCreate(Class<T> cls) {
         var entry = registry.get(cls);
         if (entry != null) {
