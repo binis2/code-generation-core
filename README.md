@@ -9,7 +9,7 @@ For usage examples please see [https://github.com/binis2/code-generation]
     <dependency>
         <groupId>dev.binis</groupId>
         <artifactId>code-generator-core</artifactId>
-        <version>0.1.2</version>
+        <version>0.1.3</version>
     </dependency>
 ```
 
