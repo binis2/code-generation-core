@@ -36,6 +36,7 @@ import static net.binis.codegen.tools.Reflection.initialize;
 public class CodeFactory {
 
     private static final Map<Class<?>, RegistryEntry> registry = new HashMap<>();
+    private static final Map<Class<?>, IdRegistryEntry> idRegistry = new HashMap<>();
     private static EnvelopingObjectFactory envelopingFactory;
 
     private CodeFactory() {
@@ -99,6 +100,14 @@ public class CodeFactory {
             return entry.getImplClass();
         }
         return null;
+    }
+
+    public static IdDescription lookupId(Class<?> intf) {
+        return idRegistry.get(intf);
+    }
+
+    public static void registerId(Class<?> cls, String fieldName, Class<?> fieldType) {
+        idRegistry.computeIfAbsent(cls, k -> IdRegistryEntry.builder().name(fieldName).type(fieldType).build());
     }
 
     public static void registerType(Class<?> intf, ObjectFactory impl, EmbeddedObjectFactory modifier) {
@@ -176,6 +185,10 @@ public class CodeFactory {
         return instance;
     }
 
+    public interface IdDescription {
+        String getName();
+        Class<?> getType();
+    }
 
     @Data
     @Builder
@@ -185,4 +198,12 @@ public class CodeFactory {
         private EmbeddedObjectFactory modifierFactory;
         private EmbeddedObjectFactory orgModifierFactory;
     }
+
+    @Data
+    @Builder
+    private static class IdRegistryEntry implements IdDescription {
+        private String name;
+        private Class<?> type;
+    }
+
 }
