@@ -42,6 +42,8 @@ public @interface CodePrototype {
     Class<?> mixInClass() default void.class;
     String implementationPackage() default "";
     String basePath() default "";
+    String interfacePath() default "";
+    String implementationPath() default "";
 
     Class<? extends Enricher>[] enrichers() default {};
     Class<? extends Enricher>[] inheritedEnrichers() default {};
