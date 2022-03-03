@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
 
 @CodeAnnotation
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD})
+@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 public @interface Ignore {
 
     boolean forField() default false;
