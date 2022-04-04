@@ -4,7 +4,7 @@ package net.binis.codegen.validation;
  * #%L
  * code-generator-core
  * %%
- * Copyright (C) 2021 Binis Belev
+ * Copyright (C) 2021 - 2022 Binis Belev
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,13 @@ package net.binis.codegen.validation;
  * #L%
  */
 
-import net.binis.codegen.annotation.builder.CodeBuilder;
+public interface ValidatorWithMessages extends CodeValidator {
 
-public interface Validator extends CodeValidator {
-    boolean validate(Object value, Object... params);
+    ValidationResult validate(Object value, Object... params);
+
+    interface ValidationResult {
+        boolean result();
+        int error();
+    }
+
 }

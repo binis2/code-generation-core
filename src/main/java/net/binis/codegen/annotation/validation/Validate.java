@@ -21,6 +21,7 @@ package net.binis.codegen.annotation.validation;
  */
 
 import net.binis.codegen.annotation.CodeAnnotation;
+import net.binis.codegen.validation.CodeValidator;
 import net.binis.codegen.validation.Validator;
 
 import java.lang.annotation.*;
@@ -30,7 +31,7 @@ import java.lang.annotation.*;
 @Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Validate {
-    Class<? extends Validator> value();
+    Class<? extends CodeValidator> value();
     String[] params() default {};
     String message() default "";
     String asCode() default "";
