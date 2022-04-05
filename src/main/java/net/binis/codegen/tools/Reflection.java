@@ -35,7 +35,7 @@ public class Reflection {
     public static Class<?> loadClass(String className) {
         try {
             return Class.forName(className);
-        } catch (NoClassDefFoundError | Exception e) {
+        } catch (Throwable e) {
             return null;
         }
     }
