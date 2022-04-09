@@ -20,8 +20,6 @@ package net.binis.codegen.validation;
  * #L%
  */
 
-import net.binis.codegen.annotation.builder.CodeBuilder;
-
 public interface Validator extends CodeValidator {
     boolean validate(Object value, Object... params);
 }
