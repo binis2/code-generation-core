@@ -25,15 +25,18 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 
+import static java.util.Objects.nonNull;
+
 @Slf4j
-public class Reflection {
+public abstract class Reflection {
 
-    private Reflection() {
-
-    }
+    private static ClassLoader loader;
 
     public static Class<?> loadClass(String className) {
         try {
+            if (nonNull(loader)) {
+                return loader.loadClass(className);
+            }
             return Class.forName(className);
         } catch (Throwable e) {
             return null;
@@ -47,7 +50,7 @@ public class Reflection {
 
     @SneakyThrows
     public static void initialize(String cls) {
-        instantiate(Class.forName(cls));
+        instantiate(loadClass(cls));
     }
 
     public static Field findField(Class<?> cls, String name) {
@@ -67,6 +70,15 @@ public class Reflection {
         } catch (Exception e) {
             log.error("Unable to get value for field {} of {}", name, obj.getClass().getName(), e);
             return null;
+        }
+    }
+
+    public static void withLoader(ClassLoader loader, Runnable task) {
+        try {
+            Reflection.loader = loader;
+            task.run();
+        } finally {
+            Reflection.loader = null;
         }
     }
 

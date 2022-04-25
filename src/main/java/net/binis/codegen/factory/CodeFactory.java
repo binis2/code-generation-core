@@ -49,12 +49,14 @@ public class CodeFactory {
         if (entry != null) {
             return internalEnvelop((T) entry.getImplFactory().create());
         } else {
-            var parent = cls.getDeclaringClass();
-            if (nonNull(parent)) {
-                return (T) defaultCreate(cls, parent);
-            } else {
-                return defaultCreate(cls, cls);
+            var result = defaultCreate(cls, cls);
+            if (isNull(result)) {
+                var parent = cls.getDeclaringClass();
+                if (nonNull(parent)) {
+                    result = (T) defaultCreate(cls, parent);
+                }
             }
+            return result;
         }
     }
 
@@ -159,6 +161,11 @@ public class CodeFactory {
         return () -> object;
     }
 
+    public static void debug() {
+        log.info("Registered classes: ");
+        registry.forEach((key, value) -> log.info("- {}: {}", key, value));
+    }
+
     @SuppressWarnings("unchecked")
     private static <T> T defaultCreate(Class<?> impl, Class<T> cls) {
         var ann = cls.getDeclaredAnnotation(Default.class);
@@ -187,6 +194,7 @@ public class CodeFactory {
 
     public interface IdDescription {
         String getName();
+
         Class<?> getType();
     }
 
