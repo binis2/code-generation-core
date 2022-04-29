@@ -35,36 +35,36 @@ public class EmbeddedCodeListImpl<M, T, R> extends EmbeddedCodeCollectionImpl<M,
     }
 
     @Override
-    public EmbeddedCodeCollection<M, T, R> remove(int index) {
+    public EmbeddedCodeCollection<M, T, R> _remove(int index) {
         list.remove(index);
         return this;
     }
 
     @Override
-    public EmbeddedCodeCollection<M, T, R> sort(Comparator<? super T> comparator) {
+    public EmbeddedCodeCollection<M, T, R> _sort(Comparator<? super T> comparator) {
         list.sort(comparator);
         return this;
     }
 
     @Override
-    public M get(int index) {
-        return CodeFactory.modify(this, list.get(index));
+    public M _get(int index) {
+        return CodeFactory.modify(this, list.get(index), cls);
     }
 
     @Override
-    public M insert(int index) {
+    public M _insert(int index) {
         T value = CodeFactory.create(cls);
         list.add(index, value);
-        return CodeFactory.modify(this, value);
+        return CodeFactory.modify(this, value, cls);
     }
 
     @Override
-    public M first() {
-        return CodeFactory.modify(this, list.get(0));
+    public M _first() {
+        return CodeFactory.modify(this, list.get(0), cls);
     }
 
     @Override
-    public M last() {
-        return CodeFactory.modify(this, list.get(list.size() - 1));
+    public M _last() {
+        return CodeFactory.modify(this, list.get(list.size() - 1), cls);
     }
 }

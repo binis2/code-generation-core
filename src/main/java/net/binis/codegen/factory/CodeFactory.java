@@ -80,8 +80,8 @@ public class CodeFactory {
 
 
     @SuppressWarnings("unchecked")
-    public static <M, T, P> M modify(P parent, T value) {
-        var entry = registry.get(value.getClass());
+    public static <M, T, P> M modify(P parent, T value, Class cls) {
+        var entry = registry.get(cls);
         if (entry != null) {
             var obj = entry.getModifierFactory().create(parent, value);
             if (isNull(envelopingFactory)) {

@@ -9,9 +9,9 @@ package net.binis.codegen.modifier;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,8 +20,7 @@ package net.binis.codegen.modifier;
  * #L%
  */
 
-public interface Modifier<T> {
-    T getObject();
-
-    void setObject(T object);
+public interface BaseModifier<T, R> {
+    R done();
+    T _if(boolean condition, java.util.function.Consumer<T> consumer);
 }

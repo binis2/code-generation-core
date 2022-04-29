@@ -25,50 +25,53 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 public interface EmbeddedCodeCollection<M, T, R> {
 
-    EmbeddedCodeCollection<M, T, R> add(T value);
+    EmbeddedCodeCollection<M, T, R> _add(T value);
 
-    EmbeddedCodeCollection<M, T, R> remove(T value);
+    EmbeddedCodeCollection<M, T, R> _add(UnaryOperator<M> initializer);
 
-    EmbeddedCodeCollection<M, T, R> remove(int index);
+    EmbeddedCodeCollection<M, T, R> _remove(T value);
 
-    EmbeddedCodeCollection<M, T, R> clear();
+    EmbeddedCodeCollection<M, T, R> _remove(int index);
 
-    EmbeddedCodeCollection<M, T, R> each(Consumer<M> doWhat);
+    EmbeddedCodeCollection<M, T, R> _clear();
 
-    EmbeddedCodeCollection<M, T, R> ifEmpty(Consumer<EmbeddedCodeCollection<M, T, R>> doWhat);
+    EmbeddedCodeCollection<M, T, R> _each(Consumer<M> doWhat);
 
-    EmbeddedCodeCollection<M, T, R> ifNotEmpty(Consumer<EmbeddedCodeCollection<M, T, R>> doWhat);
+    EmbeddedCodeCollection<M, T, R> _ifEmpty(Consumer<EmbeddedCodeCollection<M, T, R>> doWhat);
 
-    EmbeddedCodeCollection<M, T, R> ifContains(T value, Consumer<EmbeddedCodeCollection<M, T, R>> doWhat);
+    EmbeddedCodeCollection<M, T, R> _ifNotEmpty(Consumer<EmbeddedCodeCollection<M, T, R>> doWhat);
 
-    EmbeddedCodeCollection<M, T, R> ifContains(Predicate<T> predicate, Consumer<EmbeddedCodeCollection<M, T, R>> doWhat);
+    EmbeddedCodeCollection<M, T, R> _ifContains(T value, Consumer<EmbeddedCodeCollection<M, T, R>> doWhat);
 
-    EmbeddedCodeCollection<M, T, R> ifNotContains(T value, Consumer<EmbeddedCodeCollection<M, T, R>> doWhat);
+    EmbeddedCodeCollection<M, T, R> _ifContains(Predicate<T> predicate, Consumer<EmbeddedCodeCollection<M, T, R>> doWhat);
 
-    EmbeddedCodeCollection<M, T, R> ifNotContains(Predicate<T> predicate, Consumer<EmbeddedCodeCollection<M, T, R>> doWhat);
+    EmbeddedCodeCollection<M, T, R> _ifNotContains(T value, Consumer<EmbeddedCodeCollection<M, T, R>> doWhat);
 
-    EmbeddedCodeCollection<M, T, R> sort(Comparator<? super T> comparator);
+    EmbeddedCodeCollection<M, T, R> _ifNotContains(Predicate<T> predicate, Consumer<EmbeddedCodeCollection<M, T, R>> doWhat);
 
-    Stream<T> stream();
+    EmbeddedCodeCollection<M, T, R> _sort(Comparator<? super T> comparator);
 
-    M add();
+    Stream<T> _stream();
 
-    M get(int index);
+    M _add();
 
-    M insert(int index);
+    M _get(int index);
 
-    M first();
+    M _insert(int index);
 
-    M last();
+    M _first();
 
-    Optional<M> find(Predicate<T> predicate);
+    M _last();
 
-    List<M> findAll(Predicate<T> predicate);
+    Optional<M> _find(Predicate<T> predicate);
 
-    R and();
+    List<M> _findAll(Predicate<T> predicate);
+
+    R done();
 
 }

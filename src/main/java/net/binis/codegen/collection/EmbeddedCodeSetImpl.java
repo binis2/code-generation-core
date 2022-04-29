@@ -30,32 +30,32 @@ public class EmbeddedCodeSetImpl<M, T, R> extends EmbeddedCodeCollectionImpl<M, 
     }
 
     @Override
-    public EmbeddedCodeCollection<M, T, R> remove(int index) {
+    public EmbeddedCodeCollection<M, T, R> _remove(int index) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public EmbeddedCodeCollection<M, T, R> sort(Comparator<? super T> comparator) {
+    public EmbeddedCodeCollection<M, T, R> _sort(Comparator<? super T> comparator) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public M get(int index) {
+    public M _get(int index) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public M insert(int index) {
+    public M _insert(int index) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public M first() {
+    public M _first() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public M last() {
+    public M _last() {
         throw new UnsupportedOperationException();
     }
 
