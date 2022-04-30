@@ -20,6 +20,9 @@ package net.binis.codegen.modifier;
  * #L%
  */
 
+import net.binis.codegen.annotation.Default;
+
+@Default("net.binis.codegen.modifier.impl.BaseModifierImpl<T, R>")
 public interface BaseModifier<T, R> {
     R done();
     T _if(boolean condition, java.util.function.Consumer<T> consumer);

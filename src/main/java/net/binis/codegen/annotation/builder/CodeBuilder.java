@@ -22,6 +22,7 @@ package net.binis.codegen.annotation.builder;
 
 import net.binis.codegen.annotation.CodeAnnotation;
 import net.binis.codegen.enrich.Enricher;
+import net.binis.codegen.modifier.BaseModifier;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -39,7 +40,7 @@ public @interface CodeBuilder {
     boolean interfaceSetters() default false;
     boolean classGetters() default true;
     boolean classSetters() default false;
-    Class<?> baseModifierClass() default void.class;
+    Class<? extends BaseModifier> baseModifierClass() default BaseModifier.class;
     Class<?> mixInClass() default void.class;
     String implementationPackage() default "";
     String basePath() default "";
