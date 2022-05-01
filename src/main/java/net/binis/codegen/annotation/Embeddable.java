@@ -31,5 +31,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 public @interface Embeddable {
-    EmbeddedModifierType value() default EmbeddedModifierType.COLLECTION;
+    EmbeddedModifierType value() default EmbeddedModifierType.BOTH;
 }
