@@ -26,7 +26,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @CodeAnnotation
-@Ignore(forClass = true, forInterface = false, forField = true, forModifier = true)
+@Ignore(forClass = true, forField = true, forModifier = true, forQuery = true)
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
 public @interface Keep {

@@ -34,5 +34,6 @@ public @interface Ignore {
     boolean forClass() default false;
     boolean forInterface() default false;
     boolean forModifier() default false;
+    boolean forQuery() default false;
 
 }
