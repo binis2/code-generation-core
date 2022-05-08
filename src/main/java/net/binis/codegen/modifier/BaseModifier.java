@@ -1,4 +1,4 @@
-package net.binis.codegen.annotation;
+package net.binis.codegen.modifier;
 
 /*-
  * #%L
@@ -20,20 +20,7 @@ package net.binis.codegen.annotation;
  * #L%
  */
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@CodeAnnotation
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
-public @interface Ignore {
-
-    boolean forField() default false;
-    boolean forClass() default false;
-    boolean forInterface() default false;
-    boolean forModifier() default false;
-    boolean forQuery() default false;
-
+public interface BaseModifier<T, R> {
+    R done();
+    T _if(boolean condition, java.util.function.Consumer<T> consumer);
 }

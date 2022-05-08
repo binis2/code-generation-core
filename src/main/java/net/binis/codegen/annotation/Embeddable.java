@@ -20,6 +20,8 @@ package net.binis.codegen.annotation;
  * #L%
  */
 
+import net.binis.codegen.annotation.type.EmbeddedModifierType;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -29,5 +31,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 public @interface Embeddable {
-
+    EmbeddedModifierType value() default EmbeddedModifierType.BOTH;
 }

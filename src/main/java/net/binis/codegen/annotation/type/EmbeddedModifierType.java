@@ -1,10 +1,10 @@
-package net.binis.codegen.annotation;
+package net.binis.codegen.annotation.type;
 
 /*-
  * #%L
  * code-generator-core
  * %%
- * Copyright (C) 2021 Binis Belev
+ * Copyright (C) 2021 - 2022 Binis Belev
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,18 @@ package net.binis.codegen.annotation;
  * #L%
  */
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+public enum EmbeddedModifierType {
+    NONE,
+    SINGLE,
+    COLLECTION,
+    BOTH;
 
-@CodeAnnotation
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD})
-public @interface Final {
-    String[] imports() default {};
-    String description() default "";
+    public boolean isSolo() {
+        return this.equals(BOTH) || this.equals(SINGLE);
+    }
+
+    public boolean isCollection() {
+        return this.equals(BOTH) || this.equals(COLLECTION);
+    }
+
 }

@@ -21,6 +21,7 @@ package net.binis.codegen.collection;
  */
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class CodeListImpl<T, R> implements CodeList<T, R> {
 
@@ -39,7 +40,16 @@ public class CodeListImpl<T, R> implements CodeList<T, R> {
     }
 
     @Override
-    public R and() {
+    public R done() {
         return parent;
     }
+
+    @Override
+    public CodeList<T, R> _if(boolean condition, Consumer<CodeList<T, R>> consumer) {
+        if (condition) {
+            consumer.accept(this);
+        }
+        return this;
+    }
+
 }

@@ -20,9 +20,10 @@ package net.binis.codegen.collection;
  * #L%
  */
 
-public interface CodeList<T, R> {
+import net.binis.codegen.modifier.BaseModifier;
+
+public interface CodeList<T, R> extends BaseModifier<CodeList<T, R>, R> {
 
     CodeList<T, R> add(T value);
-    R and();
 
 }

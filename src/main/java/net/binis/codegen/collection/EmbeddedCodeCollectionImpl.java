@@ -21,54 +21,64 @@ package net.binis.codegen.collection;
  */
 
 import net.binis.codegen.factory.CodeFactory;
+import net.binis.codegen.modifier.Modifier;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCodeCollection<M, T, R> {
+public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCodeCollection<M, T, R>, Modifier<R> {
 
     private final Collection<T> collection;
-    protected final R parent;
+    protected R parent;
     protected final Class<T> cls;
 
-    public EmbeddedCodeCollectionImpl(R parent, Collection<T> collection, Class<T> cls) {
+    protected EmbeddedCodeCollectionImpl(R parent, Collection<T> collection, Class<T> cls) {
         this.parent = parent;
         this.collection = collection;
         this.cls = cls;
     }
 
-
     @Override
-    public EmbeddedCodeCollection<M, T, R> add(T value) {
+    public EmbeddedCodeCollection<M, T, R> _add(T value) {
         collection.add(value);
         return this;
     }
 
     @Override
-    public EmbeddedCodeCollection<M, T, R> remove(T value) {
+    public EmbeddedCodeCollection<M, T, R> _add(UnaryOperator<M> init) {
+        T value = CodeFactory.create(cls);
+        collection.add(value);
+        init.apply(CodeFactory.modify(this, value, cls));
+        return this;
+    }
+
+
+    @Override
+    public EmbeddedCodeCollection<M, T, R> _remove(T value) {
         collection.remove(value);
         return this;
     }
 
     @Override
-    public EmbeddedCodeCollection<M, T, R> clear() {
+    public EmbeddedCodeCollection<M, T, R> _clear() {
         collection.clear();
         return this;
     }
 
     @Override
-    public EmbeddedCodeCollection<M, T, R> each(Consumer<M> doWhat) {
-        collection.forEach(e -> doWhat.accept(CodeFactory.modify(this, e)));
+    public EmbeddedCodeCollection<M, T, R> _each(Consumer<M> doWhat) {
+        collection.forEach(e -> doWhat.accept(CodeFactory.modify(this, e, cls)));
         return this;
     }
 
     @Override
-    public EmbeddedCodeCollection<M, T, R> ifEmpty(Consumer<EmbeddedCodeCollection<M, T, R>> doWhat) {
+    public EmbeddedCodeCollection<M, T, R> _ifEmpty(Consumer<EmbeddedCodeCollection<M, T, R>> doWhat) {
         if (collection.isEmpty()) {
             doWhat.accept(this);
         }
@@ -76,7 +86,7 @@ public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCod
     }
 
     @Override
-    public EmbeddedCodeCollection<M, T, R> ifNotEmpty(Consumer<EmbeddedCodeCollection<M, T, R>> doWhat) {
+    public EmbeddedCodeCollection<M, T, R> _ifNotEmpty(Consumer<EmbeddedCodeCollection<M, T, R>> doWhat) {
         if (!collection.isEmpty()) {
             doWhat.accept(this);
         }
@@ -84,7 +94,7 @@ public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCod
     }
 
     @Override
-    public EmbeddedCodeCollection<M, T, R> ifContains(T value, Consumer<EmbeddedCodeCollection<M, T, R>> doWhat) {
+    public EmbeddedCodeCollection<M, T, R> _ifContains(T value, Consumer<EmbeddedCodeCollection<M, T, R>> doWhat) {
         if (collection.contains(value)) {
             doWhat.accept(this);
         }
@@ -92,7 +102,7 @@ public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCod
     }
 
     @Override
-    public EmbeddedCodeCollection<M, T, R> ifContains(Predicate<T> predicate, Consumer<EmbeddedCodeCollection<M, T, R>> doWhat) {
+    public EmbeddedCodeCollection<M, T, R> _ifContains(Predicate<T> predicate, Consumer<EmbeddedCodeCollection<M, T, R>> doWhat) {
         if (collection.stream().anyMatch(predicate)) {
             doWhat.accept(this);
         }
@@ -100,7 +110,7 @@ public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCod
     }
 
     @Override
-    public EmbeddedCodeCollection<M, T, R> ifNotContains(T value, Consumer<EmbeddedCodeCollection<M, T, R>> doWhat) {
+    public EmbeddedCodeCollection<M, T, R> _ifNotContains(T value, Consumer<EmbeddedCodeCollection<M, T, R>> doWhat) {
         if (!collection.contains(value)) {
             doWhat.accept(this);
         }
@@ -108,7 +118,7 @@ public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCod
     }
 
     @Override
-    public EmbeddedCodeCollection<M, T, R> ifNotContains(Predicate<T> predicate, Consumer<EmbeddedCodeCollection<M, T, R>> doWhat) {
+    public EmbeddedCodeCollection<M, T, R> _ifNotContains(Predicate<T> predicate, Consumer<EmbeddedCodeCollection<M, T, R>> doWhat) {
         if (collection.stream().noneMatch(predicate)) {
             doWhat.accept(this);
         }
@@ -116,30 +126,40 @@ public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCod
     }
 
     @Override
-    public M add() {
+    public M _add() {
         T value = CodeFactory.create(cls);
         collection.add(value);
-        return CodeFactory.modify(this, value);
+        return CodeFactory.modify(this, value, cls);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<M> find(Predicate<T> predicate) {
-        return collection.stream().filter(predicate).map(e -> (M) CodeFactory.modify(this, e)).findFirst();
+    public Optional<M> _find(Predicate<T> predicate) {
+        return collection.stream().filter(predicate).map(e -> (M) CodeFactory.modify(this, e, cls)).findFirst();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<M> findAll(Predicate<T> predicate) {
-        return collection.stream().filter(predicate).map(e -> (M) CodeFactory.modify(this, e)).collect(Collectors.toList());
+    public List<M> _findAll(Predicate<T> predicate) {
+        return collection.stream().filter(predicate).map(e -> (M) CodeFactory.modify(this, e, cls)).collect(Collectors.toList());
     }
 
     @Override
-    public R and() {
+    public R done() {
         return parent;
     }
 
-    public Stream<T> stream() {
+    public Stream<T> _stream() {
         return collection.stream();
-    };
+    }
+
+    @Override
+    public R getObject() {
+        return parent;
+    }
+
+    @Override
+    public void setObject(R object) {
+        parent = object;
+    }
 }
