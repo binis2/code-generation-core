@@ -114,16 +114,16 @@ public class CodeFactory {
 
     public static void registerType(Class<?> intf, ObjectFactory impl, EmbeddedObjectFactory modifier) {
         if (!registry.containsKey(intf)) {
-            registry.put(intf, RegistryEntry.builder().implFactory(impl).modifierFactory(modifier).orgModifierFactory(modifier).build());
+            forceRegisterType(intf, impl, modifier);
         }
     }
 
     public static void forceRegisterType(Class<?> intf, ObjectFactory impl, EmbeddedObjectFactory modifier) {
-        registry.put(intf, RegistryEntry.builder().implFactory(impl).modifierFactory(modifier).orgModifierFactory(modifier).build());
+        registry.put(intf, RegistryEntry.builder().implFactory(impl).orgImplFactory(impl).modifierFactory(modifier).orgModifierFactory(modifier).build());
     }
 
     @SuppressWarnings("unchecked")
-    public static void envelopType(Class<?> intf, EnvelopFactory impl, EmbeddedEnvelopFactory modifier) {
+    public static <T> void envelopType(Class<T> intf, EnvelopFactory<T> impl, EmbeddedEnvelopFactory modifier) {
         var reg = registry.get(intf);
         var implFactory = reg.getImplFactory();
 
@@ -136,17 +136,19 @@ public class CodeFactory {
         }
     }
 
-    public static void clearEnvelopedType(Class<?> intf, EnvelopFactory impl, EmbeddedEnvelopFactory modifier) {
+    public static void cleanEnvelopedType(Class<?> intf) {
         var reg = registry.get(intf);
         var implFactory = reg.getImplFactory();
 
-        reg.setImplFactory(() -> impl.envelop(implFactory));
-        if (nonNull(reg.getModifierFactory())) {
-            var embeddedFactory = reg.getModifierFactory();
-            if (nonNull(embeddedFactory) && nonNull(modifier)) {
-                reg.setModifierFactory(reg.orgModifierFactory);
-            }
-        }
+        reg.setImplFactory(reg.orgImplFactory);
+        reg.setModifierFactory(reg.orgModifierFactory);
+    }
+
+    public static void cleanAllEnvelopedTypes() {
+        registry.forEach((c, reg) -> {
+            reg.setImplFactory(reg.orgImplFactory);
+            reg.setModifierFactory(reg.orgModifierFactory);
+        });
     }
 
     public static void envelopFactory(EnvelopingObjectFactory factory) {
@@ -203,6 +205,7 @@ public class CodeFactory {
     private static class RegistryEntry {
         private Class<?> implClass;
         private ObjectFactory implFactory;
+        private ObjectFactory orgImplFactory;
         private EmbeddedObjectFactory modifierFactory;
         private EmbeddedObjectFactory orgModifierFactory;
     }

@@ -21,8 +21,8 @@ package net.binis.codegen.factory;
  */
 
 @FunctionalInterface
-public interface EnvelopFactory {
+public interface EnvelopFactory<T> {
 
-    Object envelop(ObjectFactory factory);
+    T envelop(ObjectFactory<T> factory);
 
 }
