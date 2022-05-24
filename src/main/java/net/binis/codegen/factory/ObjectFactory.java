@@ -21,8 +21,8 @@ package net.binis.codegen.factory;
  */
 
 @FunctionalInterface
-public interface ObjectFactory {
+public interface ObjectFactory<T> {
 
-    Object create();
+    T create();
 
 }
