@@ -1,10 +1,10 @@
-package net.binis.codegen.exception;
+package net.binis.codegen.options;
 
 /*-
  * #%L
  * code-generator-core
  * %%
- * Copyright (C) 2021 Binis Belev
+ * Copyright (C) 2021 - 2022 Binis Belev
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,16 @@ package net.binis.codegen.exception;
  * #L%
  */
 
-public class ValidationException extends RuntimeException {
+import net.binis.codegen.enrich.AsEnricher;
+import net.binis.codegen.enrich.Enricher;
 
-    private final String field;
-    private final Class<?> cls;
+public final class Options {
 
-    public ValidationException(Class<?> cls, String field, String message) {
-        super(message);
-        this.field = field;
-        this.cls = cls;
+    private Options() {
+        //Do nothing
     }
 
-    public String getField() {
-        return field;
-    }
-
-    public Class<?> getCls() {
-        return cls;
-    }
+    public static final Class<? extends CodeOption> VALIDATION_FORM = ValidationFormOption.class;
+    public static final Class<? extends CodeOption> HIDDEN_CREATE_METHOD = HiddenCreateMethodOption.class;
 
 }

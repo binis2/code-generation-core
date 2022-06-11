@@ -20,22 +20,28 @@ package net.binis.codegen.exception;
  * #L%
  */
 
-public class ValidationException extends RuntimeException {
+import lombok.ToString;
 
-    private final String field;
+import java.util.List;
+import java.util.Map;
+
+@ToString
+public class ValidationFormException extends RuntimeException {
+
+    private final Map<String, List<String>> errors;
     private final Class<?> cls;
 
-    public ValidationException(Class<?> cls, String field, String message) {
-        super(message);
-        this.field = field;
+    public ValidationFormException(Class<?> cls, Map<String, List<String>> errors) {
+        super();
+        this.errors = errors;
         this.cls = cls;
     }
 
-    public String getField() {
-        return field;
+    public Map<String, List<String>> getErrors() {
+        return errors;
     }
 
-    public Class<?> getCls() {
+    public Class<?> getFormClass() {
         return cls;
     }
 
