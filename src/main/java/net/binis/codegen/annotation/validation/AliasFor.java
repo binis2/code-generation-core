@@ -32,4 +32,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AliasFor {
     String value();
+
+    int order() default 0;
 }
