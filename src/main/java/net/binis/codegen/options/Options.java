@@ -1,10 +1,10 @@
-package net.binis.codegen.annotation.validation;
+package net.binis.codegen.options;
 
 /*-
  * #%L
  * code-generator-core
  * %%
- * Copyright (C) 2021 Binis Belev
+ * Copyright (C) 2021 - 2022 Binis Belev
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,16 @@ package net.binis.codegen.annotation.validation;
  * #L%
  */
 
-import net.binis.codegen.annotation.CodeAnnotation;
+import net.binis.codegen.enrich.AsEnricher;
+import net.binis.codegen.enrich.Enricher;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+public final class Options {
 
-@CodeAnnotation
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface AliasFor {
-    String value();
+    private Options() {
+        //Do nothing
+    }
 
-    int order() default 0;
+    public static final Class<? extends CodeOption> VALIDATION_FORM = ValidationFormOption.class;
+    public static final Class<? extends CodeOption> HIDDEN_CREATE_METHOD = HiddenCreateMethodOption.class;
+
 }

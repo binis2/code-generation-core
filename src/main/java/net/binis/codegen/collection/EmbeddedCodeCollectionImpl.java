@@ -51,7 +51,7 @@ public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCod
     }
 
     @Override
-    public EmbeddedCodeCollection<M, T, R> _add(UnaryOperator<M> init) {
+    public EmbeddedCodeCollection<M, T, R> _add$(UnaryOperator<M> init) {
         T value = CodeFactory.create(cls);
         collection.add(value);
         init.apply(CodeFactory.modify(this, value, cls));

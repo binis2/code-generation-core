@@ -1,4 +1,4 @@
-package net.binis.codegen.annotation.validation;
+package net.binis.codegen.exception;
 
 /*-
  * #%L
@@ -20,18 +20,29 @@ package net.binis.codegen.annotation.validation;
  * #L%
  */
 
-import net.binis.codegen.annotation.CodeAnnotation;
+import lombok.ToString;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.List;
+import java.util.Map;
 
-@CodeAnnotation
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface AliasFor {
-    String value();
+@ToString
+public class ValidationFormException extends RuntimeException {
 
-    int order() default 0;
+    private final Map<String, List<String>> errors;
+    private final Class<?> cls;
+
+    public ValidationFormException(Class<?> cls, Map<String, List<String>> errors) {
+        super();
+        this.errors = errors;
+        this.cls = cls;
+    }
+
+    public Map<String, List<String>> getErrors() {
+        return errors;
+    }
+
+    public Class<?> getFormClass() {
+        return cls;
+    }
+
 }

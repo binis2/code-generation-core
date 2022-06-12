@@ -22,8 +22,21 @@ package net.binis.codegen.exception;
 
 public class ValidationException extends RuntimeException {
 
-    public ValidationException(String message) {
+    private final String field;
+    private final Class<?> cls;
+
+    public ValidationException(Class<?> cls, String field, String message) {
         super(message);
+        this.field = field;
+        this.cls = cls;
+    }
+
+    public String getField() {
+        return field;
+    }
+
+    public Class<?> getCls() {
+        return cls;
     }
 
 }

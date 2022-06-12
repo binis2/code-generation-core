@@ -32,7 +32,7 @@ public interface EmbeddedCodeCollection<M, T, R> {
 
     EmbeddedCodeCollection<M, T, R> _add(T value);
 
-    EmbeddedCodeCollection<M, T, R> _add(UnaryOperator<M> initializer);
+    EmbeddedCodeCollection<M, T, R> _add$(UnaryOperator<M> initializer);
 
     EmbeddedCodeCollection<M, T, R> _remove(T value);
 

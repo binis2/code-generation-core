@@ -56,6 +56,9 @@ public class CodeFactory {
                     result = (T) defaultCreate(cls, parent);
                 }
             }
+            if (isNull(result)) {
+                registerType(cls, null, null);
+            }
             return result;
         }
     }
@@ -65,7 +68,11 @@ public class CodeFactory {
         var entry = registry.get(cls);
         Object obj = null;
         if (entry != null) {
-            obj = entry.getImplFactory().create();
+            if (entry.getImplFactory() != null) {
+                obj = entry.getImplFactory().create();
+            } else {
+                return null;
+            }
         } else {
             try {
                 initialize(defaultClass);
@@ -95,8 +102,14 @@ public class CodeFactory {
 
     public static Class<?> lookup(Class<?> intf) {
         var entry = registry.get(intf);
+
+        if (isNull(entry)) {
+            create(intf);
+            entry = registry.get(intf);
+        }
+
         if (entry != null) {
-            if (entry.getImplClass() == null) {
+            if (entry.getImplClass() == null && entry.getImplFactory() != null) {
                 entry.setImplClass(entry.getImplFactory().create().getClass());
             }
             return entry.getImplClass();
@@ -113,7 +126,8 @@ public class CodeFactory {
     }
 
     public static void registerType(Class<?> intf, ObjectFactory impl, EmbeddedObjectFactory modifier) {
-        if (!registry.containsKey(intf)) {
+        var reg = registry.get(intf);
+        if (isNull(reg) || isNull(reg.getImplClass())) {
             forceRegisterType(intf, impl, modifier);
         }
     }
