@@ -20,17 +20,5 @@ package net.binis.codegen.options;
  * #L%
  */
 
-public final class Options {
-
-    private Options() {
-        //Do nothing
-    }
-
-    //Validation options
-    public static final Class<? extends CodeOption> VALIDATION_FORM = ValidationFormOption.class;
-    public static final Class<? extends CodeOption> EXPOSE_VALIDATE_METHOD = ExposeValidateMethodOption.class;
-
-    //Creation options
-    public static final Class<? extends CodeOption> HIDDEN_CREATE_METHOD = HiddenCreateMethodOption.class;
-
+public interface ExposeValidateMethodOption extends CodeOption {
 }
