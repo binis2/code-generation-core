@@ -35,5 +35,7 @@ public final class Enrichers {
     public static final Class<? extends Enricher> QUERY = QueryEnricher.class;
     public static final Class<? extends Enricher> REGION = RegionEnricher.class;
     public static final Class<? extends Enricher> VALIDATION = ValidationEnricher.class;
+    public static final Class<? extends Enricher> OPENAPI = OpenApiEnricher.class;
+    public static final Class<? extends Enricher> JACKSON = JacksonEnricher.class;
 
 }

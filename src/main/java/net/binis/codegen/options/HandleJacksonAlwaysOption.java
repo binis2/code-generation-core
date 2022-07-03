@@ -1,10 +1,10 @@
-package net.binis.codegen.annotation;
+package net.binis.codegen.options;
 
 /*-
  * #%L
  * code-generator-core
  * %%
- * Copyright (C) 2021 Binis Belev
+ * Copyright (C) 2021 - 2022 Binis Belev
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,5 @@ package net.binis.codegen.annotation;
  * #L%
  */
 
-import java.lang.annotation.*;
-
-@CodeAnnotation
-@Repeatable(ForInterfaces.class)
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.TYPE})
-public @interface ForInterface {
-
+public interface HandleJacksonAlwaysOption extends CodeOption {
 }

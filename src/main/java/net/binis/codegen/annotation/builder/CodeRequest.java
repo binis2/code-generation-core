@@ -23,10 +23,7 @@ package net.binis.codegen.annotation.builder;
 import net.binis.codegen.annotation.CodeAnnotation;
 import net.binis.codegen.enrich.Enricher;
 import net.binis.codegen.modifier.BaseModifier;
-import net.binis.codegen.options.CodeOption;
-import net.binis.codegen.options.HiddenCreateMethodOption;
-import net.binis.codegen.options.Options;
-import net.binis.codegen.options.ValidationFormOption;
+import net.binis.codegen.options.*;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -69,6 +66,6 @@ public @interface CodeRequest {
 
     Class<? extends Enricher>[] inheritedEnrichers() default {};
 
-    Class<? extends CodeOption>[] options() default {ValidationFormOption.class, HiddenCreateMethodOption.class};
+    Class<? extends CodeOption>[] options() default {ValidationFormOption.class, HiddenCreateMethodOption.class, GenerateOpenApiIfAvailableOption.class};
 
 }
