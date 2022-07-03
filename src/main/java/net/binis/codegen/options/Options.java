@@ -33,4 +33,12 @@ public final class Options {
     //Creation options
     public static final Class<? extends CodeOption> HIDDEN_CREATE_METHOD = HiddenCreateMethodOption.class;
 
+    //OpenApi
+    public static final Class<? extends CodeOption> GENERATE_OPENAPI_ALWAYS = GenerateOpenApiAlwaysOption.class;
+    public static final Class<? extends CodeOption> GENERATE_OPENAPI_IF_AVAILABLE = GenerateOpenApiIfAvailableOption.class;
+
+    //Jackson
+    public static final Class<? extends CodeOption> HANDLE_JACKSON_ALWAYS = HandleJacksonAlwaysOption.class;
+    public static final Class<? extends CodeOption> HANDLE_JACKSON_IF_AVAILABLE = HandleJacksonIfAvailableOption.class;
+
 }
