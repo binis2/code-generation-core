@@ -20,12 +20,16 @@ package net.binis.codegen.annotation;
  * #L%
  */
 
-import java.lang.annotation.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 @CodeAnnotation
-@Repeatable(ForInterfaces.class)
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
-public @interface ForInterface {
+public @interface ForInterfaces {
+
+    ForInterface[] value();
 
 }
