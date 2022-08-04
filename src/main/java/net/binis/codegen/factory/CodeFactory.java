@@ -24,9 +24,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.binis.codegen.annotation.Default;
+import net.binis.codegen.exception.GenericCodeGenException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -38,6 +42,9 @@ public class CodeFactory {
     private static final Map<Class<?>, RegistryEntry> registry = new HashMap<>();
     private static final Map<Class<?>, IdRegistryEntry> idRegistry = new HashMap<>();
     private static EnvelopingObjectFactory envelopingFactory;
+    private static ProjectionProvider projections = initProjectionProvider();
+
+    private static final Map<Class<?>, Map<Class<?>, ProjectionInstantiation>> projectionsCache = new HashMap<>();
 
     private CodeFactory() {
         //Do nothing
@@ -152,7 +159,6 @@ public class CodeFactory {
 
     public static void cleanEnvelopedType(Class<?> intf) {
         var reg = registry.get(intf);
-        var implFactory = reg.getImplFactory();
 
         reg.setImplFactory(reg.orgImplFactory);
         reg.setModifierFactory(reg.orgModifierFactory);
@@ -177,9 +183,44 @@ public class CodeFactory {
         return () -> object;
     }
 
+    public static void setProjectionProvider(ProjectionProvider provider) {
+        projections = provider;
+    }
+
     public static void debug() {
         log.info("Registered classes: ");
         registry.forEach((key, value) -> log.info("- {}: {}", key, value));
+    }
+
+    private static ProjectionProvider initProjectionProvider() {
+        try {
+            var cls = Class.forName("net.binis.codegen.projection.provider.CodeGenProjectionProvider");
+            return (ProjectionProvider) cls.getDeclaredConstructors()[0].newInstance();
+        } catch (Exception e) {
+            //Do nothing
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T projection(Object object, Class<T> projection) {
+        if (nonNull(object)) {
+            if (nonNull(projections)) {
+
+//                if (object instanceof Map || object instanceof List || object instanceof Set) {
+//                    return projections.handleCollection(object);
+//                }
+
+                return (T) projectionsCache.computeIfAbsent(projection, k ->
+                                new HashMap<>())
+                        .computeIfAbsent(object.getClass(), k ->
+                                projections.create(k, projection)).create(object);
+            } else {
+                throw new GenericCodeGenException("Projections provider not present!");
+            }
+        } else {
+            return null;
+        }
     }
 
     @SuppressWarnings("unchecked")
