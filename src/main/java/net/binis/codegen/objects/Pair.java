@@ -35,10 +35,12 @@ public interface Pair<K, V> {
     Pair<K, V>  value(V value);
     Pair<K, V>  right(V right);
 
+    @SuppressWarnings("unchecked")
     static <K1, V1> Pair<K1, V1> of(K1 key, V1 value) {
         return CodeFactory.create(Pair.class).key(key).value(value);
     }
 
+    @SuppressWarnings("unchecked")
     static <K1, V1> Pair<K1, V1> create() {
         return CodeFactory.create(Pair.class);
     }
