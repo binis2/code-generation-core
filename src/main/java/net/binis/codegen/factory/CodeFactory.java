@@ -187,6 +187,10 @@ public class CodeFactory {
         projections = provider;
     }
 
+    public static ProjectionProvider getProjectionProvider() {
+        return projections;
+    }
+
     public static void debug() {
         log.info("Registered classes: ");
         registry.forEach((key, value) -> log.info("- {}: {}", key, value));
@@ -216,11 +220,22 @@ public class CodeFactory {
                         .computeIfAbsent(object.getClass(), k ->
                                 projections.create(k, projection)).create(object);
             } else {
-                throw new GenericCodeGenException("Projections provider not present!");
+                if (projection.isInstance(object)) {
+                    return projection.cast(object);
+                } else {
+                    throw new GenericCodeGenException("Projections provider not present!");
+                }
             }
         } else {
             return null;
         }
+    }
+
+    public static <T> T cast(Object object, Class<T> projection) {
+        if (projection.isInstance(object)) {
+            return projection.cast(object);
+        }
+        return projection(object, projection);
     }
 
     @SuppressWarnings("unchecked")
