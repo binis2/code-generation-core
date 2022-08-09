@@ -52,4 +52,10 @@ public class CodeListImpl<T, R> implements CodeList<T, R> {
         return this;
     }
 
+    @Override
+    public CodeList<T, R> _self(Consumer<R> consumer) {
+        consumer.accept(parent);
+        return this;
+    }
+
 }

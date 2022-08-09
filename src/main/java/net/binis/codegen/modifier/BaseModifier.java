@@ -23,4 +23,6 @@ package net.binis.codegen.modifier;
 public interface BaseModifier<T, R> {
     R done();
     T _if(boolean condition, java.util.function.Consumer<T> consumer);
+    T _self(java.util.function.Consumer<R> consumer);
+
 }

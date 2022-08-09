@@ -43,6 +43,13 @@ public abstract class BaseModifierImpl<T, R> implements BaseModifier<T, R>, Modi
         return (T) this;
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public T _self(Consumer<R> consumer) {
+        consumer.accept(parent);
+        return (T) this;
+    }
+
     @Override
     public R getObject() {
         return parent;
