@@ -25,12 +25,9 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.binis.codegen.annotation.Default;
 import net.binis.codegen.exception.GenericCodeGenException;
+import net.binis.codegen.objects.Pair;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -42,9 +39,10 @@ public class CodeFactory {
     private static final Map<Class<?>, RegistryEntry> registry = new HashMap<>();
     private static final Map<Class<?>, IdRegistryEntry> idRegistry = new HashMap<>();
     private static EnvelopingObjectFactory envelopingFactory;
-    private static ProjectionProvider projections = initProjectionProvider();
-
+    private static final Set<Class<?>> customProxyClassesRegistry = new HashSet<>();
+    private static final List<Pair<Class<?>, ProjectionProvider>> customProxyClasses = new ArrayList<>();
     private static final Map<Class<?>, Map<Class<?>, ProjectionInstantiation>> projectionsCache = new HashMap<>();
+    private static ProjectionProvider projections = initProjectionProvider();
 
     private CodeFactory() {
         //Do nothing
@@ -196,29 +194,16 @@ public class CodeFactory {
         registry.forEach((key, value) -> log.info("- {}: {}", key, value));
     }
 
-    private static ProjectionProvider initProjectionProvider() {
-        try {
-            var cls = Class.forName("net.binis.codegen.projection.provider.CodeGenProjectionProvider");
-            return (ProjectionProvider) cls.getDeclaredConstructors()[0].newInstance();
-        } catch (Exception e) {
-            //Do nothing
-        }
-        return null;
-    }
-
     @SuppressWarnings("unchecked")
     public static <T> T projection(Object object, Class<T> projection) {
         if (nonNull(object)) {
             if (nonNull(projections)) {
-
-//                if (object instanceof Map || object instanceof List || object instanceof Set) {
-//                    return projections.handleCollection(object);
-//                }
-
                 return (T) projectionsCache.computeIfAbsent(projection, k ->
                                 new HashMap<>())
                         .computeIfAbsent(object.getClass(), k ->
-                                projections.create(k, projection)).create(object);
+                                checkForCustomClass(k).orElse(projections)
+                                        .create(k, projection))
+                        .create(object);
             } else {
                 if (projection.isInstance(object)) {
                     return projection.cast(object);
@@ -231,11 +216,49 @@ public class CodeFactory {
         }
     }
 
+    public static Object projections(Object object, Class<?>... projections) {
+        if (nonNull(object) && projections.length > 0) {
+            return projection(object, projections[0]);
+        } else {
+            return object;
+        }
+    }
+
+
     public static <T> T cast(Object object, Class<T> projection) {
         if (projection.isInstance(object)) {
             return projection.cast(object);
         }
         return projection(object, projection);
+    }
+
+    public static void registerCustomProxyClass(Class<?> cls, ProjectionProvider provider) {
+        customProxyClasses.add(Pair.of(cls, provider));
+        customProxyClassesRegistry.add(cls);
+    }
+
+    public static boolean isCustomProxyClass(Class<?> cls) {
+        return customProxyClassesRegistry.contains(cls);
+    }
+
+
+    private static ProjectionProvider initProjectionProvider() {
+        try {
+            var cls = Class.forName("net.binis.codegen.projection.provider.CodeGenProjectionProvider");
+            return (ProjectionProvider) cls.getDeclaredConstructors()[0].newInstance();
+        } catch (Exception e) {
+            //Do nothing
+        }
+        return null;
+    }
+
+    private static Optional<ProjectionProvider> checkForCustomClass(Class<?> cls) {
+        for (var c : customProxyClasses) {
+            if (c.getKey().isAssignableFrom(cls)) {
+                return Optional.of(c.getValue());
+            }
+        }
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
