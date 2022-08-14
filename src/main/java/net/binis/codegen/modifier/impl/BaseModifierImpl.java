@@ -24,6 +24,7 @@ import net.binis.codegen.collection.EmbeddedCodeCollection;
 import net.binis.codegen.modifier.BaseModifier;
 import net.binis.codegen.modifier.Modifier;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public abstract class BaseModifierImpl<T, R> implements BaseModifier<T, R>, Modifier<R> {
@@ -45,8 +46,17 @@ public abstract class BaseModifierImpl<T, R> implements BaseModifier<T, R>, Modi
 
     @SuppressWarnings("unchecked")
     @Override
-    public T _self(Consumer<R> consumer) {
-        consumer.accept(parent);
+    public T _if(boolean condition, BiConsumer<T, R> consumer) {
+        if (condition) {
+            consumer.accept((T) this, parent);
+        }
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public T _self(BiConsumer<T, R> consumer) {
+        consumer.accept((T) this, parent);
         return (T) this;
     }
 

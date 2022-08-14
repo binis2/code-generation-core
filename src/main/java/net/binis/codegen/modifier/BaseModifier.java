@@ -20,9 +20,13 @@ package net.binis.codegen.modifier;
  * #L%
  */
 
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 public interface BaseModifier<T, R> {
     R done();
-    T _if(boolean condition, java.util.function.Consumer<T> consumer);
-    T _self(java.util.function.Consumer<R> consumer);
+    T _if(boolean condition, Consumer<T> consumer);
+    T _if(boolean condition, BiConsumer<T, R> consumer);
+    T _self(BiConsumer<T, R> consumer);
 
 }

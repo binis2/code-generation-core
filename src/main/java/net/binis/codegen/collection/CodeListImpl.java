@@ -21,6 +21,7 @@ package net.binis.codegen.collection;
  */
 
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class CodeListImpl<T, R> implements CodeList<T, R> {
@@ -53,8 +54,16 @@ public class CodeListImpl<T, R> implements CodeList<T, R> {
     }
 
     @Override
-    public CodeList<T, R> _self(Consumer<R> consumer) {
-        consumer.accept(parent);
+    public CodeList<T, R> _if(boolean condition, BiConsumer<CodeList<T, R>, R> consumer) {
+        if (condition) {
+            consumer.accept(this, parent);
+        }
+        return this;
+    }
+
+    @Override
+    public CodeList<T, R> _self(BiConsumer<CodeList<T, R>, R> consumer) {
+        consumer.accept(this, parent);
         return this;
     }
 
