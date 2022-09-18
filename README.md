@@ -24,3 +24,4 @@ Validation and Sanitization extension - [https://github.com/binis2/code-generati
 Jackson support - [https://github.com/binis2/code-generation-jackson]   
 Spring Boot configuration - [https://github.com/binis2/code-generation-spring-configuration]   
 Projections support - [https://github.com/binis2/code-generation-projection]   
+Hibernate support - [https://github.com/binis2/code-generation-hibernate]   

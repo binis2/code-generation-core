@@ -26,8 +26,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.binis.codegen.annotation.Default;
 import net.binis.codegen.exception.GenericCodeGenException;
 import net.binis.codegen.objects.Pair;
+import net.binis.codegen.objects.base.enumeration.CodeEnum;
+import net.binis.codegen.objects.base.enumeration.CodeEnumImpl;
 
+import java.lang.reflect.Array;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -43,6 +47,8 @@ public class CodeFactory {
     private static final List<Pair<Class<?>, ProjectionProvider>> customProxyClasses = new ArrayList<>();
     private static final Map<Class<?>, Map<Class<?>, ProjectionInstantiation>> projectionsCache = new HashMap<>();
     private static ProjectionProvider projections = initProjectionProvider();
+
+    private static final Map<Class<?>, EnumEntry> enumRegistry = new HashMap<>();
 
     private CodeFactory() {
         //Do nothing
@@ -224,7 +230,6 @@ public class CodeFactory {
         }
     }
 
-
     public static <T> T cast(Object object, Class<T> projection) {
         if (projection.isInstance(object)) {
             return projection.cast(object);
@@ -239,6 +244,143 @@ public class CodeFactory {
 
     public static boolean isCustomProxyClass(Class<?> cls) {
         return customProxyClassesRegistry.contains(cls);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends CodeEnum> T initializeEnumValue(Class<T> cls, String name, int ordinal, Object... params) {
+        if (CodeEnum.class.isAssignableFrom(cls)) {
+            var registry = enumRegistry.computeIfAbsent(cls, c -> EnumEntry.builder().initializer(buildEnumInitializer(cls)).build());
+            CodeEnum inst;
+            if (ordinal == Integer.MIN_VALUE) {
+                ordinal = generateUniqueOrdinal(registry);
+            } else {
+                inst = registry.ordinals.get(ordinal);
+                if (nonNull(inst)) {
+                    return (T) inst;
+                }
+                inst = registry.values.get(name);
+                if (nonNull(inst)) {
+                    return (T) inst;
+                }
+            }
+            inst = registry.initializer.initialize(ordinal, name, params);
+
+            registry.ordinals.put(ordinal, inst);
+            registry.values.put(name, inst);
+            registry.dirty = true;
+
+            return (T) inst;
+        }
+        throw new GenericCodeGenException("Class " + cls.getCanonicalName() + " isn't enumeration class!");
+    }
+
+    private static int generateUniqueOrdinal(EnumEntry registry) {
+        var result = -100;
+        while (nonNull(registry.ordinals.get(result))) {
+            result--;
+        }
+        return result;
+    }
+
+    public static <T extends CodeEnum> T initializeUnknownEnumValue(Class<T> cls, String name, int ordinal, Object... params) {
+        var result = initializeEnumValue(cls, name, ordinal, params);
+        ((CodeEnumImpl) result).setUnknown();
+        return result;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public static <T extends CodeEnum> T enumValueOf(Class<T> cls, String name) {
+        var registry = enumRegistry.get(cls);
+        if (nonNull(registry)) {
+            return (T) registry.values.get(name);
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends CodeEnum> T enumValueOf(Class<T> cls, int ordinal) {
+        var registry = enumRegistry.get(cls);
+        if (nonNull(registry)) {
+            return (T) registry.ordinals.get(ordinal);
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends CodeEnum> T[] enumValues(Class<T> cls) {
+        var registry = enumRegistry.get(cls);
+        if (nonNull(registry)) {
+            if (registry.dirty) {
+                registry.sorted = registry.values.values().stream()
+                        .sorted(Comparator.comparing(CodeEnum::ordinal))
+                        .collect(Collectors.toList());
+            }
+            return (T[]) registry.sorted.toArray();
+        }
+        return (T[]) Array.newInstance(cls.getComponentType(), 0);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    private static <T extends CodeEnum> EnumInitializer buildEnumInitializer(Class<T> cls) {
+        var a = cls.getAnnotation(Default.class);
+        if (isNull(a)) {
+            throw new GenericCodeGenException("Can't find implementation pointer for " + cls.getCanonicalName());
+        }
+        try {
+            var c = Class.forName(a.value());
+            var constructor = c.getDeclaredConstructors()[0];
+            return ((ordinal, name, params) -> {
+                var list = new ArrayList<>(params.length + 2);
+                list.add(ordinal);
+                list.add(name);
+                Collections.addAll(list, params);
+                if (constructor.getParameterCount() > list.size()) {
+                    var types = constructor.getParameterTypes();
+                    for (var i = list.size(); i < constructor.getParameterCount(); i++) {
+                        list.add(defaultValue(types[i]));
+                    }
+                }
+                try {
+                    return (T) constructor.newInstance(list.toArray());
+                } catch (Exception e) {
+                    throw new GenericCodeGenException("Unable to initialize enum value!", e);
+                }
+            });
+        } catch (ClassNotFoundException e) {
+            throw new GenericCodeGenException("Can't find implementation class for " + cls.getCanonicalName());
+        }
+    }
+
+    private static Object defaultValue(Class<?> type) {
+        if (type.isPrimitive()) {
+            if (byte.class.equals(type)) {
+                return 0;
+            }
+            if (short.class.equals(type)) {
+                return 0;
+            }
+            if (int.class.equals(type)) {
+                return 0;
+            }
+            if (long.class.equals(type)) {
+                return 0L;
+            }
+            if (float.class.equals(type)) {
+                return 0.0f;
+            }
+            if (double.class.equals(type)) {
+                return 0.0d;
+            }
+            if (char.class.equals(type)) {
+                return '\u0000';
+            }
+            if (boolean.class.equals(type)) {
+                return false;
+            }
+        }
+        return null;
     }
 
 
@@ -308,6 +450,25 @@ public class CodeFactory {
     private static class IdRegistryEntry implements IdDescription {
         private String name;
         private Class<?> type;
+    }
+
+    @FunctionalInterface
+    private interface EnumInitializer {
+        CodeEnum initialize(int ordinal, String name, Object... params);
+    }
+
+    @Data
+    @Builder
+    private static class EnumEntry {
+        @Builder.Default
+        private Map<Integer, CodeEnum> ordinals = new HashMap<>();
+        @Builder.Default
+        private Map<String, CodeEnum> values = new HashMap<>();
+        @Builder.Default
+        private boolean dirty = true;
+        private List<CodeEnum> sorted;
+
+        private EnumInitializer initializer;
     }
 
 }
