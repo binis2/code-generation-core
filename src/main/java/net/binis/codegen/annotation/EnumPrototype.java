@@ -32,5 +32,6 @@ public @interface EnumPrototype {
 
     String name() default "";
     Class<?> mixIn() default void.class;
+    int ordinalOffset() default 0;
 
 }
