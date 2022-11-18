@@ -26,6 +26,8 @@ import sun.misc.Unsafe;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Objects;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -39,10 +41,7 @@ public abstract class Reflection {
 
     public static Class<?> loadClass(String className) {
         try {
-            if (nonNull(loader)) {
-                return loader.loadClass(className);
-            }
-            return Class.forName(className);
+            return Objects.nonNull(loader) ? loader.loadClass(className) : Class.forName(className);
         } catch (Throwable e) {
             return null;
         }
@@ -66,6 +65,9 @@ public abstract class Reflection {
                     }
                 }
                 if (match) {
+                    if (!Modifier.isPublic(constructor.getModifiers())) {
+                        constructor.setAccessible(true);
+                    }
                     return constructor;
                 }
             }

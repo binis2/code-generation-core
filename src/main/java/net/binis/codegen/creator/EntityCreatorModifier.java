@@ -35,7 +35,7 @@ public class EntityCreatorModifier {
     }
     @SuppressWarnings({"unchecked"})
     public static <T> Modifiable<T> create(Class<?> cls, String defaultClass) {
-        return (Modifiable<T>) CodeFactory.create(cls, defaultClass);
+        return (Modifiable<T>) CodeFactory.createDefault(cls, defaultClass);
     }
 
 }

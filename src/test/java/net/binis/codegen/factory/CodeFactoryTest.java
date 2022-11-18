@@ -45,7 +45,11 @@ class CodeFactoryTest {
     public static class TestImpl implements TestIntf {
         private final String param;
 
-        public TestImpl(String param) {
+        {
+            CodeFactory.registerType(TestIntf.class, params -> new TestImpl((String) params[0]), null);
+        }
+
+        protected TestImpl(String param) {
             this.param = param;
         }
 
