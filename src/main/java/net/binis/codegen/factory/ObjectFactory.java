@@ -23,6 +23,6 @@ package net.binis.codegen.factory;
 @FunctionalInterface
 public interface ObjectFactory<T> {
 
-    T create();
+    T create(Object... params);
 
 }

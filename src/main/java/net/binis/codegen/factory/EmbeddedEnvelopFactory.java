@@ -23,6 +23,6 @@ package net.binis.codegen.factory;
 @FunctionalInterface
 public interface EmbeddedEnvelopFactory<T> {
 
-    Object envelop(EmbeddedObjectFactory<T> env, Object parent, T value);
+    Object envelop(EmbeddedObjectFactory<T> env, Object parent, T value, Object... params);
 
 }

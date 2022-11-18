@@ -32,7 +32,7 @@ public class EntityCreator {
         return CodeFactory.create(cls);
     }
     public static <T> T create(Class<T> cls, String defaultClass) {
-        return CodeFactory.create(cls, defaultClass);
+        return CodeFactory.createDefault(cls, defaultClass);
     }
 
 }

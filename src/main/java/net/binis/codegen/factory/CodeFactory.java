@@ -31,6 +31,7 @@ import net.binis.codegen.objects.base.enumeration.CodeEnumImpl;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
@@ -55,39 +56,39 @@ public class CodeFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T create(Class<T> cls) {
+    public static <T> T create(Class<T> cls, Object... params) {
         var entry = registry.get(cls);
         if (entry != null) {
-            return internalEnvelop((T) entry.getImplFactory().create());
+            return internalEnvelop((T) entry.getImplFactory().create(params));
         } else {
-            var result = defaultCreate(cls, cls);
+            var result = defaultCreate(cls, cls, params);
             if (isNull(result)) {
                 var parent = cls.getDeclaringClass();
                 if (nonNull(parent)) {
-                    result = (T) defaultCreate(cls, parent);
+                    result = (T) defaultCreate(cls, parent, params);
                 }
             }
             if (isNull(result)) {
-                registerType(cls, null, null);
+                registerType(cls, (ObjectFactory) null, null);
             }
             return result;
         }
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T create(Class<T> cls, String defaultClass) {
+    public static <T> T createDefault(Class<T> cls, String defaultClass, Object... params) {
         var entry = registry.get(cls);
         Object obj = null;
         if (entry != null) {
             if (entry.getImplFactory() != null) {
-                obj = entry.getImplFactory().create();
+                obj = entry.getImplFactory().create(params);
             } else {
                 return null;
             }
         } else {
             try {
-                initialize(defaultClass);
-                obj = internalCreate(cls);
+                initialize(defaultClass, params);
+                obj = internalCreate(cls, params);
             } catch (Exception e) {
                 log.error("Can't find class: {}", defaultClass);
             }
@@ -143,6 +144,10 @@ public class CodeFactory {
         }
     }
 
+    public static void registerType(Class<?> intf, Supplier impl, EmbeddedObjectFactory modifier) {
+        registerType(intf, params -> impl.get(), modifier);
+    }
+
     public static void forceRegisterType(Class<?> intf, ObjectFactory impl, EmbeddedObjectFactory modifier) {
         registry.put(intf, RegistryEntry.builder().implFactory(impl).orgImplFactory(impl).modifierFactory(modifier).orgModifierFactory(modifier).build());
     }
@@ -152,11 +157,11 @@ public class CodeFactory {
         var reg = registry.get(intf);
         var implFactory = reg.getImplFactory();
 
-        reg.setImplFactory(() -> impl.envelop(implFactory));
+        reg.setImplFactory((params) -> impl.envelop(implFactory));
         if (nonNull(reg.getModifierFactory())) {
             var embeddedFactory = reg.getModifierFactory();
             if (nonNull(embeddedFactory) && nonNull(modifier)) {
-                reg.setModifierFactory((parent, value) -> modifier.envelop(embeddedFactory, parent, value));
+                reg.setModifierFactory((parent, value, params) -> modifier.envelop(embeddedFactory, parent, value, params));
             }
         }
     }
@@ -184,7 +189,7 @@ public class CodeFactory {
     }
 
     public static ObjectFactory singleton(Object object) {
-        return () -> object;
+        return (params) -> object;
     }
 
     public static void setProjectionProvider(ProjectionProvider provider) {
@@ -404,19 +409,19 @@ public class CodeFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T defaultCreate(Class<?> impl, Class<T> cls) {
+    private static <T> T defaultCreate(Class<?> impl, Class<T> cls, Object... params) {
         var ann = cls.getDeclaredAnnotation(Default.class);
         if (nonNull(ann)) {
-            return (T) create(impl, ann.value());
+            return (T) createDefault(impl, ann.value(), params);
         }
         return internalEnvelop(null);
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T internalCreate(Class<T> cls) {
+    private static <T> T internalCreate(Class<T> cls, Object... params) {
         var entry = registry.get(cls);
         if (entry != null) {
-            return (T) entry.getImplFactory().create();
+            return (T) entry.getImplFactory().create(params);
         }
         return null;
     }

@@ -22,15 +22,20 @@ package net.binis.codegen.tools;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import sun.misc.Unsafe;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Slf4j
 public abstract class Reflection {
 
     private static ClassLoader loader;
+
+    private static Unsafe unsafe;
 
     public static Class<?> loadClass(String className) {
         try {
@@ -43,14 +48,34 @@ public abstract class Reflection {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @SneakyThrows
-    public static <T> T instantiate(Class<T> cls) {
-        return cls.getDeclaredConstructor().newInstance();
+    public static <T> T instantiate(Class<T> cls, Object... params) {
+        return (T) findConstructor(cls, params).newInstance(params);
+    }
+
+    private static Constructor findConstructor(Class<?> cls, Object... params) {
+        for (var constructor : cls.getDeclaredConstructors()) {
+            if (constructor.getParameterCount() == params.length) {
+                var types = constructor.getParameterTypes();
+                var match = true;
+                for (var i = 0; i < params.length; i++) {
+                    if ((isNull(params[i]) && types[i].isPrimitive()) || !types[i].isAssignableFrom(params[i].getClass())) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) {
+                    return constructor;
+                }
+            }
+        }
+        throw new UnsupportedOperationException("Unable to find proper constructor for class " + cls.getCanonicalName());
     }
 
     @SneakyThrows
-    public static void initialize(String cls) {
-        instantiate(loadClass(cls));
+    public static void initialize(String cls, Object... params) {
+        instantiate(loadClass(cls), params);
     }
 
     public static Field findField(Class<?> cls, String name) {
@@ -60,6 +85,24 @@ public abstract class Reflection {
             return null;
         }
     }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T getFieldValueUnsafe(Object obj, String name) {
+        try {
+            if (isNull(unsafe)) {
+                var f = Unsafe.class.getDeclaredField("theUnsafe");
+                f.setAccessible(true);
+                unsafe = (Unsafe) f.get(null);
+            }
+
+            var field = findField(obj.getClass(), name);
+            return (T) unsafe.getObject(obj, unsafe.objectFieldOffset(field));
+        } catch (Exception e) {
+            log.error("Unable to get value for field {} of {}", name, obj.getClass().getName(), e);
+            return null;
+        }
+    }
+
 
     @SuppressWarnings("unchecked")
     public static <T> T getFieldValue(Object obj, String name) {
