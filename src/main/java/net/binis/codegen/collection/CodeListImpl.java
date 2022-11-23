@@ -62,6 +62,26 @@ public class CodeListImpl<T, R> implements CodeList<T, R> {
     }
 
     @Override
+    public CodeList<T, R> _if(boolean condition, Consumer<CodeList<T, R>> consumer, Consumer<CodeList<T, R>> elseConsumer) {
+        if (condition) {
+            consumer.accept(this);
+        } else {
+            elseConsumer.accept(this);
+        }
+        return this;
+    }
+
+    @Override
+    public CodeList<T, R> _if(boolean condition, BiConsumer<CodeList<T, R>, R> consumer, BiConsumer<CodeList<T, R>, R> elseConsumer) {
+        if (condition) {
+            consumer.accept(this, parent);
+        } else {
+            elseConsumer.accept(this, parent);
+        }
+        return this;
+    }
+
+    @Override
     public CodeList<T, R> _self(BiConsumer<CodeList<T, R>, R> consumer) {
         consumer.accept(this, parent);
         return this;

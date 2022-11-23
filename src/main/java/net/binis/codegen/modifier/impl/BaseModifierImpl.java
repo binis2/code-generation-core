@@ -55,6 +55,28 @@ public abstract class BaseModifierImpl<T, R> implements BaseModifier<T, R>, Modi
 
     @SuppressWarnings("unchecked")
     @Override
+    public T _if(boolean condition, Consumer<T> consumer, Consumer<T> elseConsumer) {
+        if (condition) {
+            consumer.accept((T) this);
+        } else {
+            elseConsumer.accept((T) this);
+        }
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public T _if(boolean condition, BiConsumer<T, R> consumer, BiConsumer<T, R> elseConsumer) {
+        if (condition) {
+            consumer.accept((T) this, parent);
+        } else {
+            elseConsumer.accept((T) this, parent);
+        }
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public T _self(BiConsumer<T, R> consumer) {
         consumer.accept((T) this, parent);
         return (T) this;

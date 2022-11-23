@@ -27,6 +27,8 @@ public interface BaseModifier<T, R> {
     R done();
     T _if(boolean condition, Consumer<T> consumer);
     T _if(boolean condition, BiConsumer<T, R> consumer);
+    T _if(boolean condition, Consumer<T> consumer, Consumer<T> elseConsumer);
+    T _if(boolean condition, BiConsumer<T, R> consumer, BiConsumer<T, R> elseConsumer);
     T _self(BiConsumer<T, R> consumer);
 
 }
