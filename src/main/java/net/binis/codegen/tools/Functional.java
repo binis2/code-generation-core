@@ -3,9 +3,12 @@ package net.binis.codegen.tools;
 import net.binis.codegen.annotation.Default;
 import net.binis.codegen.factory.CodeFactory;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.*;
+
+import static java.util.Objects.nonNull;
 
 @SuppressWarnings("unchecked")
 public class Functional {
@@ -18,28 +21,85 @@ public class Functional {
         return _do()._with((Supplier) supplier);
     }
 
+    public static <T, R> FunctionalRecursive<T, R> _recursive(T start) {
+        return CodeFactory.create(FunctionalRecursive.class, start);
+    }
+
     protected Functional() {
         //Do nothing
+    }
+
+    public static class Initializer {
+
+        public static <T> Supplier<List<T>> listOf(Class<T> cls) {
+            return ArrayList::new;
+        }
+
+        protected Initializer() {
+            //Do nothing
+        }
+
     }
 
     @Default("net.binis.codegen.tools.Functional$FunctionalDoWhileImpl")
     public interface FunctionalDoWhile<R> {
         FunctionalDoWhile<R> _run(Runnable runnable);
         FunctionalDoWhile<R> _with(Supplier<R> supplier);
-        FunctionalEnd<R> _while(Function<R, Boolean> func);
-        FunctionalEnd<R> _while(Supplier<Boolean> supplier);
+        FunctionalEnd<R> _while(Predicate<R> predicate);
+        FunctionalEnd<R> _while(BooleanSupplier supplier);
     }
+
+    @Default("net.binis.codegen.tools.Functional$FunctionalRecursiveImpl")
+    public interface FunctionalRecursive<T, R> {
+        FunctionalRecursive<T, R> _on(UnaryOperator<T> on);
+        <Q> FunctionalRecursive<T, Q> _init(Supplier<Q> init);
+        <Q>FunctionalRecursive<T, Q> _init(Q init);
+        void _perform(Consumer<T> doConsumer);
+        FunctionalEnd<T> _do(UnaryOperator<T> doOperator);
+        FunctionalEnd<R> _do(BiFunction<T, R, R> doFunction);
+        FunctionalEnd<R> _perform(BiConsumer<T, R> perform);
+    }
+
 
     public interface FunctionalEnd<R> {
         void _done();
-        R _get();
-        void _then(Consumer<R> consumer);
+        Optional<R> _get();
+        <T> FunctionalEnd<T> _map(Function<R, T> mapper);
+        FunctionalEnd<R> _then(Consumer<R> consumer);
     }
 
-    protected static class FunctionalDoWhileImpl<R> implements FunctionalDoWhile<R>, FunctionalEnd<R> {
+    protected static class FunctionalEndImpl<R> implements FunctionalEnd<R> {
+
+        protected Object result = null;
+
+        @Override
+        public void _done() {
+            //Do nothing
+        }
+
+        @Override
+        public Optional _get() {
+            return Optional.ofNullable(result);
+        }
+
+        @Override
+        public FunctionalEnd _map(Function mapper) {
+            result = mapper.apply(result);
+            return this;
+        }
+
+        @Override
+        public FunctionalEnd _then(Consumer consumer) {
+            if (nonNull(result)) {
+                consumer.accept(result);
+            }
+            return this;
+        }
+    }
+
+    protected static class FunctionalDoWhileImpl<R> extends FunctionalEndImpl<R> implements FunctionalDoWhile<R> {
 
         protected Supplier<R> supplier = () -> null;
-        protected R result = null;
 
         {
             CodeFactory.registerType(FunctionalDoWhile.class, FunctionalDoWhileImpl::new, null);
@@ -61,34 +121,94 @@ public class Functional {
         }
 
         @Override
-        public FunctionalEnd<R> _while(Function<R, Boolean> func) {
+        public FunctionalEnd _while(Predicate predicate) {
             do {
                 result = supplier.get();
-            } while (func.apply(result));
+            } while (predicate.test(result));
 
             return this;
         }
 
         @Override
-        public FunctionalEnd<R> _while(Supplier<Boolean> supplier) {
-            return _while(r -> supplier.get());
-        }
-
-        @Override
-        public void _done() {
-            //Do nothing
-        }
-
-        @Override
-        public R _get() {
-            return result;
-        }
-
-        @Override
-        public void _then(Consumer<R> consumer) {
-            consumer.accept(result);
+        public FunctionalEnd<R> _while(BooleanSupplier supplier) {
+            return _while(r -> supplier.getAsBoolean());
         }
     }
 
+    protected static class FunctionalRecursiveImpl<T, R> extends FunctionalEndImpl<R> implements FunctionalRecursive<T, R> {
+
+        protected UnaryOperator<T> on = null;
+        protected T object;
+        protected Supplier<R> init;
+
+        {
+            CodeFactory.registerType(FunctionalRecursive.class, p -> new FunctionalRecursiveImpl<>(p[0]), null);
+        }
+
+        protected FunctionalRecursiveImpl(T start) {
+            this.object = start;
+        }
+
+        @Override
+        public FunctionalRecursive<T, R> _on(UnaryOperator<T> on) {
+            this.on = on;
+            return this;
+        }
+
+        @Override
+        public FunctionalRecursive _init(Supplier init) {
+            this.init = init;
+            return this;
+        }
+
+        @Override
+        public FunctionalRecursive _init(Object init) {
+            this.init = () -> (R) init;
+            return this;
+        }
+
+        @Override
+        public void _perform(Consumer<T> doConsumer) {
+            assert nonNull(on) : "_on() operator is not specified!";
+            var obj = object;
+            while (nonNull(obj)) {
+                obj = on.apply(obj);
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public FunctionalEnd<T> _do(UnaryOperator<T> doOperator) {
+            var obj = object;
+            while (nonNull(obj)) {
+                obj = doOperator.apply(obj);
+            }
+
+            result = (R) obj;
+
+            return (FunctionalEnd) this;
+        }
+
+        @Override
+        public FunctionalEnd<R> _do(BiFunction<T, R, R> doFunction) {
+            assert nonNull(on) : "_on() operator is not specified!";
+            var obj = object;
+            R res = nonNull(init)? init.get() : null;
+            while (nonNull(obj)) {
+                res = doFunction.apply(obj, res);
+                obj = on.apply(obj);
+            }
+            result = res;
+            return this;
+        }
+
+        @Override
+        public FunctionalEnd<R> _perform(BiConsumer<T, R> perform) {
+            return _do((t, r) -> {
+                perform.accept(t, r);
+                return r;
+            });
+        }
+    }
 
 }
