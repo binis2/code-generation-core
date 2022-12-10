@@ -3,9 +3,7 @@ package net.binis.codegen.tools;
 import net.binis.codegen.annotation.Default;
 import net.binis.codegen.factory.CodeFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.*;
 
 import static java.util.Objects.nonNull;
@@ -33,6 +31,10 @@ public class Functional {
 
         public static <T> Supplier<List<T>> listOf(Class<T> cls) {
             return ArrayList::new;
+        }
+
+        public static <K, V> Supplier<Map<K, V>> mapOf(Class<K> keyClass, Class<V> valueClass) {
+            return HashMap::new;
         }
 
         protected Initializer() {
