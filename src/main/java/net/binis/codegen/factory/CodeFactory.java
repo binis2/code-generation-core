@@ -319,13 +319,25 @@ public class CodeFactory {
             if (registry.dirty) {
                 registry.sorted = registry.values.values().stream()
                         .sorted(Comparator.comparing(CodeEnum::ordinal))
-                        .collect(Collectors.toList());
+                        .toList();
             }
             return (T[]) registry.sorted.toArray();
         }
         return (T[]) Array.newInstance(cls.getComponentType(), 0);
     }
 
+    public static <T extends CodeEnum> int enumLength(Class<T> cls) {
+        var registry = enumRegistry.get(cls);
+        if (nonNull(registry)) {
+            if (registry.dirty) {
+                registry.sorted = registry.values.values().stream()
+                        .sorted(Comparator.comparing(CodeEnum::ordinal))
+                        .toList();
+            }
+            return registry.sorted.size();
+        }
+        return 0;
+    }
 
     @SuppressWarnings("unchecked")
     private static <T extends CodeEnum> EnumInitializer buildEnumInitializer(Class<T> cls) {
