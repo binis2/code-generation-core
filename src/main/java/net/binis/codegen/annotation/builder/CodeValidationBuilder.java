@@ -21,7 +21,7 @@ package net.binis.codegen.annotation.builder;
  */
 
 import net.binis.codegen.annotation.CodeAnnotation;
-import net.binis.codegen.enrich.Enricher;
+import net.binis.codegen.enrich.*;
 import net.binis.codegen.options.CodeOption;
 
 import java.lang.annotation.Retention;
@@ -47,7 +47,7 @@ public @interface CodeValidationBuilder {
     String interfacePath() default "";
     String implementationPath() default "";
 
-    Class<? extends Enricher>[] enrichers() default {};
+    Class<? extends Enricher>[] enrichers() default {ValidationEnricher.class, CreatorModifierEnricher.class, ModifierEnricher.class, RegionEnricher.class};
     Class<? extends Enricher>[] inheritedEnrichers() default {};
     Class<? extends CodeOption>[] options() default {};
 }

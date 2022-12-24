@@ -48,7 +48,6 @@ public @interface CodePrototype {
 
     Class<? extends Enricher>[] enrichers() default {};
     Class<? extends Enricher>[] inheritedEnrichers() default {};
-
     Class<? extends CodeOption>[] options() default {};
 
 }
