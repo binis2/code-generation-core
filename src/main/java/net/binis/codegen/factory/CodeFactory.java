@@ -272,7 +272,6 @@ public class CodeFactory {
 
             registry.ordinals.put(ordinal, inst);
             registry.values.put(name, inst);
-            registry.dirty = true;
 
             return (T) inst;
         }
@@ -313,31 +312,30 @@ public class CodeFactory {
     }
 
     @SuppressWarnings("unchecked")
+    public static <T extends CodeEnum> Map<Integer, T> enumValuesMap(Class<T> cls) {
+        var registry = enumRegistry.get(cls);
+        if (nonNull(registry)) {
+            return (Map) registry.ordinals;
+        }
+        return Collections.emptyMap();
+    }
+
+    @SuppressWarnings("unchecked")
     public static <T extends CodeEnum> T[] enumValues(Class<T> cls) {
         var registry = enumRegistry.get(cls);
         if (nonNull(registry)) {
-            if (registry.dirty) {
-                registry.sorted = registry.values.values().stream()
-                        .sorted(Comparator.comparing(CodeEnum::ordinal))
-                        .toList();
+            var list = registry.ordinals.values().stream().sorted(Comparator.comparing(CodeEnum::ordinal)).toList();
+            if (!list.isEmpty()) {
+                var arr = (T[]) Array.newInstance(cls, list.size());
+                for (var i = 0; i < list.size(); i++) {
+                    arr[i] = (T) list.get(i);
+                }
+                return arr;
             }
-            return (T[]) registry.sorted.toArray();
         }
-        return (T[]) Array.newInstance(cls.getComponentType(), 0);
+        return (T[]) Array.newInstance(cls, 0);
     }
 
-    public static <T extends CodeEnum> int enumLength(Class<T> cls) {
-        var registry = enumRegistry.get(cls);
-        if (nonNull(registry)) {
-            if (registry.dirty) {
-                registry.sorted = registry.values.values().stream()
-                        .sorted(Comparator.comparing(CodeEnum::ordinal))
-                        .toList();
-            }
-            return registry.sorted.size();
-        }
-        return 0;
-    }
 
     @SuppressWarnings("unchecked")
     private static <T extends CodeEnum> EnumInitializer buildEnumInitializer(Class<T> cls) {
@@ -481,10 +479,6 @@ public class CodeFactory {
         private Map<Integer, CodeEnum> ordinals = new HashMap<>();
         @Builder.Default
         private Map<String, CodeEnum> values = new HashMap<>();
-        @Builder.Default
-        private boolean dirty = true;
-        private List<CodeEnum> sorted;
-
         private EnumInitializer initializer;
     }
 
