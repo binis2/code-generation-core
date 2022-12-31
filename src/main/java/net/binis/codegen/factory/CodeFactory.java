@@ -30,13 +30,14 @@ import net.binis.codegen.objects.base.enumeration.CodeEnum;
 import net.binis.codegen.objects.base.enumeration.CodeEnumImpl;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static net.binis.codegen.tools.Reflection.initialize;
+import static net.binis.codegen.tools.Reflection.*;
 
 @Slf4j
 public class CodeFactory {
@@ -69,7 +70,23 @@ public class CodeFactory {
                 }
             }
             if (isNull(result)) {
-                registerType(cls, (ObjectFactory) null, null);
+                if (!cls.isInterface()) {
+                    try {
+                        var ctor = findConstructor(cls, params);
+                        result = (T) ctor.newInstance(params);
+                        registerType(cls, p -> {
+                            try {
+                                return ctor.newInstance(params);
+                            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                                return null;
+                            }
+                        }, null);
+                    } catch (Exception e) {
+                        registerType(cls, (ObjectFactory) null, null);
+                    }
+                } else {
+                    registerType(cls, (ObjectFactory) null, null);
+                }
             }
             return result;
         }

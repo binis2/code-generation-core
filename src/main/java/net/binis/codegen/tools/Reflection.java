@@ -53,7 +53,7 @@ public abstract class Reflection {
         return (T) findConstructor(cls, params).newInstance(params);
     }
 
-    private static Constructor findConstructor(Class<?> cls, Object... params) {
+    public static Constructor findConstructor(Class<?> cls, Object... params) {
         for (var constructor : cls.getDeclaredConstructors()) {
             if (constructor.getParameterCount() == params.length) {
                 var types = constructor.getParameterTypes();
