@@ -161,6 +161,14 @@ public class CodeFactory {
         }
     }
 
+    public static void registerType(Class<?> intf, ObjectFactory impl) {
+        registerType(intf, impl, null);
+    }
+
+    public static void registerType(Class<?> intf, Supplier impl) {
+        registerType(intf, params -> impl.get(), null);
+    }
+
     public static void registerType(Class<?> intf, Supplier impl, EmbeddedObjectFactory modifier) {
         registerType(intf, params -> impl.get(), modifier);
     }

@@ -1,10 +1,10 @@
-package net.binis.codegen.modifier;
+package net.binis.codegen.map;
 
 /*-
  * #%L
  * code-generator-core
  * %%
- * Copyright (C) 2021 Binis Belev
+ * Copyright (C) 2021 - 2023 Binis Belev
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,9 @@ package net.binis.codegen.modifier;
  * #L%
  */
 
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+public interface MapperFactory {
 
-public interface BaseModifier<T, R> {
-    R done();
-    T _if(boolean condition, Consumer<T> consumer);
-    T _if(boolean condition, BiConsumer<T, R> consumer);
-    T _if(boolean condition, Consumer<T> consumer, Consumer<T> elseConsumer);
-    T _if(boolean condition, BiConsumer<T, R> consumer, BiConsumer<T, R> elseConsumer);
-    T _self(BiConsumer<T, R> consumer);
-    T _map(Object source);
+    <T> T map(Object source, Class<T> destination);
+    <T> T map(Object source, T destination);
 
 }

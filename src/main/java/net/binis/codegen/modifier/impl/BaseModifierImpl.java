@@ -21,6 +21,7 @@ package net.binis.codegen.modifier.impl;
  */
 
 import net.binis.codegen.collection.EmbeddedCodeCollection;
+import net.binis.codegen.map.Mapper;
 import net.binis.codegen.modifier.BaseModifier;
 import net.binis.codegen.modifier.Modifier;
 
@@ -79,6 +80,12 @@ public abstract class BaseModifierImpl<T, R> implements BaseModifier<T, R>, Modi
     @Override
     public T _self(BiConsumer<T, R> consumer) {
         consumer.accept((T) this, parent);
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T _map(Object source) {
+        Mapper.map(source, this);
         return (T) this;
     }
 

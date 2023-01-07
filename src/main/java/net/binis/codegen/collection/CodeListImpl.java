@@ -87,4 +87,10 @@ public class CodeListImpl<T, R> implements CodeList<T, R> {
         return this;
     }
 
+    @Override
+    public CodeList<T, R> _map(Object source) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+        //TODO: Implement handling for collections.
+    }
+
 }

@@ -9,9 +9,9 @@ package net.binis.codegen.tools;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,11 +26,11 @@ import sun.misc.Unsafe;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 @Slf4j
 public abstract class Reflection {
@@ -126,5 +126,25 @@ public abstract class Reflection {
             Reflection.loader = null;
         }
     }
+
+    public static boolean isGetter(Method method) {
+        var name = method.getName();
+        return !method.getReturnType().equals(void.class) && method.getParameterCount() == 0 &&
+                (((name.startsWith("get") && name.length() > 3) && (Character.isUpperCase(name.charAt(3)))) ||
+                        ((name.startsWith("is") && name.length() > 2) && (Character.isUpperCase(name.charAt(2)))));
+    }
+
+    public static boolean isSetter(Method method) {
+        var name = method.getName();
+        return method.getReturnType().equals(void.class) && method.getParameterCount() == 1 &&
+                (name.startsWith("set") && name.length() > 3) && (Character.isUpperCase(name.charAt(3)));
+    }
+
+    public static boolean isWrapperType(Class<?> type) {
+        return (type == Double.class || type == Float.class || type == Long.class ||
+                type == Integer.class || type == Short.class || type == Character.class ||
+                type == Byte.class || type == Boolean.class);
+    }
+
 
 }
