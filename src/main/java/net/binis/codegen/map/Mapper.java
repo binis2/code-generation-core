@@ -22,6 +22,10 @@ package net.binis.codegen.map;
 
 import net.binis.codegen.factory.CodeFactory;
 import net.binis.codegen.map.executor.DefaultMapperExecutor;
+import net.binis.codegen.map.executor.LambdaMapperExecutor;
+
+import java.util.List;
+import java.util.function.BiFunction;
 
 public class Mapper {
 
@@ -35,6 +39,26 @@ public class Mapper {
 
     public static <T> T map(Object source, T destination) {
         return CodeFactory.create(MapperFactory.class).map(source, destination);
+    }
+
+    public static <T> T convert(Object source, Class<T> destination) {
+        return CodeFactory.create(MapperFactory.class).convert(source, destination);
+    }
+
+    public static <T> T convert(Object source, T destination) {
+        return CodeFactory.create(MapperFactory.class).convert(source, destination);
+    }
+
+    public static void registerMapper(Class<?> source, Class<?> destination, Mapping mapping) {
+        CodeFactory.create(MapperFactory.class).registerMapper(source, destination, mapping);
+    }
+
+    public static <S, D> void registerMapper(Class<S> source, Class<D> destination, BiFunction<S, D, D> func) {
+        CodeFactory.create(MapperFactory.class).registerMapper(source, destination, new LambdaMapperExecutor(source, destination, func));
+    }
+
+    public static <D> List<Mapping<?, D>> findMappings(Class<?> source, Class<D> destination) {
+        return CodeFactory.create(MapperFactory.class).findMappings(source, destination);
     }
 
     private Mapper() {

@@ -9,9 +9,9 @@ package net.binis.codegen.map;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,9 +20,18 @@ package net.binis.codegen.map;
  * #L%
  */
 
+import java.util.List;
+
 public interface MapperFactory {
 
     <T> T map(Object source, Class<T> destination);
     <T> T map(Object source, T destination);
-
+    <T> T convert(Object source, Class<T> destination);
+    <T> T convert(Object source, T destination);
+    boolean canMap(Class<?> source, Class<?> destination);
+    boolean canMapExactly(Class<?> source, Class<?> destination);
+    <S, D> Mapping<S, D> getMap(Class<S> source, Class<D> destination);
+    <S, D> Mapping<S, D> getExactMap(Class<S> source, Class<D> destination);
+    void registerMapper(Class<?> source, Class<?> destination, Mapping<?, ?> mapping);
+    <D> List<Mapping<?, D>> findMappings(Class<?> source, Class<D> destination);
 }

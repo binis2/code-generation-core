@@ -22,51 +22,134 @@ package net.binis.codegen.map.executor;
 
 import lombok.extern.slf4j.Slf4j;
 import net.binis.codegen.exception.MapperException;
+import net.binis.codegen.factory.CodeFactory;
+import net.binis.codegen.map.MapperFactory;
+import net.binis.codegen.map.Mapping;
 import net.binis.codegen.tools.Reflection;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 
 @Slf4j
-public class MapperExecutor<T> {
+public class MapperExecutor<T> implements Mapping<Object, T> {
 
     protected BiFunction<Object, T, T> mapper;
+    protected final Class<?> source;
+    protected final Class<T> destination;
+    protected final boolean convert;
 
-    public MapperExecutor(Object source, Object destination) {
-        build(source.getClass(), destination.getClass());
+    @SuppressWarnings("unchecked")
+    public MapperExecutor(Object source, T destination, boolean convert) {
+        this.source = source.getClass();
+        this.destination = (Class) destination.getClass();
+        this.convert = convert;
+        build();
+    }
+
+    public MapperExecutor(Class<?> source, Class<T> destination, boolean convert) {
+        this.source = source;
+        this.destination = destination;
+        this.convert = convert;
+        build();
+    }
+
+    @Override
+    public Class getSource() {
+        return source;
+    }
+
+    @Override
+    public Class getDestination() {
+        return destination;
     }
 
     public T map(Object source, T destination) {
         return mapper.apply(source, destination);
     }
 
-    protected void build(Class<?> source, Class<?> destination) {
+    @SuppressWarnings("unchecked")
+    protected void build() {
 
         var accessors = new HashMap<String, TriFunction>();
+        List<TriFunction> list;
+
+        if (convert) {
+            buildConverter(accessors);
+
+            if (accessors.isEmpty()) {
+                buildMatcher(accessors);
+            }
+        } else {
+            buildMatcher(accessors);
+
+            if (accessors.isEmpty()) {
+                buildConverter(accessors);
+            }
+        }
+
+        if (accessors.isEmpty()) {
+            mapper = (s, d) -> d;
+        } else {
+            list = accessors.values().stream().toList();
+
+            mapper = (s, d) -> {
+                Object wither = null;
+                Object result = d;
+                for (var accessor : list) {
+                    var res = accessor.apply(s, result, wither);
+                    if (res instanceof WitherHolder holder) {
+                        wither = holder.get();
+                    } else {
+                        result = res;
+                    }
+                }
+                return (T) result;
+            };
+        }
+    }
+
+    private void buildMatcher(HashMap<String, TriFunction> accessors) {
         if (net.binis.codegen.modifier.Modifier.class.isAssignableFrom(destination)) {
             matchGettersModifier(accessors, source, destination);
         } else {
             matchGettersWithers(accessors, source, destination);
             matchGettersSetters(accessors, source, destination);
         }
+    }
 
-        var list = accessors.values().stream().toList();
+    @SuppressWarnings("unchecked")
+    private void buildConverter(HashMap<String, TriFunction> accessors) {
+        List<Mapping> mappings = (List) CodeFactory.create(MapperFactory.class).findMappings(source, destination);
 
-        mapper = (s, d) -> {
-            Object wither = null;
-            for (var accessor : list) {
-                wither = accessor.apply(s, d, wither);
+        if (!mappings.isEmpty()) {
+            var first = mappings.get(0);
+            if (first.getSource().isInterface()) {
+                var list = new ArrayList<Mapping>();
+                for (var item : mappings) {
+                    list.add(item);
+                    if (!item.getSource().isInterface()) {
+                        break;
+                    }
+                }
+                accessors.put(first.getSource().getCanonicalName(), (s, d, w) -> {
+                    Object result = d;
+                    for (var m : list) {
+                        result =  m.map(s, result);
+                    }
+                    return result;
+                });
+
+            } else {
+                accessors.put(first.getSource().getCanonicalName(), (s, d, w) -> {
+                    return first.map(s, d);
+                });
             }
-            return d;
-        };
-
+        }
     }
 
     protected void matchGettersSetters(Map<String, TriFunction> accessors, Class<?> source, Class<?> destination) {
@@ -94,8 +177,9 @@ public class MapperExecutor<T> {
                                 addPlainGetterSetterMapping(accessors, destination, getter, setter, name);
                             } else if (isNullableToNonNullable(srcType, destType)) {
                                 addNullProtectedGetterSetterMapping(accessors, destination, getter, setter, name);
+                            } else {
+                                addConverter(accessors, source, destination, getter, setter, name);
                             }
-                            //TODO: Implement conversions
                         }
                     } catch (Exception e) {
                         log.info("Getter ({}) on {} is not accessible!", getter.getName(), source.getCanonicalName());
@@ -131,20 +215,17 @@ public class MapperExecutor<T> {
                                 var name = entry.getKey();
                                 var srcType = getter.getReturnType();
                                 var destType = setter.getParameterTypes()[0];
+                                if (!witherAdded) {
+                                    addWither(accessors, wither);
+                                    witherAdded = true;
+                                }
                                 if (destType.isAssignableFrom(srcType) || isNonNullableToNullable(srcType, destType)) {
-                                    if (!witherAdded) {
-                                        addWither(accessors, wither);
-                                        witherAdded = true;
-                                    }
                                     addPlainGetterWitherMapping(accessors, destination, getter, setter, name);
                                 } else if (isNullableToNonNullable(srcType, destType)) {
-                                    if (!witherAdded) {
-                                        addWither(accessors, wither);
-                                        witherAdded = true;
-                                    }
                                     addNullProtectedGetterWitherMapping(accessors, destination, getter, setter, name);
+                                } else {
+                                    addConverterWither(accessors, source, destination, getter, setter, name);
                                 }
-                                //TODO: Implement conversions
                             }
                         } catch (Exception e) {
                             log.info("Getter ({}) on {} is not accessible!", getter.getName(), source.getCanonicalName());
@@ -183,8 +264,9 @@ public class MapperExecutor<T> {
                                     addPlainGetterSetterMapping(accessors, destination, getter, setter, name);
                                 } else if (isNullableToNonNullable(srcType, destType)) {
                                     addNullProtectedGetterSetterMapping(accessors, destination, getter, setter, name);
+                                } else {
+                                    addConverter(accessors, source, destination, getter, setter, name);
                                 }
-                                //TODO: Implement conversions
                             }
                         } catch (Exception e) {
                             log.info("Getter ({}) on {} is not accessible!", getter.getName(), source.getCanonicalName());
@@ -194,18 +276,62 @@ public class MapperExecutor<T> {
             }
     }
 
+    protected void addConverter(Map<String, TriFunction> accessors, Class<?> source, Class<?> destination, Method getter, Method setter, String name) {
+        try {
+            setter.setAccessible(true);
+            var type = setter.getParameterTypes()[0];
+            accessors.put(name, (s, d, w) -> {
+                try {
+                    var value = getter.invoke(s);
+                    if (convert) {
+                        setter.invoke(d, CodeFactory.create(MapperFactory.class).convert(value, type));
+                    } else {
+                        setter.invoke(d, CodeFactory.create(MapperFactory.class).map(value, type));
+                    }
+                    return d;
+                } catch (Exception e) {
+                    throw new MapperException("Unable to map value for field (" + name + ") for mapping (" + s.getClass().getCanonicalName() + "->" + d.getClass().getCanonicalName() + ")!", e);
+                }
+            });
+        } catch (Exception e) {
+            log.info("Setter ({}) on {} is not accessible!", setter.getName(), destination.getCanonicalName());
+        }
+    }
 
-    private void addWither(Map<String, TriFunction> accessors, Method wither) {
+    protected void addConverterWither(Map<String, TriFunction> accessors, Class<?> source, Class<?> destination, Method getter, Method setter, String name) {
+        try {
+            setter.setAccessible(true);
+            var type = setter.getParameterTypes()[0];
+            accessors.put(name, (s, d, w) -> {
+                try {
+                    var value = getter.invoke(s);
+                    if (convert) {
+                        setter.invoke(w, CodeFactory.create(MapperFactory.class).convert(value, type));
+                    } else {
+                        setter.invoke(w, CodeFactory.create(MapperFactory.class).map(value, type));
+                    }
+                    return d;
+                } catch (Exception e) {
+                    throw new MapperException("Unable to map value for field (" + name + ") for mapping (" + s.getClass().getCanonicalName() + "->" + d.getClass().getCanonicalName() + ")!", e);
+                }
+            });
+        } catch (Exception e) {
+            log.info("Setter ({}) on {} is not accessible!", setter.getName(), destination.getCanonicalName());
+        }
+    }
+
+
+    protected void addWither(Map<String, TriFunction> accessors, Method wither) {
         accessors.put("?!?wither?!?", (s, d, w) -> {
             try {
-                return wither.invoke(d);
+                return new WitherHolder(wither.invoke(d));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
     }
 
-    private boolean isNonNullableToNullable(Class<?> srcType, Class<?> destType) {
+    protected boolean isNonNullableToNullable(Class<?> srcType, Class<?> destType) {
         if (srcType.isPrimitive()) {
             if (destType.equals(Double.class)) {
                 return double.class.equals(srcType);
@@ -228,7 +354,7 @@ public class MapperExecutor<T> {
         return false;
     }
 
-    private boolean isNullableToNonNullable(Class<?> srcType, Class<?> destType) {
+    protected boolean isNullableToNonNullable(Class<?> srcType, Class<?> destType) {
         if (destType.isPrimitive()) {
             if (srcType.equals(Double.class)) {
                 return double.class.equals(destType);
@@ -302,7 +428,7 @@ public class MapperExecutor<T> {
                 try {
                     var value = getter.invoke(s);
                     func.accept(value, d, setter);
-                    return null;
+                    return d;
                 } catch (Exception e) {
                     throw new MapperException("Unable to map value for field (" + name + ") for mapping (" + s.getClass().getCanonicalName() + "->" + d.getClass().getCanonicalName() + ")!", e);
                 }
@@ -319,7 +445,7 @@ public class MapperExecutor<T> {
                 try {
                     var value = getter.invoke(s);
                     func.accept(value, w, setter);
-                    return w;
+                    return d;
                 } catch (Exception e) {
                     throw new MapperException("Unable to map value for field (" + name + ") for mapping (" + s.getClass().getCanonicalName() + "->" + d.getClass().getCanonicalName() + ")!", e);
                 }
@@ -342,12 +468,24 @@ public class MapperExecutor<T> {
     }
 
     @FunctionalInterface
-    private interface TriConsumer {
+    protected interface TriConsumer {
         void accept(Object dest, Object value, Method setter);
     }
 
-    private interface TriFunction {
+    protected interface TriFunction {
         Object apply(Object source, Object destination, Object wither);
+    }
+
+    protected static class WitherHolder {
+        Object wither;
+
+        public WitherHolder(Object wither) {
+            this.wither = wither;
+        }
+
+        public Object get() {
+            return wither;
+        }
     }
 
 }
