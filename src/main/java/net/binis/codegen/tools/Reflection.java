@@ -146,5 +146,34 @@ public abstract class Reflection {
                 type == Byte.class || type == Boolean.class);
     }
 
+    public static Method findMethod(String name, Class<?> cls, Class<?>... params) {
+        Method result = null;
+        try {
+            result = cls.getDeclaredMethod(name, params);
+        } catch (Exception e) {
+            try {
+                result = cls.getMethod(name, params);
+            } catch (Exception ex) {
+                //Do nothing
+            }
+        }
+        return result;
+    }
+
+    public static Object invoke(Method m, Object instance, Object... args) {
+        try {
+            return m.invoke(instance, args);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static Object invokeStatic(Method m, Object... args) {
+        try {
+            return m.invoke(null, args);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
 }

@@ -24,13 +24,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.binis.codegen.annotation.Default;
+import net.binis.codegen.discovery.Discoverer;
 import net.binis.codegen.exception.GenericCodeGenException;
 import net.binis.codegen.objects.Pair;
 import net.binis.codegen.objects.base.enumeration.CodeEnum;
 import net.binis.codegen.objects.base.enumeration.CodeEnumImpl;
+import net.binis.codegen.tools.Reflection;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -54,6 +57,15 @@ public class CodeFactory {
 
     private CodeFactory() {
         //Do nothing
+    }
+
+    static {
+        Discoverer.findAnnotations().stream().filter(Discoverer.DiscoveredService::isConfig).forEach(config -> {
+            var method = Reflection.findMethod("initialize", config.getCls());
+            if (nonNull(method) && Modifier.isStatic(method.getModifiers())) {
+                Reflection.invokeStatic(method);
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")
