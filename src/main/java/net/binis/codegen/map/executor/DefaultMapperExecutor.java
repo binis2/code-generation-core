@@ -50,6 +50,11 @@ public class DefaultMapperExecutor implements MapperFactory {
     }
 
     @Override
+    public Mapping mapping(Class source, Class destination) {
+        return buildMapperClass(source, destination, false, false);
+    }
+
+    @Override
     public <T> T convert(Object source, Class<T> destination) {
         return convert(source, CodeFactory.create(destination));
     }
@@ -86,8 +91,8 @@ public class DefaultMapperExecutor implements MapperFactory {
     }
 
     @Override
-    public void registerMapper(Class<?> source, Class<?> destination, Mapping<?, ?> mapping) {
-        mappers.put(calcMapperName(source, destination), mapping);
+    public void registerMapper(Mapping<?, ?> mapping) {
+        mappers.put(calcMapperName(mapping.getSource(), mapping.getDestination()), mapping);
     }
 
     @Override
@@ -95,6 +100,17 @@ public class DefaultMapperExecutor implements MapperFactory {
         var result = new LinkedHashMap<Class<?>, Mapping<?, D>>();
         findMappings(result, source, destination);
         return result.values().stream().toList();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <S, D> Mapping<S, D> clearMapping(Class<S> source, Class<D> destination) {
+        return mappers.remove(calcMapperName(source, destination));
+    }
+
+    @Override
+    public void clearAllMappings() {
+        mappers.clear();
     }
 
     @SuppressWarnings("unchecked")
@@ -114,10 +130,17 @@ public class DefaultMapperExecutor implements MapperFactory {
     }
 
     protected <T> MapperExecutor buildMapper(Object source, T destination, boolean convert) {
+        return buildMapperClass(source.getClass(), destination.getClass(), convert, true);
+    }
+
+    protected <T> MapperExecutor buildMapperClass(Class source, Class destination, boolean convert, boolean register) {
         var result = new MapperExecutor(source, destination, convert);
-        mappers.put(calcMapperName(source.getClass(), destination.getClass()), result);
+        if (register) {
+            mappers.put(calcMapperName(source, destination), result);
+        }
         return result;
     }
+
 
     protected String calcMapperName(Class source, Class destination) {
         return source.getCanonicalName() + "->" + destination.getCanonicalName();

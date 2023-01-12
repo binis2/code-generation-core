@@ -24,16 +24,18 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import net.binis.codegen.config.DefaultMappings;
 import net.binis.codegen.map.Mapper;
+import net.binis.codegen.map.MapperFactory;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class MapperTest {
 
-    @BeforeAll
-    static void init() {
-        DefaultMappings.initialize();
+    @BeforeEach
+    void setup() {
+        CodeFactory.create(MapperFactory.class).clearMapping(TestMap.class, TestMap2.class);
     }
 
     @Test
@@ -53,8 +55,6 @@ class MapperTest {
 
     @Test
     void testDifferent() {
-        var mappings = Mapper.findMappings(Number.class, String.class);
-
         var test = new TestMap();
         test.setBaseString("base");
         test.setString1("test");
@@ -84,6 +84,44 @@ class MapperTest {
         assertEquals(1, Mapper.convert(1L, double.class));
     }
 
+    @Test
+    void testBuilder() {
+        var test = new TestMap();
+        test.setBaseString("base");
+        test.setString1("test");
+        test.setLong1(1L);
+        test.setInt1(2);
+        Mapper.map().source(TestMap.class).destination(TestMap2.class);
+        var resultTest = Mapper.map(test, TestMap2.class);
+        assertEquals(test.getString1(), resultTest.getString1());
+        assertEquals((long) test.getLong1(), resultTest.getLong1());
+        assertEquals(test.getInt1(), (int) resultTest.getInt1());
+        assertNull(test.getInt2());
+        assertEquals(0, resultTest.getInt2());
+    }
+
+    @Test
+    void testCustomBuilder() {
+        var test = new TestMap();
+        test.setBaseString("base");
+        test.setString1("test");
+        test.setLong1(1L);
+        test.setInt1(2);
+        test.setConvert1(3);
+        test.setConvert2(true);
+        Mapper.map().source(TestMap.class).destination(TestMap2.class).custom((s, d) ->
+                d.setBuilder(s.getConvert1() + s.getString1()));
+        var resultTest = Mapper.map(test, TestMap2.class);
+        assertEquals(test.getString1(), resultTest.getString1());
+        assertEquals((long) test.getLong1(), resultTest.getLong1());
+        assertEquals(test.getInt1(), (int) resultTest.getInt1());
+        assertNull(test.getInt2());
+        assertEquals(0, resultTest.getInt2());
+        assertEquals(3L, resultTest.getConvert1());
+        assertEquals("true", resultTest.getConvert2());
+        assertEquals("3test", resultTest.getBuilder());
+    }
+
     @Data
     private static class BaseMap {
         private String baseString;
@@ -111,6 +149,8 @@ class MapperTest {
 
         private long convert1;
         private String convert2;
+
+        private String builder;
     }
 
 }

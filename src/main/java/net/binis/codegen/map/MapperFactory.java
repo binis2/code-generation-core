@@ -26,12 +26,16 @@ public interface MapperFactory {
 
     <T> T map(Object source, Class<T> destination);
     <T> T map(Object source, T destination);
+    Mapping mapping(Class source, Class destination);
     <T> T convert(Object source, Class<T> destination);
     <T> T convert(Object source, T destination);
     boolean canMap(Class<?> source, Class<?> destination);
     boolean canMapExactly(Class<?> source, Class<?> destination);
     <S, D> Mapping<S, D> getMap(Class<S> source, Class<D> destination);
     <S, D> Mapping<S, D> getExactMap(Class<S> source, Class<D> destination);
-    void registerMapper(Class<?> source, Class<?> destination, Mapping<?, ?> mapping);
+    void registerMapper(Mapping<?, ?> mapping);
     <D> List<Mapping<?, D>> findMappings(Class<?> source, Class<D> destination);
+    <S, D> Mapping<S, D> clearMapping(Class<S> source, Class<D> destination);
+    void clearAllMappings();
+
 }
