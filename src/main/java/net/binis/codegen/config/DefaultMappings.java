@@ -23,7 +23,9 @@ package net.binis.codegen.config;
 import net.binis.codegen.annotation.CodeConfiguration;
 import net.binis.codegen.factory.CodeFactory;
 import net.binis.codegen.map.Mapper;
+import net.binis.codegen.objects.base.enumeration.CodeEnum;
 
+@SuppressWarnings("unchecked")
 @CodeConfiguration
 public abstract class DefaultMappings {
 
@@ -66,6 +68,10 @@ public abstract class DefaultMappings {
         Mapper.registerMapper(Number.class, Double.class, (s, d) -> s.doubleValue());
         //String conversion
         Mapper.registerMapper(Object.class, String.class, (s, d) -> s.toString());
+        //Enum conversion
+        Mapper.registerMapperClass(String.class, Enum.class, (s, d) -> Enum.valueOf(d, s));
+        Mapper.registerMapperClass(String.class, CodeEnum.class, (s, d) -> CodeFactory.enumValueOf(d, s));
+        Mapper.registerMapperClass(Number.class, CodeEnum.class, (s, d) -> CodeFactory.enumValueOf(d, s.intValue()));
     }
 
     private DefaultMappings() {
