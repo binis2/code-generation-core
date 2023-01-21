@@ -72,7 +72,11 @@ public class CodeFactory {
     public static <T> T create(Class<T> cls, Object... params) {
         var entry = registry.get(cls);
         if (entry != null) {
-            return internalEnvelop((T) entry.getImplFactory().create(params));
+            if (nonNull(entry.getImplFactory())) {
+                return internalEnvelop((T) entry.getImplFactory().create(params));
+            } else {
+                return null;
+            }
         } else {
             var result = defaultCreate(cls, cls, params);
             if (isNull(result)) {

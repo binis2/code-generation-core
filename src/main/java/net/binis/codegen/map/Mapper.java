@@ -56,10 +56,14 @@ public class Mapper {
     }
 
     public static <S, D> void registerMapper(Class<S> source, Class<D> destination, BiFunction<S, D, D> func) {
-        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, destination, func));
+        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, destination, false, func));
     }
 
-    public static <D> List<Mapping<?, D>> findMappings(Class<?> source, Class<D> destination) {
+    public static <S, D> void registerMapperClass(Class<S> source, Class<D> destination, BiFunction<S, Class<D>, D> func) {
+        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, destination, true, func));
+    }
+
+    public static <S, D> List<Mapping<S, D>> findMappings(Class<S> source, Class<D> destination) {
         return CodeFactory.create(MapperFactory.class).findMappings(source, destination);
     }
 

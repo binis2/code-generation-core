@@ -139,15 +139,25 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
                 accessors.put(first.getSource().getCanonicalName(), (s, d, w) -> {
                     Object result = d;
                     for (var m : list) {
-                        result =  m.map(s, result);
+                        if (m instanceof ClassMapping c && c.isClass()) {
+                            result = m.map(s, destination);
+                        } else {
+                            result = m.map(s, result);
+                        }
                     }
                     return result;
                 });
 
             } else {
-                accessors.put(first.getSource().getCanonicalName(), (s, d, w) -> {
-                    return first.map(s, d);
-                });
+                if (first instanceof ClassMapping c && c.isClass()) {
+                    accessors.put(first.getSource().getCanonicalName(), (s, d, w) -> {
+                        return first.map(s, destination);
+                    });
+                } else {
+                    accessors.put(first.getSource().getCanonicalName(), (s, d, w) -> {
+                        return first.map(s, d);
+                    });
+                }
             }
         }
     }

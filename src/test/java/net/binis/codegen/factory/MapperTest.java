@@ -22,6 +22,7 @@ package net.binis.codegen.factory;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import net.binis.codegen.annotation.type.GenerationStrategy;
 import net.binis.codegen.config.DefaultMappings;
 import net.binis.codegen.map.Mapper;
 import net.binis.codegen.map.MapperFactory;
@@ -120,6 +121,12 @@ class MapperTest {
         assertEquals(3L, resultTest.getConvert1());
         assertEquals("true", resultTest.getConvert2());
         assertEquals("3test", resultTest.getBuilder());
+    }
+
+    @Test
+    void testEnum() {
+        assertEquals(GenerationStrategy.CLASSIC, Mapper.convert("CLASSIC", GenerationStrategy.class));
+        assertEquals(GenerationStrategy.IMPLEMENTATION, Mapper.convert("IMPLEMENTATION", GenerationStrategy.class));
     }
 
     @Data

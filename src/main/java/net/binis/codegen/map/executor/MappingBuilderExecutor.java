@@ -37,7 +37,7 @@ public class MappingBuilderExecutor implements SourceMappingBuilder, Destination
     @SuppressWarnings("unchecked")
     @Override
     public void custom(BiConsumer mapping) {
-        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, this.mapping.getDestination(), (source, destination) -> {
+        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, this.mapping.getDestination(), false, (source, destination) -> {
             var result = this.mapping.map(source, destination);
             mapping.accept(source, destination);
             return result;

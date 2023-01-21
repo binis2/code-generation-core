@@ -34,7 +34,7 @@ public interface MapperFactory {
     <S, D> Mapping<S, D> getMap(Class<S> source, Class<D> destination);
     <S, D> Mapping<S, D> getExactMap(Class<S> source, Class<D> destination);
     void registerMapper(Mapping<?, ?> mapping);
-    <D> List<Mapping<?, D>> findMappings(Class<?> source, Class<D> destination);
+    <S, D> List<Mapping<S, D>> findMappings(Class<S> source, Class<D> destination);
     <S, D> Mapping<S, D> clearMapping(Class<S> source, Class<D> destination);
     void clearAllMappings();
 

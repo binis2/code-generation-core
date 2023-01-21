@@ -24,16 +24,18 @@ import net.binis.codegen.map.Mapping;
 
 import java.util.function.BiFunction;
 
-public class LambdaMapperExecutor implements Mapping {
+public class LambdaMapperExecutor implements Mapping, ClassMapping {
 
     private final Class<?> source   ;
     private final Class<?> destination;
     private final BiFunction lambda;
+    private final boolean cls;
 
-    public LambdaMapperExecutor(Class<?> source, Class<?> destination, BiFunction lambda) {
+    public LambdaMapperExecutor(Class<?> source, Class<?> destination, boolean isClass, BiFunction lambda) {
         this.source = source;
         this.destination = destination;
         this.lambda = lambda;
+        this.cls = isClass;
     }
     @Override
     public Class getSource() {
@@ -46,8 +48,12 @@ public class LambdaMapperExecutor implements Mapping {
     }
 
     @Override
+    public boolean isClass() {
+        return cls;
+    }
+
+    @Override
     public Object map(Object source, Object destination) {
         return lambda.apply(source, destination);
     }
-
 }

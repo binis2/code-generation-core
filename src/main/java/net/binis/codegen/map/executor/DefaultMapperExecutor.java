@@ -56,7 +56,7 @@ public class DefaultMapperExecutor implements MapperFactory {
 
     @Override
     public <T> T convert(Object source, Class<T> destination) {
-        return convert(source, CodeFactory.create(destination));
+        return convert(source, CodeFactory.create(destination), destination);
     }
 
     @SuppressWarnings("unchecked")
@@ -68,6 +68,15 @@ public class DefaultMapperExecutor implements MapperFactory {
         }
         return (T) mapper.map(source, destination);
     }
+
+    protected <T> T convert(Object source, T destination, Class<T> cls) {
+        var mapper = mappers.get(calcMapperName(source.getClass(), cls));
+        if (isNull(mapper)) {
+            mapper = buildMapperClass(source.getClass(), cls, true, true);
+        }
+        return (T) mapper.map(source, destination);
+    }
+
 
     @Override
     public boolean canMap(Class<?> source, Class<?> destination) {
@@ -95,10 +104,14 @@ public class DefaultMapperExecutor implements MapperFactory {
         mappers.put(calcMapperName(mapping.getSource(), mapping.getDestination()), mapping);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public <D> List<Mapping<?, D>> findMappings(Class<?> source, Class<D> destination) {
-        var result = new LinkedHashMap<Class<?>, Mapping<?, D>>();
+    public <S, D> List<Mapping<S, D>> findMappings(Class<S> source, Class<D> destination) {
+        var result = new LinkedHashMap();
         findMappings(result, source, destination);
+        if (result.isEmpty()) {
+            findReverseMappings(result, source, destination);
+        }
         return result.values().stream().toList();
     }
 
@@ -114,7 +127,7 @@ public class DefaultMapperExecutor implements MapperFactory {
     }
 
     @SuppressWarnings("unchecked")
-    protected <D> void findMappings(Map<Class<?>, Mapping<?, D>> map, Class<?> source, Class<D> destination) {
+    protected void findMappings(Map<Class, Mapping> map, Class source, Class destination) {
         var mapping = mappers.get(calcMapperName(source, destination));
         if (nonNull(mapping)) {
             map.putIfAbsent(source, mapping);
@@ -128,6 +141,23 @@ public class DefaultMapperExecutor implements MapperFactory {
             }
         }
     }
+
+    @SuppressWarnings("unchecked")
+    protected <S> void findReverseMappings(Map<Class<S>, Mapping<S, ?>> map, Class<S> source, Class<?> destination) {
+        var mapping = mappers.get(calcMapperName(source, destination));
+        if (nonNull(mapping)) {
+            map.putIfAbsent(source, mapping);
+        } else {
+            for (var intf : destination.getInterfaces()) {
+                findReverseMappings(map, source, intf);
+            }
+
+            if (nonNull(destination.getSuperclass())) {
+                findReverseMappings(map, source, destination.getSuperclass());
+            }
+        }
+    }
+
 
     protected <T> MapperExecutor buildMapper(Object source, T destination, boolean convert) {
         return buildMapperClass(source.getClass(), destination.getClass(), convert, true);
