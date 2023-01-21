@@ -28,11 +28,14 @@ import net.binis.codegen.options.GenerateOpenApiIfAvailableOption;
 import net.binis.codegen.options.HiddenCreateMethodOption;
 import net.binis.codegen.options.ValidationFormOption;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 @CodeAnnotation
 @Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 public @interface CodeRequest {
 
     String name() default "";

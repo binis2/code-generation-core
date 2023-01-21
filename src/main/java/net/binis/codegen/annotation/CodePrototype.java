@@ -20,6 +20,7 @@ package net.binis.codegen.annotation;
  * #L%
  */
 
+import net.binis.codegen.annotation.type.GenerationStrategy;
 import net.binis.codegen.enrich.Enricher;
 import net.binis.codegen.options.CodeOption;
 
@@ -45,6 +46,7 @@ public @interface CodePrototype {
     String basePath() default "";
     String interfacePath() default "";
     String implementationPath() default "";
+    GenerationStrategy strategy() default GenerationStrategy.CLASSIC;
 
     Class<? extends Enricher>[] enrichers() default {};
     Class<? extends Enricher>[] inheritedEnrichers() default {};
