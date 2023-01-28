@@ -27,7 +27,7 @@ import net.binis.codegen.factory.CodeFactory;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
-public abstract class Async {
+public class Async {
 
     static {
         CodeFactory.registerType(AsyncDispatcher.class, CodeFactory.singleton(CodeExecutor.defaultDispatcher()), null);
@@ -45,6 +45,10 @@ public abstract class Async {
 
     public static void registerFlow(String name, Function<String, Executor> executor) {
         CodeExecutor.registerExecutor(name, executor.apply(name));
+    }
+
+    private Async() {
+        //Do nothing
     }
 
 }

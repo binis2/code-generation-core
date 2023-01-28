@@ -23,7 +23,6 @@ package net.binis.codegen.async;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public interface AsyncExecutor<R> {
