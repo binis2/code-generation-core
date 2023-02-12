@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import static java.util.Objects.nonNull;
 
 @Slf4j
+@SuppressWarnings("unchecked")
 public class MapperExecutor<T> implements Mapping<Object, T> {
 
     protected BiFunction<Object, T, T> mapper;
@@ -43,7 +44,6 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
     protected final Class<T> destination;
     protected final boolean convert;
 
-    @SuppressWarnings("unchecked")
     public MapperExecutor(Object source, T destination, boolean convert) {
         this.source = source.getClass();
         this.destination = (Class) destination.getClass();
@@ -72,7 +72,6 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
         return mapper.apply(source, destination);
     }
 
-    @SuppressWarnings("unchecked")
     protected void build() {
 
         var accessors = new HashMap<String, TriFunction>();
@@ -122,7 +121,6 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void buildConverter(HashMap<String, TriFunction> accessors) {
         List<Mapping> mappings = (List) CodeFactory.create(MapperFactory.class).findMappings(source, destination);
 

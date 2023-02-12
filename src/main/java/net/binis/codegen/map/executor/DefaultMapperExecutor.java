@@ -59,6 +59,12 @@ public class DefaultMapperExecutor implements MapperFactory {
         return convert(source, CodeFactory.create(destination), destination);
     }
 
+    @Override
+    public <T> T convert(Object source, Class<T> destination, Object... params) {
+        return convert(source, CodeFactory.create(destination, params), destination);
+    }
+
+
     @SuppressWarnings("unchecked")
     @Override
     public <T> T convert(Object source, T destination) {
@@ -69,6 +75,7 @@ public class DefaultMapperExecutor implements MapperFactory {
         return (T) mapper.map(source, destination);
     }
 
+    @SuppressWarnings("unchecked")
     protected <T> T convert(Object source, T destination, Class<T> cls) {
         var mapper = mappers.get(calcMapperName(source.getClass(), cls));
         if (isNull(mapper)) {
@@ -136,8 +143,9 @@ public class DefaultMapperExecutor implements MapperFactory {
                 findMappings(map, intf, destination);
             }
 
-            if (nonNull(source.getSuperclass())) {
-                findMappings(map, source.getSuperclass(), destination);
+            var superClass = getSuperClass(source);
+            if (nonNull(superClass)) {
+                findMappings(map, superClass, destination);
             }
         }
     }
@@ -152,17 +160,18 @@ public class DefaultMapperExecutor implements MapperFactory {
                 findReverseMappings(map, source, intf);
             }
 
-            if (nonNull(destination.getSuperclass())) {
-                findReverseMappings(map, source, destination.getSuperclass());
+            var superClass = getSuperClass(destination);
+            if (nonNull(superClass)) {
+                findReverseMappings(map, source, superClass);
             }
         }
     }
-
 
     protected <T> MapperExecutor buildMapper(Object source, T destination, boolean convert) {
         return buildMapperClass(source.getClass(), destination.getClass(), convert, true);
     }
 
+    @SuppressWarnings("unchecked")
     protected <T> MapperExecutor buildMapperClass(Class source, Class destination, boolean convert, boolean register) {
         var result = new MapperExecutor(source, destination, convert);
         if (register) {
@@ -170,7 +179,6 @@ public class DefaultMapperExecutor implements MapperFactory {
         }
         return result;
     }
-
 
     protected String calcMapperName(Class source, Class destination) {
         return source.getCanonicalName() + "->" + destination.getCanonicalName();
@@ -181,5 +189,12 @@ public class DefaultMapperExecutor implements MapperFactory {
         return mappers.get(calcMapperName(source, destination));
     }
 
+    protected Class getSuperClass(Class<?> cls) {
+        var result = cls.getSuperclass();
+        if (isNull(result) && cls.isInterface()) {
+            result = Object.class;
+        }
+        return result;
+    }
 
 }

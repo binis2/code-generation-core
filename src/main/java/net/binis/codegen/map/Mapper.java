@@ -47,6 +47,10 @@ public class Mapper {
         return CodeFactory.create(MapperFactory.class).convert(source, destination);
     }
 
+    public static <T> T convert(Object source, Class<T> destination, Object... params) {
+        return CodeFactory.create(MapperFactory.class).convert(source, destination, params);
+    }
+
     public static <T> T convert(Object source, T destination) {
         return CodeFactory.create(MapperFactory.class).convert(source, destination);
     }

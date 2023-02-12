@@ -28,6 +28,7 @@ public interface MapperFactory {
     <T> T map(Object source, T destination);
     Mapping mapping(Class source, Class destination);
     <T> T convert(Object source, Class<T> destination);
+    <T> T convert(Object source, Class<T> destination, Object... params);
     <T> T convert(Object source, T destination);
     boolean canMap(Class<?> source, Class<?> destination);
     boolean canMapExactly(Class<?> source, Class<?> destination);

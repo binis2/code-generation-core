@@ -21,9 +21,12 @@ package net.binis.codegen.config;
  */
 
 import net.binis.codegen.annotation.CodeConfiguration;
+import net.binis.codegen.exception.MapperException;
 import net.binis.codegen.factory.CodeFactory;
 import net.binis.codegen.map.Mapper;
 import net.binis.codegen.objects.base.enumeration.CodeEnum;
+
+import java.io.*;
 
 @SuppressWarnings("unchecked")
 @CodeConfiguration
@@ -72,6 +75,22 @@ public abstract class DefaultMappings {
         Mapper.registerMapperClass(String.class, Enum.class, (s, d) -> Enum.valueOf(d, s));
         Mapper.registerMapperClass(String.class, CodeEnum.class, (s, d) -> CodeFactory.enumValueOf(d, s));
         Mapper.registerMapperClass(Number.class, CodeEnum.class, (s, d) -> CodeFactory.enumValueOf(d, s.intValue()));
+        //Java Serialization
+        Mapper.registerMapperClass(byte[].class, Serializable.class, (s, d) -> {
+            try (ObjectInputStream is = new ObjectInputStream(new ByteArrayInputStream(s))) {
+                return (Serializable) is.readObject();
+            } catch (Exception e) {
+                throw new MapperException(e);
+            }
+        });
+        Mapper.registerMapperClass(Serializable.class, byte[].class, (s, d) -> {
+            try (ByteArrayOutputStream bos = new ByteArrayOutputStream(); ObjectOutputStream os = new ObjectOutputStream(bos)) {
+                os.writeObject(s);
+                return bos.toByteArray();
+            } catch (Exception e) {
+                throw new MapperException(e);
+            }
+        });
     }
 
     private DefaultMappings() {

@@ -29,6 +29,7 @@ import net.binis.codegen.exception.GenericCodeGenException;
 import net.binis.codegen.objects.Pair;
 import net.binis.codegen.objects.base.enumeration.CodeEnum;
 import net.binis.codegen.objects.base.enumeration.CodeEnumImpl;
+import net.binis.codegen.tools.Holder;
 import net.binis.codegen.tools.Reflection;
 
 import java.lang.reflect.Array;
@@ -36,11 +37,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static net.binis.codegen.tools.Reflection.*;
+import static net.binis.codegen.tools.Reflection.findConstructor;
+import static net.binis.codegen.tools.Reflection.initialize;
 
 @Slf4j
 public class CodeFactory {
@@ -120,8 +121,7 @@ public class CodeFactory {
             }
         } else {
             try {
-                initialize(defaultClass, params);
-                obj = internalCreate(cls, params);
+                obj = internalCreate(cls, initialize(defaultClass, params), params);
             } catch (Exception e) {
                 log.error("Can't find class: {}", defaultClass);
             }
@@ -230,7 +230,13 @@ public class CodeFactory {
     }
 
     public static ObjectFactory singleton(Object object) {
-        return (params) -> object;
+        return params -> object;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static ObjectFactory lazy(Supplier supplier) {
+        var inst = Holder.lazy(supplier);
+        return params -> inst.get();
     }
 
     public static void setProjectionProvider(ProjectionProvider provider) {
@@ -469,9 +475,10 @@ public class CodeFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T internalCreate(Class<T> cls, Object... params) {
+    private static <T> T internalCreate(Class<T> cls, Class<?> impl, Object... params) {
         var entry = registry.get(cls);
         if (entry != null) {
+            entry.setImplClass(impl);
             return (T) entry.getImplFactory().create(params);
         }
         return null;

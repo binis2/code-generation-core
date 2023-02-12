@@ -25,10 +25,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.binis.codegen.annotation.CodeConfiguration;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -83,7 +80,9 @@ public abstract class Discoverer {
                                 services.add(DiscoveredService.builder().type(parts[0]).name(parts[1]).cls(cls).build());
                             }
                         } else {
-                            log.warn("Can't load class: {}!", parts[1]);
+                            if (!(stream instanceof BufferedInputStream)) {
+                                log.warn("Can't load class: {}!", parts[1]);
+                            }
                         }
                     } else if (CONFIG.equals(parts[0])) {
                         var cls = loadClass(parts[1]);

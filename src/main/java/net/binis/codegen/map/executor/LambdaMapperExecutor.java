@@ -52,6 +52,7 @@ public class LambdaMapperExecutor implements Mapping, ClassMapping {
         return cls;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object map(Object source, Object destination) {
         return lambda.apply(source, destination);
