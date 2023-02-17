@@ -28,7 +28,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @CodeAnnotation
-@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD})
+@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.TYPE_USE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Sanitizations {
     Sanitize[] value();

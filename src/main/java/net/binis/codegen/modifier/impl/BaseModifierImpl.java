@@ -85,7 +85,7 @@ public abstract class BaseModifierImpl<T, R> implements BaseModifier<T, R>, Modi
 
     @SuppressWarnings("unchecked")
     public T _map(Object source) {
-        Mapper.map(source, this);
+        Mapper.map(source, parent);
         return (T) this;
     }
 

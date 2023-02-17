@@ -28,7 +28,7 @@ import java.lang.annotation.*;
 
 @CodeAnnotation
 @Repeatable(Validations.class)
-@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD})
+@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.TYPE_USE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Validate {
     Class<? extends CodeValidator> value();

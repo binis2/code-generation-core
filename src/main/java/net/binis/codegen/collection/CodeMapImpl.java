@@ -21,19 +21,34 @@ package net.binis.codegen.collection;
  */
 
 import java.util.Map;
+import java.util.function.Consumer;
+
+import static java.util.Objects.nonNull;
 
 public class CodeMapImpl<K, V, R> implements CodeMap<K, V, R> {
 
     private final R parent;
     private final Map<K, V> map;
+    private final Consumer<K> keyValidator;
+    private final Consumer<V> valueValidator;
 
     public CodeMapImpl(R parent, Map<K, V> map) {
         this.parent = parent;
         this.map = map;
+        this.keyValidator = null;
+        this.valueValidator = null;
+    }
+
+    public CodeMapImpl(R parent, Map<K, V> map, Consumer<K> keyValidator, Consumer<V> valueValidator) {
+        this.parent = parent;
+        this.map = map;
+        this.keyValidator = keyValidator;
+        this.valueValidator = valueValidator;
     }
 
     @Override
     public CodeMap<K, V, R> put(K key, V value) {
+        validate(key, value);
         map.put(key, value);
         return this;
     }
@@ -41,5 +56,15 @@ public class CodeMapImpl<K, V, R> implements CodeMap<K, V, R> {
     @Override
     public R and() {
         return parent;
+    }
+
+    protected void validate(K key, V value) {
+        if(nonNull(keyValidator)) {
+            keyValidator.accept(key);
+        }
+        if(nonNull(valueValidator)) {
+            valueValidator.accept(value);
+        }
+
     }
 }

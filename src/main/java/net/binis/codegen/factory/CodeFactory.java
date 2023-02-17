@@ -193,6 +193,10 @@ public class CodeFactory {
         registry.put(intf, RegistryEntry.builder().implFactory(impl).orgImplFactory(impl).modifierFactory(modifier).orgModifierFactory(modifier).build());
     }
 
+    public static boolean unregisterType(Class<?> cls) {
+        return nonNull(registry.remove(cls));
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> void envelopType(Class<T> intf, EnvelopFactory<T> impl, EmbeddedEnvelopFactory modifier) {
         var reg = registry.get(intf);

@@ -27,7 +27,7 @@ import java.lang.annotation.*;
 
 @CodeAnnotation
 @Repeatable(Executions.class)
-@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD})
+@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.TYPE_USE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Execute {
     Class<? extends Executor> value();

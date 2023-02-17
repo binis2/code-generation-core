@@ -9,9 +9,9 @@ package net.binis.codegen.map.executor;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,13 +36,22 @@ public class DefaultMapperExecutor implements MapperFactory {
 
     @Override
     public <T> T map(Object source, Class<T> destination) {
-        return map(source, CodeFactory.create(destination));
+        return map(source, CodeFactory.create(destination), destination);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T map(Object source, T destination) {
         var mapper = mappers.get(calcMapperName(source.getClass(), destination.getClass()));
+        if (isNull(mapper)) {
+            mapper = buildMapper(source, destination, false);
+        }
+        return (T) mapper.map(source, destination);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <T> T map(Object source, T destination, Class<T> cls) {
+        var mapper = mappers.get(calcMapperName(source.getClass(), cls));
         if (isNull(mapper)) {
             mapper = buildMapper(source, destination, false);
         }
@@ -119,6 +128,9 @@ public class DefaultMapperExecutor implements MapperFactory {
         if (result.isEmpty()) {
             findReverseMappings(result, source, destination);
         }
+        if (result.isEmpty()) {
+            findJoinMappings(result, source, destination);
+        }
         return result.values().stream().toList();
     }
 
@@ -167,6 +179,32 @@ public class DefaultMapperExecutor implements MapperFactory {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    protected <S> void findJoinMappings(Map<Class, Mapping> map, Class<S> source, Class<?> destination) {
+        var mapping = mappers.get(calcMapperName(source, destination));
+        if (nonNull(mapping)) {
+            map.putIfAbsent(source, mapping);
+        } else {
+            for (var intf : destination.getInterfaces()) {
+                for (var dIntf : destination.getInterfaces()) {
+                    findMappings(map, intf, dIntf);
+                    findReverseMappings((Map) map, intf, dIntf);
+                }
+            }
+
+            var superClass = getSuperClass(source);
+            while (nonNull(superClass)) {
+                var dSuperClass = getSuperClass(destination);
+                while (nonNull(dSuperClass)) {
+                    findJoinMappings(map, superClass, dSuperClass);
+                    dSuperClass = getSuperClass(dSuperClass);
+                }
+                superClass = getSuperClass(superClass);
+            }
+        }
+    }
+
+
     protected <T> MapperExecutor buildMapper(Object source, T destination, boolean convert) {
         return buildMapperClass(source.getClass(), destination.getClass(), convert, true);
     }
@@ -185,7 +223,7 @@ public class DefaultMapperExecutor implements MapperFactory {
     }
 
     @SuppressWarnings("unchecked")
-    protected <S, D> Mapping<S,D> findMapper(Class<S> source, Class<D> destination) {
+    protected <S, D> Mapping<S, D> findMapper(Class<S> source, Class<D> destination) {
         return mappers.get(calcMapperName(source, destination));
     }
 

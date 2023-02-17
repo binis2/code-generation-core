@@ -24,18 +24,29 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import static java.util.Objects.nonNull;
+
 public class CodeListImpl<T, R> implements CodeList<T, R> {
 
     private final R parent;
     private final List<T> list;
+    private final Consumer<T> validator;
 
     public CodeListImpl(R parent, List<T> list) {
         this.parent = parent;
         this.list = list;
+        this.validator = null;
+    }
+
+    public CodeListImpl(R parent, List<T> list, Consumer<T> validator) {
+        this.parent = parent;
+        this.list = list;
+        this.validator = validator;
     }
 
     @Override
     public CodeList<T, R> add(T value) {
+        validate(value);
         list.add(value);
         return this;
     }
@@ -91,6 +102,12 @@ public class CodeListImpl<T, R> implements CodeList<T, R> {
     public CodeList<T, R> _map(Object source) {
         throw new UnsupportedOperationException("Not implemented yet!");
         //TODO: Implement handling for collections.
+    }
+
+    protected void validate(T value) {
+        if (nonNull(validator)) {
+            validator.accept(value);
+        }
     }
 
 }

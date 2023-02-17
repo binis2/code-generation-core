@@ -20,20 +20,33 @@ package net.binis.codegen.collection;
  * #L%
  */
 
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
+
+import static java.util.Objects.nonNull;
 
 public class CodeSetImpl<T, R> implements CodeSet<T, R> {
 
     private final R parent;
     private final Set<T> set;
+    private final Consumer<T> validator;
 
     public CodeSetImpl(R parent, Set<T> set) {
         this.parent = parent;
         this.set = set;
+        this.validator = null;
+    }
+
+    public CodeSetImpl(R parent, Set<T> set, Consumer<T> validator) {
+        this.parent = parent;
+        this.set = set;
+        this.validator = validator;
     }
 
     @Override
     public CodeSet<T, R> add(T value) {
+        validate(value);
         set.add(value);
         return this;
     }
@@ -42,4 +55,11 @@ public class CodeSetImpl<T, R> implements CodeSet<T, R> {
     public R and() {
         return parent;
     }
+
+    protected void validate(T value) {
+        if (nonNull(validator)) {
+            validator.accept(value);
+        }
+    }
+
 }
