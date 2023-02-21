@@ -22,6 +22,7 @@ package net.binis.codegen.factory;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
 import net.binis.codegen.annotation.type.GenerationStrategy;
 import net.binis.codegen.config.DefaultMappings;
 import net.binis.codegen.map.Mapper;
@@ -30,8 +31,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.*;
+import java.time.temporal.*;
+
+import static java.time.temporal.ChronoField.*;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Slf4j
 class MapperTest {
 
     @BeforeEach
@@ -128,6 +135,58 @@ class MapperTest {
         assertEquals(GenerationStrategy.CLASSIC, Mapper.convert("CLASSIC", GenerationStrategy.class));
         assertEquals(GenerationStrategy.IMPLEMENTATION, Mapper.convert("IMPLEMENTATION", GenerationStrategy.class));
     }
+
+    @Test
+    void testDates() {
+        CodeFactory.registerType(LocalDate.class, () -> LocalDate.now());
+        CodeFactory.registerType(LocalDateTime.class, () -> LocalDateTime.now());
+        CodeFactory.registerType(LocalTime.class, () -> LocalTime.now());
+        CodeFactory.registerType(OffsetDateTime.class, () -> OffsetDateTime.now());
+        CodeFactory.registerType(OffsetTime.class, () -> OffsetTime.now());
+        CodeFactory.registerType(ZonedDateTime.class, () -> ZonedDateTime.now());
+        Mapper.registerMapper(Temporal.class, Temporal.class, this::temporalConvert);
+
+        assertEquals(LocalDate.of(2020, 1, 1), Mapper.convert(LocalDateTime.of(2020, 1, 1, 2, 15), LocalDate.class));
+        assertEquals(LocalDateTime.of(2020, 1, 1, 0, 0), Mapper.convert(LocalDate.of(2020, 1, 1), LocalDateTime.class));
+        assertEquals(LocalTime.of(2, 15), Mapper.convert(LocalDateTime.of(2020, 1, 1, 2, 15), LocalTime.class));
+        assertEquals(OffsetTime.of(2, 15, 0, 0, ZoneOffset.ofTotalSeconds(7200)), Mapper.convert(LocalDateTime.of(2020, 1, 1, 2, 15), OffsetTime.class));
+        assertEquals(OffsetDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZoneOffset.ofTotalSeconds(7200)), Mapper.convert(LocalDate.of(2020, 1, 1), OffsetDateTime.class));
+        assertEquals(ZonedDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZoneId.of("Europe/Sofia")), Mapper.convert(LocalDate.of(2020, 1, 1), ZonedDateTime.class));
+        assertEquals(ZonedDateTime.of(2020, 1, 1, 2, 15, 0, 0, ZoneId.of("Europe/Sofia")), Mapper.convert(OffsetDateTime.of(2020, 1, 1, 2, 15, 0, 0, ZoneOffset.UTC), ZonedDateTime.class));
+    }
+
+    private Temporal temporalConvert(Temporal source, Temporal destination) {
+        destination = temporalConvertField(EPOCH_DAY, source, destination);
+        destination = temporalConvertField(NANO_OF_DAY, source, destination);
+
+        if (destination.isSupported(OFFSET_SECONDS)) {
+            if (source.isSupported(OFFSET_SECONDS)) {
+                destination = destination.with(OFFSET_SECONDS, source.getLong(OFFSET_SECONDS));
+            } else {
+                if (destination.isSupported(NANO_OF_DAY)) {
+                    destination = destination.with(OFFSET_SECONDS, ZonedDateTime.now().getOffset().get(OFFSET_SECONDS));
+                }
+            }
+        } else {
+            if (source.isSupported(OFFSET_SECONDS) && destination.isSupported(NANO_OF_DAY)) {
+                destination = destination.minus(ZonedDateTime.now().getOffset().get(OFFSET_SECONDS) + source.getLong(OFFSET_SECONDS), SECONDS);
+            }
+        }
+
+        return destination;
+    }
+
+    private Temporal temporalConvertField(TemporalField field, Temporal source, Temporal destination) {
+        if (destination.isSupported(field)) {
+            if (source.isSupported(field)) {
+                destination = destination.with(field, source.getLong(field));
+            } else {
+                destination = destination.with(field, 0);
+            }
+        }
+        return destination;
+    }
+
 
     @Data
     private static class BaseMap {

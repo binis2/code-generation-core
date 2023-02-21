@@ -27,9 +27,6 @@ public interface ValidatorWithMessages extends CodeValidator {
     interface ValidationResult {
         boolean result();
         int error();
-        boolean converted();
-        Object value();
-        Object[] params();
     }
 
 }

@@ -34,4 +34,6 @@ public @interface AliasFor {
     String value();
 
     int order() default 0;
+
+    boolean alternative() default false;
 }
