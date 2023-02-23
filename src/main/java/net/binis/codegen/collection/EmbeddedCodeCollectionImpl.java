@@ -32,9 +32,12 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Objects.nonNull;
+
 public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCodeCollection<M, T, R>, Modifier<R> {
 
-    private final Collection<T> collection;
+    protected final Collection<T> collection;
+    protected final Consumer<T> validator;
     protected R parent;
     protected final Class<T> cls;
 
@@ -42,10 +45,19 @@ public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCod
         this.parent = parent;
         this.collection = collection;
         this.cls = cls;
+        this.validator = null;
+    }
+
+    protected EmbeddedCodeCollectionImpl(R parent, Collection<T> collection, Class<T> cls, Consumer<T> validator) {
+        this.parent = parent;
+        this.collection = collection;
+        this.cls = cls;
+        this.validator = validator;
     }
 
     @Override
     public EmbeddedCodeCollection<M, T, R> _add(T value) {
+        validate(value);
         collection.add(value);
         return this;
     }
@@ -53,6 +65,7 @@ public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCod
     @Override
     public EmbeddedCodeCollection<M, T, R> _add$(UnaryOperator<M> init) {
         T value = CodeFactory.create(cls);
+        validate(value);
         collection.add(value);
         init.apply(CodeFactory.modify(this, value, cls));
         return this;
@@ -129,6 +142,7 @@ public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCod
     public M _add() {
         T value = CodeFactory.create(cls);
         collection.add(value);
+        //TODO: Validate on .done()
         return CodeFactory.modify(this, value, cls);
     }
 
@@ -161,5 +175,11 @@ public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCod
     @Override
     public void setObject(R object) {
         parent = object;
+    }
+
+    protected void validate(T value) {
+        if (nonNull(validator)) {
+            validator.accept(value);
+        }
     }
 }

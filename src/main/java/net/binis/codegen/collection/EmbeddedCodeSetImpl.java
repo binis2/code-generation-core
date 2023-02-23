@@ -21,12 +21,18 @@ package net.binis.codegen.collection;
  */
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class EmbeddedCodeSetImpl<M, T, R> extends EmbeddedCodeCollectionImpl<M, T, R> {
 
     public EmbeddedCodeSetImpl(R parent, Set<T> set, Class<T> cls) {
         super(parent, set, cls);
+    }
+
+    public EmbeddedCodeSetImpl(R parent, List<T> list, Class<T> cls, Consumer<T> validator) {
+        super(parent, list, cls, validator);
     }
 
     @Override

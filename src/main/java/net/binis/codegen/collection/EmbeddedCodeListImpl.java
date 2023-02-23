@@ -24,6 +24,7 @@ import net.binis.codegen.factory.CodeFactory;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class EmbeddedCodeListImpl<M, T, R> extends EmbeddedCodeCollectionImpl<M, T, R> {
 
@@ -31,6 +32,11 @@ public class EmbeddedCodeListImpl<M, T, R> extends EmbeddedCodeCollectionImpl<M,
 
     public EmbeddedCodeListImpl(R parent, List<T> list, Class<T> cls) {
         super(parent, list, cls);
+        this.list = list;
+    }
+
+    public EmbeddedCodeListImpl(R parent, List<T> list, Class<T> cls, Consumer<T> validator) {
+        super(parent, list, cls, validator);
         this.list = list;
     }
 
