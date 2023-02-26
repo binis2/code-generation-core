@@ -29,7 +29,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.nonNull;
@@ -142,7 +141,6 @@ public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCod
     public M _add() {
         T value = CodeFactory.create(cls);
         collection.add(value);
-        //TODO: Validate on .done()
         return CodeFactory.modify(this, value, cls);
     }
 
@@ -155,7 +153,7 @@ public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCod
     @SuppressWarnings("unchecked")
     @Override
     public List<M> _findAll(Predicate<T> predicate) {
-        return collection.stream().filter(predicate).map(e -> (M) CodeFactory.modify(this, e, cls)).collect(Collectors.toList());
+        return collection.stream().filter(predicate).map(e -> (M) CodeFactory.modify(this, e, cls)).toList();
     }
 
     @Override
@@ -182,4 +180,5 @@ public abstract class EmbeddedCodeCollectionImpl<M, T, R> implements EmbeddedCod
             validator.accept(value);
         }
     }
+
 }
