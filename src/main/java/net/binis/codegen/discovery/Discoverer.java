@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static net.binis.codegen.tools.Reflection.loadClass;
 
@@ -55,6 +56,12 @@ public abstract class Discoverer {
         return list;
     }
 
+    public static List<DiscoveredService> findAnnotations(String text) {
+        var result = new ArrayList<DiscoveredService>();
+        Discoverer.processResource(text, result);
+        return result;
+    }
+
     public static List<DiscoveredService> findAnnotations() {
         var result = new ArrayList<DiscoveredService>();
         try {
@@ -65,12 +72,22 @@ public abstract class Discoverer {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
+    protected static void processResource(String text, List<DiscoveredService> services) {
+        processResource(new BufferedReader(new StringReader(text)), services, false, false);
+    }
+
     protected static void processResource(InputStream stream, List<DiscoveredService> services) {
-        var reader = new BufferedReader(new InputStreamReader(stream));
+        processResource(new BufferedReader(new InputStreamReader(stream)), services, true, !(stream instanceof BufferedInputStream));
+    }
+
+    @SuppressWarnings("unchecked")
+    protected static void processResource(BufferedReader reader, List<DiscoveredService> services, boolean tryLoad, boolean showWarning) {
         try {
             while (reader.ready()) {
                 var line = reader.readLine();
+                if (isNull(line)) {
+                    break;
+                }
                 var parts = line.split(":");
                 if (parts.length == 2) {
                     if (TEMPLATE.equals(parts[0])) {
@@ -80,7 +97,7 @@ public abstract class Discoverer {
                                 services.add(DiscoveredService.builder().type(parts[0]).name(parts[1]).cls(cls).build());
                             }
                         } else {
-                            if (!(stream instanceof BufferedInputStream)) {
+                            if (showWarning) {
                                 log.warn("Can't load class: {}!", parts[1]);
                             }
                         }
