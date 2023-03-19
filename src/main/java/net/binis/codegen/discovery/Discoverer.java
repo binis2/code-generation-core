@@ -91,24 +91,32 @@ public abstract class Discoverer {
                 var parts = line.split(":");
                 if (parts.length == 2) {
                     if (TEMPLATE.equals(parts[0])) {
-                        var cls = loadClass(parts[1]);
-                        if (nonNull(cls)) {
-                            if (Annotation.class.isAssignableFrom(cls)) {
-                                services.add(DiscoveredService.builder().type(parts[0]).name(parts[1]).cls(cls).build());
+                        if (tryLoad) {
+                            var cls = loadClass(parts[1]);
+                            if (nonNull(cls)) {
+                                if (Annotation.class.isAssignableFrom(cls)) {
+                                    services.add(DiscoveredService.builder().type(parts[0]).name(parts[1]).cls(cls).build());
+                                }
+                            } else {
+                                if (showWarning) {
+                                    log.warn("Can't load class: {}!", parts[1]);
+                                }
                             }
                         } else {
-                            if (showWarning) {
-                                log.warn("Can't load class: {}!", parts[1]);
-                            }
+                            services.add(DiscoveredService.builder().type(parts[0]).name(parts[1]).cls(null).build());
                         }
                     } else if (CONFIG.equals(parts[0])) {
-                        var cls = loadClass(parts[1]);
-                        if (nonNull(cls)) {
-                            if (cls.isAnnotationPresent(CodeConfiguration.class)) {
-                                services.add(DiscoveredService.builder().type(parts[0]).name(parts[1]).cls(cls).build());
+                        if (tryLoad) {
+                            var cls = loadClass(parts[1]);
+                            if (nonNull(cls)) {
+                                if (cls.isAnnotationPresent(CodeConfiguration.class)) {
+                                    services.add(DiscoveredService.builder().type(parts[0]).name(parts[1]).cls(cls).build());
+                                }
+                            } else {
+                                log.warn("Can't load class: {}!", parts[1]);
                             }
                         } else {
-                            log.warn("Can't load class: {}!", parts[1]);
+                            services.add(DiscoveredService.builder().type(parts[0]).name(parts[1]).cls(null).build());
                         }
                     } else {
                         log.warn("Invalid descriptor type: {}!", parts[0]);
