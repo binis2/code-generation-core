@@ -28,9 +28,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Objects;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Slf4j
 public abstract class Reflection {
@@ -146,7 +148,8 @@ public abstract class Reflection {
                 type == Byte.class || type == Boolean.class);
     }
 
-    public static Method findMethod(String name, Class<?> cls, Class<?>... params) {
+    @SuppressWarnings("unchecked")
+    public static Method findMethod(String name, Class cls, Class... params) {
         Method result = null;
         try {
             result = cls.getDeclaredMethod(name, params);
@@ -167,6 +170,19 @@ public abstract class Reflection {
             return null;
         }
     }
+
+    public static Object invoke(String name, Object instance, Object... args) {
+        try {
+            var m = findMethod(name, instance.getClass(), Arrays.stream(args).map(Object::getClass).toArray(Class[]::new));
+            if (nonNull(m)) {
+                return invoke(m, instance, args);
+            }
+        } catch (Exception e) {
+            //Do nothing
+        }
+        return null;
+    }
+
 
     public static Object invokeStatic(Method m, Object... args) {
         try {

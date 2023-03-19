@@ -43,6 +43,15 @@ public class Functional {
         return CodeFactory.create(FunctionalRecursive.class, start);
     }
 
+    public static <I, R> FunctionalFor<I, R> _for(Iterable<I> iterable) {
+        return CodeFactory.create(FunctionalFor.class, iterable);
+    }
+
+    public static <I, R> FunctionalFor<I, R> _for(Iterable<I> iterable, R initial) {
+        return CodeFactory.create(FunctionalFor.class, iterable, initial);
+    }
+
+
     protected Functional() {
         //Do nothing
     }
@@ -82,6 +91,11 @@ public class Functional {
         FunctionalEnd<R> _perform(BiConsumer<T, R> perform);
     }
 
+    @Default("net.binis.codegen.tools.Functional$FunctionalForImpl")
+    public interface FunctionalFor<I, R> {
+        R _do(BiFunction<I, R, R> function);
+        R _do(Consumer<I> consumer);
+    }
 
     public interface FunctionalEnd<R> {
         void _done();
@@ -231,6 +245,39 @@ public class Functional {
                 return r;
             });
         }
+    }
+
+    protected static class FunctionalForImpl<I, R> implements FunctionalFor<I, R> {
+
+        protected final Iterable<I> iterable;
+        protected R result;
+
+        {
+            CodeFactory.registerType(FunctionalFor.class, p -> new FunctionalForImpl<>((Iterable) p[0], p.length == 2 ? (R) p[1] : null), null);
+        }
+
+        protected FunctionalForImpl(Iterable<I> iterable, R start) {
+            this.iterable = iterable;
+            this.result = start;
+        }
+
+        @Override
+        public R _do(BiFunction<I, R, R> function) {
+            for (var i : iterable) {
+                result = function.apply(i, result);
+            }
+
+            return result;
+        }
+
+        @Override
+        public R _do(Consumer<I> consumer) {
+            for (var i : iterable) {
+                consumer.accept(i);
+            }
+            return result;
+        }
+
     }
 
 }

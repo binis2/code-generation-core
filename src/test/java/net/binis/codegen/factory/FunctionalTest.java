@@ -26,9 +26,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
-import static net.binis.codegen.tools.Functional._do;
-import static net.binis.codegen.tools.Functional._recursive;
+import static net.binis.codegen.tools.Functional.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FunctionalTest {
@@ -82,7 +82,11 @@ class FunctionalTest {
                 ._then(i -> assertTrue(i > 0));
     }
 
-
+    @Test
+    void forTest() {
+        var result = _for(List.of("1", "2", "3"), "0")._do((v, r) -> r + v);
+        assertEquals("0123", result);
+    }
 
     protected Integer positive(Integer i) {
         i--;

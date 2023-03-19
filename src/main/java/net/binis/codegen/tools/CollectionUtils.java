@@ -23,6 +23,10 @@ package net.binis.codegen.tools;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 public class CollectionUtils {
 
@@ -32,6 +36,22 @@ public class CollectionUtils {
 
     public static <T> List<T> copyList(Collection<T> collection) {
         return new ArrayList<>(collection);
+    }
+
+    public static boolean isEmpty(Collection collection) {
+        return isNull(collection) || collection.isEmpty();
+    }
+
+    public static boolean isNotEmpty(Collection collection) {
+        return nonNull(collection) && !collection.isEmpty();
+    }
+
+    public static boolean isEmpty(Map map) {
+        return isNull(map) || map.isEmpty();
+    }
+
+    public static boolean isNotEmpty(Map map) {
+        return nonNull(map) && !map.isEmpty();
     }
 
 }
