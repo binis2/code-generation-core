@@ -21,6 +21,7 @@ package net.binis.codegen.annotation.builder;
  */
 
 import net.binis.codegen.annotation.CodeAnnotation;
+import net.binis.codegen.annotation.CodePrototypeTemplate;
 import net.binis.codegen.enrich.*;
 import net.binis.codegen.modifier.BaseModifier;
 import net.binis.codegen.options.CodeOption;
@@ -34,6 +35,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @CodeAnnotation
+@CodePrototypeTemplate
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 public @interface CodeBuilderRequest {
