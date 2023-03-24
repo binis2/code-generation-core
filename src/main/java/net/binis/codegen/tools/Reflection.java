@@ -68,7 +68,7 @@ public abstract class Reflection {
                 }
                 if (match) {
                     if (!Modifier.isPublic(constructor.getModifiers())) {
-                        constructor.setAccessible(true);
+                        constructor.trySetAccessible();
                     }
                     return constructor;
                 }
@@ -86,7 +86,11 @@ public abstract class Reflection {
         try {
             return cls.getDeclaredField(name);
         } catch (NoSuchFieldException e) {
-            return null;
+            try {
+                return cls.getField(name);
+            } catch (NoSuchFieldException ex) {
+                return null;
+            }
         }
     }
 
@@ -95,7 +99,7 @@ public abstract class Reflection {
         try {
             if (isNull(unsafe)) {
                 var f = Unsafe.class.getDeclaredField("theUnsafe");
-                f.setAccessible(true);
+                f.trySetAccessible();
                 unsafe = (Unsafe) f.get(null);
             }
 
@@ -107,18 +111,38 @@ public abstract class Reflection {
         }
     }
 
+    public static <T> T getFieldValue(Object obj, String name) {
+        return getFieldValue(obj.getClass(), obj, name);
+    }
 
     @SuppressWarnings("unchecked")
-    public static <T> T getFieldValue(Object obj, String name) {
+    public static void setFieldValue(Class cls, Object obj, String name, Object value) {
         try {
-            var field = findField(obj.getClass(), name);
-            field.setAccessible(true);
+            var field = findField(cls, name);
+            field.trySetAccessible();
+            field.set(obj, value);
+        } catch (Exception e) {
+            log.error("Unable to set value for field {} of {}", name, obj.getClass().getName(), e);
+        }
+    }
+
+    public static void setFieldValue(Object obj, String name, Object value) {
+        setFieldValue(obj.getClass(), obj, name, value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T getFieldValue(Class cls, Object obj, String name) {
+        try {
+            var field = findField(cls, name);
+            field.trySetAccessible();
             return (T) field.get(obj);
         } catch (Exception e) {
             log.error("Unable to get value for field {} of {}", name, obj.getClass().getName(), e);
             return null;
         }
     }
+
+
 
     public static void withLoader(ClassLoader loader, Runnable task) {
         try {
@@ -165,6 +189,7 @@ public abstract class Reflection {
 
     public static Object invoke(Method m, Object instance, Object... args) {
         try {
+            m.trySetAccessible();
             return m.invoke(instance, args);
         } catch (Exception e) {
             return null;
@@ -191,5 +216,14 @@ public abstract class Reflection {
             return null;
         }
     }
+
+    public static Object invokeStatic(String name, Class cls, Object... args) {
+        try {
+            return findMethod(name, cls, Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)).invoke(null, args);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 
 }
