@@ -24,6 +24,7 @@ public enum GenerationStrategy {
     CLASSIC,
     IMPLEMENTATION,
     PLAIN,
+    METHOD,
     NONE
 
 }

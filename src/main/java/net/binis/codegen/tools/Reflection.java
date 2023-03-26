@@ -41,6 +41,10 @@ public abstract class Reflection {
 
     private static Unsafe unsafe;
 
+    private Reflection() {
+        //Do nothing
+    }
+
     public static Class<?> loadClass(String className) {
         try {
             return Objects.nonNull(loader) ? loader.loadClass(className) : Class.forName(className);
@@ -98,9 +102,7 @@ public abstract class Reflection {
     public static <T> T getFieldValueUnsafe(Object obj, String name) {
         try {
             if (isNull(unsafe)) {
-                var f = Unsafe.class.getDeclaredField("theUnsafe");
-                f.trySetAccessible();
-                unsafe = (Unsafe) f.get(null);
+                unsafe = getUnsafe();
             }
 
             var field = findField(obj.getClass(), name);
@@ -115,7 +117,6 @@ public abstract class Reflection {
         return getFieldValue(obj.getClass(), obj, name);
     }
 
-    @SuppressWarnings("unchecked")
     public static void setFieldValue(Class cls, Object obj, String name, Object value) {
         try {
             var field = findField(cls, name);
@@ -141,8 +142,6 @@ public abstract class Reflection {
             return null;
         }
     }
-
-
 
     public static void withLoader(ClassLoader loader, Runnable task) {
         try {
@@ -225,5 +224,14 @@ public abstract class Reflection {
         }
     }
 
+    public static Unsafe getUnsafe() {
+        try {
+            var theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
+            theUnsafe.trySetAccessible();
+            return (Unsafe) theUnsafe.get(null);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
 }

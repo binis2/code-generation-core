@@ -23,7 +23,6 @@ package net.binis.codegen.tools;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -31,13 +30,14 @@ import static java.util.Objects.nonNull;
 public abstract class BaseStringInterpolator<T> {
 
     protected static final String INVALID_EXPRESSION = "Invalid expression!";
+    protected Character identifier;
 
     protected T buildExpression(String exp) {
         var list = new ArrayList<T>();
         var flag = true;
         var start = 0;
         for (var i = 0; i < exp.length(); i++) {
-            if ('{' == exp.charAt(i)) {
+            if ((isNull(identifier) && '{' == exp.charAt(i)) || (nonNull(identifier) && identifier == exp.charAt(i) && i + 1 < exp.length() && '{' == exp.charAt(i + 1))) {
                 if (!flag) {
                     throw new InvalidParameterException(INVALID_EXPRESSION + exp);
                 }
@@ -51,8 +51,15 @@ public abstract class BaseStringInterpolator<T> {
 
                 start = i + 1;
 
+                if (nonNull(identifier)) {
+                    start++;
+                }
+
                 flag = false;
             } else if ('}' == exp.charAt(i)) {
+                if (flag && nonNull(identifier)) {
+                    continue;
+                }
                 if (flag) {
                     throw new InvalidParameterException(INVALID_EXPRESSION + exp);
                 }

@@ -149,10 +149,14 @@ class MapperTest {
         assertEquals(LocalDate.of(2020, 1, 1), Mapper.convert(LocalDateTime.of(2020, 1, 1, 2, 15), LocalDate.class));
         assertEquals(LocalDateTime.of(2020, 1, 1, 0, 0), Mapper.convert(LocalDate.of(2020, 1, 1), LocalDateTime.class));
         assertEquals(LocalTime.of(2, 15), Mapper.convert(LocalDateTime.of(2020, 1, 1, 2, 15), LocalTime.class));
-        assertEquals(OffsetTime.of(2, 15, 0, 0, ZoneOffset.ofTotalSeconds(7200)), Mapper.convert(LocalDateTime.of(2020, 1, 1, 2, 15), OffsetTime.class));
-        assertEquals(OffsetDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZoneOffset.ofTotalSeconds(7200)), Mapper.convert(LocalDate.of(2020, 1, 1), OffsetDateTime.class));
+        assertEquals(OffsetTime.of(2, 15, 0, 0, ZoneOffset.ofTotalSeconds(getOffset())), Mapper.convert(LocalDateTime.of(2020, 1, 1, 2, 15), OffsetTime.class));
+        assertEquals(OffsetDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZoneOffset.ofTotalSeconds(getOffset())), Mapper.convert(LocalDate.of(2020, 1, 1), OffsetDateTime.class));
         assertEquals(ZonedDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZoneId.of("Europe/Sofia")), Mapper.convert(LocalDate.of(2020, 1, 1), ZonedDateTime.class));
         assertEquals(ZonedDateTime.of(2020, 1, 1, 2, 15, 0, 0, ZoneId.of("Europe/Sofia")), Mapper.convert(OffsetDateTime.of(2020, 1, 1, 2, 15, 0, 0, ZoneOffset.UTC), ZonedDateTime.class));
+    }
+
+    private int getOffset() {
+        return ZoneId.of("Europe/Sofia").getRules().getOffset(LocalDateTime.now()).getTotalSeconds();
     }
 
     private Temporal temporalConvert(Temporal source, Temporal destination) {
