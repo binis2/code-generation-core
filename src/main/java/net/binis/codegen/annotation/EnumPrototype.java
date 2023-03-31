@@ -20,6 +20,8 @@ package net.binis.codegen.annotation;
  * #L%
  */
 
+import net.binis.codegen.enrich.Enricher;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -33,5 +35,7 @@ public @interface EnumPrototype {
     String name() default "";
     Class<?> mixIn() default void.class;
     int ordinalOffset() default 0;
+
+    Class<? extends Enricher>[] enrichers() default {};
 
 }
