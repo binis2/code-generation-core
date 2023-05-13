@@ -203,11 +203,8 @@ public class CodeFactory {
         var implFactory = reg.getImplFactory();
 
         reg.setImplFactory((params) -> impl.envelop(implFactory));
-        if (nonNull(reg.getModifierFactory())) {
-            var embeddedFactory = reg.getModifierFactory();
-            if (nonNull(embeddedFactory) && nonNull(modifier)) {
-                reg.setModifierFactory((parent, value, params) -> modifier.envelop(embeddedFactory, parent, value, params));
-            }
+        if (nonNull(reg.getModifierFactory()) && nonNull(modifier)) {
+            reg.setModifierFactory((parent, value, params) -> modifier.envelop(reg.getModifierFactory(), parent, value, params));
         }
     }
 

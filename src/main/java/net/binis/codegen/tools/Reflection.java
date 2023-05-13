@@ -65,7 +65,7 @@ public abstract class Reflection {
                 var types = constructor.getParameterTypes();
                 var match = true;
                 for (var i = 0; i < params.length; i++) {
-                    if ((isNull(params[i]) && types[i].isPrimitive()) || !types[i].isAssignableFrom(params[i].getClass())) {
+                    if ((isNull(params[i]) && types[i].isPrimitive()) || !compatible(types[i], params[i].getClass())) {
                         match = false;
                         break;
                     }
@@ -79,6 +79,14 @@ public abstract class Reflection {
             }
         }
         throw new UnsupportedOperationException("Unable to find proper constructor for class " + cls.getCanonicalName());
+    }
+
+    public static boolean compatible(Class<?> type, Class<?> aClass) {
+        if (type.isPrimitive()) {
+            return type.equals(TypeUtils.getPrimitiveType(aClass));
+        } else {
+            return type.isAssignableFrom(aClass);
+        }
     }
 
     @SneakyThrows
@@ -143,6 +151,19 @@ public abstract class Reflection {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> T getStaticFieldValue(Class cls, String name) {
+        try {
+            var field = findField(cls, name);
+            field.trySetAccessible();
+            return (T) field.get(null);
+        } catch (Exception e) {
+            log.error("Unable to get value for field {} of {}", name, cls.getName(), e);
+            return null;
+        }
+    }
+
+
     public static void withLoader(ClassLoader loader, Runnable task) {
         try {
             Reflection.loader = loader;
@@ -163,12 +184,6 @@ public abstract class Reflection {
         var name = method.getName();
         return method.getReturnType().equals(void.class) && method.getParameterCount() == 1 &&
                 (name.startsWith("set") && name.length() > 3) && (Character.isUpperCase(name.charAt(3)));
-    }
-
-    public static boolean isWrapperType(Class<?> type) {
-        return (type == Double.class || type == Float.class || type == Long.class ||
-                type == Integer.class || type == Short.class || type == Character.class ||
-                type == Byte.class || type == Boolean.class);
     }
 
     @SuppressWarnings("unchecked")

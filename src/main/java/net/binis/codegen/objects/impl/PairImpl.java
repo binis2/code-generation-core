@@ -25,7 +25,7 @@ import net.binis.codegen.objects.Pair;
 
 public class PairImpl<K, V> implements Pair<K, V> {
 
-    {
+    static {
         CodeFactory.registerType(Pair.class, PairImpl::new, null);
     }
 

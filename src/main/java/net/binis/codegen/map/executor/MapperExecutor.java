@@ -485,7 +485,7 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
     }
 
     protected static class WitherHolder {
-        Object wither;
+        protected final Object wither;
 
         public WitherHolder(Object wither) {
             this.wither = wither;

@@ -42,7 +42,7 @@ public abstract class Discoverer {
 
     public static final String TEMPLATE = "template";
     public static final String CONFIG = "config";
-    protected static String RESOURCE_PATH = "binis/annotations";
+    protected static final String RESOURCE_PATH = "binis/annotations";
 
     protected static List<InputStream> loadResources(
             final String name, final ClassLoader classLoader) throws IOException {

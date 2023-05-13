@@ -20,7 +20,6 @@ package net.binis.codegen.collection;
  * #L%
  */
 
-import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
