@@ -24,10 +24,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import net.binis.codegen.annotation.type.GenerationStrategy;
-import net.binis.codegen.config.DefaultMappings;
 import net.binis.codegen.map.Mapper;
 import net.binis.codegen.map.MapperFactory;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -132,7 +130,7 @@ class MapperTest {
 
     @Test
     void testEnum() {
-        assertEquals(GenerationStrategy.CLASSIC, Mapper.convert("CLASSIC", GenerationStrategy.class));
+        assertEquals(GenerationStrategy.PROTOTYPE, Mapper.convert("PROTOTYPE", GenerationStrategy.class));
         assertEquals(GenerationStrategy.IMPLEMENTATION, Mapper.convert("IMPLEMENTATION", GenerationStrategy.class));
     }
 

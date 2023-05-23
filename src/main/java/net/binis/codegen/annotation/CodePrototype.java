@@ -46,7 +46,7 @@ public @interface CodePrototype {
     String basePath() default "";
     String interfacePath() default "";
     String implementationPath() default "";
-    GenerationStrategy strategy() default GenerationStrategy.CLASSIC;
+    GenerationStrategy strategy() default GenerationStrategy.PROTOTYPE;
 
     Class<? extends Enricher>[] enrichers() default {};
     Class<? extends Enricher>[] inheritedEnrichers() default {};

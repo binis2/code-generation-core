@@ -21,10 +21,9 @@ package net.binis.codegen.annotation.type;
  */
 
 public enum GenerationStrategy {
-    CLASSIC,
+    PROTOTYPE,
     IMPLEMENTATION,
     PLAIN,
-    METHOD,
     NONE
 
 }
