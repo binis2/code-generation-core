@@ -9,9 +9,9 @@ package net.binis.codegen.factory;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,12 +20,12 @@ package net.binis.codegen.factory;
  * #L%
  */
 
+import net.binis.codegen.tools.Reflection;
 import org.junit.jupiter.api.Test;
 
 import static net.binis.codegen.tools.Reflection.isGetter;
 import static net.binis.codegen.tools.Reflection.isSetter;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ReflectionTest {
 
@@ -33,7 +33,7 @@ class ReflectionTest {
     void testGettersSetters() throws NoSuchMethodException {
         assertTrue(isGetter(TestInterface.class.getDeclaredMethod("isWorking")));
         assertTrue(isGetter(TestInterface.class.getDeclaredMethod("getWorking")));
-        assertTrue(isSetter(TestInterface.class.getDeclaredMethod("setWorking", String .class)));
+        assertTrue(isSetter(TestInterface.class.getDeclaredMethod("setWorking", String.class)));
 
         assertFalse(isGetter(TestInterface.class.getDeclaredMethod("getNotWorking1")));
         assertFalse(isGetter(TestInterface.class.getDeclaredMethod("getNotWorking2", String.class)));
@@ -43,18 +43,44 @@ class ReflectionTest {
         assertFalse(isSetter(TestInterface.class.getDeclaredMethod("settNotWorking6", String.class)));
     }
 
+    @Test
+    void testConstructor() {
+        assertNotNull(Reflection.findConstructor(TestConstructor.class, 1));
+        assertNotNull(Reflection.findConstructor(TestConstructor.class, int.class));
+        assertThrows(UnsupportedOperationException.class, () -> Reflection.findConstructor(TestConstructor.class, new Object[]{null}));
+        assertNotNull(Reflection.findConstructor(TestConstructor.class, "test", 1));
+        assertNotNull(Reflection.findConstructor(TestConstructor.class, "test", Integer.class));
+        assertNotNull(Reflection.findConstructor(TestConstructor.class, String.class, Integer.class));
+    }
+
     private interface TestInterface {
 
         void getNotWorking1();
+
         String getNotWorking2(String param);
+
         void setNotWorking3();
+
         String setNotWorking4(String value);
+
         String gettNotWorking5();
+
         void settNotWorking6(String value);
 
         boolean isWorking();
+
         String getWorking();
+
         void setWorking(String value);
+
+    }
+
+    private static class TestConstructor {
+        private TestConstructor(int a) {
+        }
+
+        private TestConstructor(String s, Integer a) {
+        }
 
     }
 

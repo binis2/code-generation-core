@@ -65,7 +65,7 @@ public abstract class Reflection {
                 var types = constructor.getParameterTypes();
                 var match = true;
                 for (var i = 0; i < params.length; i++) {
-                    if ((isNull(params[i]) && types[i].isPrimitive()) || !compatible(types[i], params[i].getClass())) {
+                    if ((isNull(params[i]) && types[i].isPrimitive()) || !compatible(types[i], params[i])) {
                         match = false;
                         break;
                     }
@@ -81,11 +81,16 @@ public abstract class Reflection {
         throw new UnsupportedOperationException("Unable to find proper constructor for class " + cls.getCanonicalName());
     }
 
-    public static boolean compatible(Class<?> type, Class<?> aClass) {
-        if (type.isPrimitive()) {
-            return type.equals(TypeUtils.getPrimitiveType(aClass));
+    public static boolean compatible(Class<?> type, Object obj) {
+        if (nonNull(obj)) {
+            var aClass = obj instanceof Class<?> c ? c : obj.getClass();
+            if (type.isPrimitive()) {
+                return type.equals(TypeUtils.getPrimitiveType(aClass));
+            } else {
+                return type.isAssignableFrom(aClass);
+            }
         } else {
-            return type.isAssignableFrom(aClass);
+            return !type.isPrimitive();
         }
     }
 

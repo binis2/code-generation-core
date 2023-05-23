@@ -54,7 +54,11 @@ public class TypeUtils {
     }
 
     public static Class<?> getPrimitiveType(Class<?> type) {
-        return wrapperPrimitiveMap.get(type);
+        if (type.isPrimitive()) {
+            return type;
+        } else {
+            return wrapperPrimitiveMap.get(type);
+        }
     }
 
 }
