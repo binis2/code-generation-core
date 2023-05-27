@@ -30,8 +30,8 @@ import java.util.function.Function;
 public class Async {
 
     static {
-        CodeFactory.registerType(AsyncDispatcher.class, CodeFactory.singleton(CodeExecutor.defaultDispatcher()), null);
-        CodeFactory.registerType(AsyncExecutor.class, AsyncExecutorImpl::new, null);
+        CodeFactory.registerType(AsyncDispatcher.class, CodeFactory.singleton(CodeExecutor.defaultDispatcher()));
+        CodeFactory.registerType(AsyncExecutor.class, AsyncExecutorImpl::new);
     }
 
     @SuppressWarnings("unchecked")

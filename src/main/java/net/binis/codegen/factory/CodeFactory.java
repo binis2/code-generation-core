@@ -46,17 +46,17 @@ import static net.binis.codegen.tools.Reflection.initialize;
 @Slf4j
 public class CodeFactory {
 
-    private static final Map<Class<?>, RegistryEntry> registry = new HashMap<>();
-    private static final Map<Class<?>, IdRegistryEntry> idRegistry = new HashMap<>();
-    private static EnvelopingObjectFactory envelopingFactory;
-    private static final Set<Class<?>> customProxyClassesRegistry = new HashSet<>();
-    private static final List<Pair<Class<?>, ProjectionProvider>> customProxyClasses = new ArrayList<>();
-    private static final Map<Class<?>, Map<Class<?>, ProjectionInstantiation>> projectionsCache = new HashMap<>();
-    private static ProjectionProvider projections = initProjectionProvider();
+    protected static final Map<Class<?>, RegistryEntry> registry = new HashMap<>();
+    protected static final Map<Class<?>, IdRegistryEntry> idRegistry = new HashMap<>();
+    protected static EnvelopingObjectFactory envelopingFactory;
+    protected static final Set<Class<?>> customProxyClassesRegistry = new HashSet<>();
+    protected static final List<Pair<Class<?>, ProjectionProvider>> customProxyClasses = new ArrayList<>();
+    protected static final Map<Class<?>, Map<Class<?>, ProjectionInstantiation>> projectionsCache = new HashMap<>();
+    protected static ProjectionProvider projections = initProjectionProvider();
 
-    private static final Map<Class<?>, EnumEntry> enumRegistry = new HashMap<>();
+    protected static final Map<Class<?>, EnumEntry> enumRegistry = new HashMap<>();
 
-    private CodeFactory() {
+    protected CodeFactory() {
         //Do nothing
     }
 
@@ -326,7 +326,7 @@ public class CodeFactory {
         throw new GenericCodeGenException("Class " + cls.getCanonicalName() + " isn't enumeration class!");
     }
 
-    private static int generateUniqueOrdinal(EnumEntry registry) {
+    protected static int generateUniqueOrdinal(EnumEntry registry) {
         var result = -100;
         while (nonNull(registry.ordinals.get(result))) {
             result--;
@@ -386,7 +386,7 @@ public class CodeFactory {
 
 
     @SuppressWarnings("unchecked")
-    private static <T extends CodeEnum> EnumInitializer buildEnumInitializer(Class<T> cls) {
+    protected static <T extends CodeEnum> EnumInitializer buildEnumInitializer(Class<T> cls) {
         var a = cls.getAnnotation(Default.class);
         if (isNull(a)) {
             throw new GenericCodeGenException("Can't find implementation pointer for " + cls.getCanonicalName());
@@ -416,7 +416,7 @@ public class CodeFactory {
         }
     }
 
-    private static Object defaultValue(Class<?> type) {
+    protected static Object defaultValue(Class<?> type) {
         if (type.isPrimitive()) {
             if (byte.class.equals(type)) {
                 return 0;
@@ -447,7 +447,7 @@ public class CodeFactory {
     }
 
 
-    private static ProjectionProvider initProjectionProvider() {
+    protected static ProjectionProvider initProjectionProvider() {
         try {
             var cls = Class.forName("net.binis.codegen.projection.provider.CodeGenProjectionProvider");
             return (ProjectionProvider) cls.getDeclaredConstructors()[0].newInstance();
@@ -457,7 +457,7 @@ public class CodeFactory {
         return null;
     }
 
-    private static Optional<ProjectionProvider> checkForCustomClass(Class<?> cls) {
+    protected static Optional<ProjectionProvider> checkForCustomClass(Class<?> cls) {
         for (var c : customProxyClasses) {
             if (c.getKey().isAssignableFrom(cls)) {
                 return Optional.of(c.getValue());
@@ -467,7 +467,7 @@ public class CodeFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T defaultCreate(Class<?> impl, Class<T> cls, Object... params) {
+    protected static <T> T defaultCreate(Class<?> impl, Class<T> cls, Object... params) {
         var ann = cls.getDeclaredAnnotation(Default.class);
         if (nonNull(ann)) {
             return (T) createDefault(impl, ann.value(), params);
@@ -476,7 +476,7 @@ public class CodeFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T internalCreate(Class<T> cls, Class<?> impl, Object... params) {
+    protected static <T> T internalCreate(Class<T> cls, Class<?> impl, Object... params) {
         var entry = registry.get(cls);
         if (entry != null) {
             entry.setImplClass(impl);
@@ -486,7 +486,7 @@ public class CodeFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T internalEnvelop(T instance) {
+    protected static <T> T internalEnvelop(T instance) {
         if (nonNull(envelopingFactory)) {
             return (T) envelopingFactory.envelop(instance);
         }
@@ -501,34 +501,34 @@ public class CodeFactory {
 
     @Data
     @Builder
-    private static class RegistryEntry {
-        private Class<?> implClass;
-        private ObjectFactory implFactory;
-        private ObjectFactory orgImplFactory;
-        private EmbeddedObjectFactory modifierFactory;
-        private EmbeddedObjectFactory orgModifierFactory;
+    protected static class RegistryEntry {
+        protected Class<?> implClass;
+        protected ObjectFactory implFactory;
+        protected ObjectFactory orgImplFactory;
+        protected EmbeddedObjectFactory modifierFactory;
+        protected EmbeddedObjectFactory orgModifierFactory;
     }
 
     @Data
     @Builder
-    private static class IdRegistryEntry implements IdDescription {
-        private String name;
-        private Class<?> type;
+    protected static class IdRegistryEntry implements IdDescription {
+        protected String name;
+        protected Class<?> type;
     }
 
     @FunctionalInterface
-    private interface EnumInitializer {
+    protected interface EnumInitializer {
         CodeEnum initialize(int ordinal, String name, Object... params);
     }
 
     @Data
     @Builder
-    private static class EnumEntry {
+    protected static class EnumEntry {
         @Builder.Default
-        private Map<Integer, CodeEnum> ordinals = new HashMap<>();
+        protected Map<Integer, CodeEnum> ordinals = new HashMap<>();
         @Builder.Default
-        private Map<String, CodeEnum> values = new HashMap<>();
-        private EnumInitializer initializer;
+        protected Map<String, CodeEnum> values = new HashMap<>();
+        protected EnumInitializer initializer;
     }
 
 }
