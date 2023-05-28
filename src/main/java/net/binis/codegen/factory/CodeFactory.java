@@ -93,7 +93,7 @@ public class CodeFactory {
                         result = (T) ctor.newInstance(params);
                         registerType(cls, p -> {
                             try {
-                                return ctor.newInstance(params);
+                                return ctor.newInstance(p);
                             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                                 return null;
                             }
