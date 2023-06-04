@@ -34,4 +34,5 @@ public @interface Execute {
     String[] params() default {};
     String message() default "";
     String asCode() default "";
+    Class<?>[] targets() default {};
 }

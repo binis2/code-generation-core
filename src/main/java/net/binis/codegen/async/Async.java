@@ -39,6 +39,11 @@ public class Async {
         return CodeFactory.create(AsyncExecutor.class);
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> AsyncExecutor<T> start(String flow) {
+        return CodeFactory.create(AsyncExecutor.class).flow(flow);
+    }
+
     public static void registerFlow(String name, Executor executor) {
         CodeExecutor.registerExecutor(name, executor);
     }

@@ -35,4 +35,5 @@ public @interface Validate {
     String[] params() default {};
     String message() default "";
     String asCode() default "";
+    Class<?>[] targets() default {};
 }

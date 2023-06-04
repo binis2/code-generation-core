@@ -82,4 +82,8 @@ public class Holder<T> {
         return result;
     }
 
+    public String toString() {
+        return (isNull(object)) ? "null" : object.toString();
+    }
+
 }
