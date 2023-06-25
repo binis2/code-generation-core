@@ -24,10 +24,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import sun.misc.Unsafe;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -227,12 +224,22 @@ public abstract class Reflection {
         return null;
     }
 
-
     public static Object invokeStatic(Method m, Object... args) {
         try {
             return m.invoke(null, args);
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    @SneakyThrows
+    public static Object invokeStaticWithException(Method m, Object... args) {
+        try {
+            return m.invoke(null, args);
+        } catch (InvocationTargetException e) {
+            throw e.getTargetException();
+        } catch (Exception e) {
+            throw e;
         }
     }
 
