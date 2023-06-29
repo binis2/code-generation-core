@@ -36,7 +36,11 @@ public abstract class Reflection {
 
     private static ClassLoader loader;
 
-    private static Unsafe unsafe;
+    private static final Unsafe unsafe = getUnsafe();
+
+    private static final Method declaredFields = findMethod("getDeclaredFields0", Class.class, boolean.class);
+
+    private static final Long offset = getFirstFieldOffset();
 
     private Reflection() {
         //Do nothing
@@ -49,6 +53,15 @@ public abstract class Reflection {
             return null;
         }
     }
+
+    public static Class<?> loadClass(String className, ClassLoader loader) {
+        try {
+            return loader.loadClass(className);
+        } catch (Throwable e) {
+            return null;
+        }
+    }
+
 
     @SuppressWarnings("unchecked")
     @SneakyThrows
@@ -69,7 +82,9 @@ public abstract class Reflection {
                 }
                 if (match) {
                     if (!Modifier.isPublic(constructor.getModifiers())) {
-                        constructor.trySetAccessible();
+                        if (!constructor.trySetAccessible()) {
+                            setAccessible(constructor);
+                        }
                     }
                     return constructor;
                 }
@@ -103,18 +118,20 @@ public abstract class Reflection {
             try {
                 return cls.getField(name);
             } catch (NoSuchFieldException ex) {
-                return null;
+                var fields = (Field[]) invoke(declaredFields, cls, false);
+                for (var field : fields) {
+                    if (field.getName().equals(name)) {
+                        return field;
+                    }
+                }
             }
         }
+        return null;
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T getFieldValueUnsafe(Object obj, String name) {
         try {
-            if (isNull(unsafe)) {
-                unsafe = getUnsafe();
-            }
-
             var field = findField(obj.getClass(), name);
             return (T) unsafe.getObject(obj, unsafe.objectFieldOffset(field));
         } catch (Exception e) {
@@ -130,7 +147,9 @@ public abstract class Reflection {
     public static void setFieldValue(Class cls, Object obj, String name, Object value) {
         try {
             var field = findField(cls, name);
-            field.trySetAccessible();
+            if (!field.trySetAccessible()) {
+                setAccessible(field);
+            }
             field.set(obj, value);
         } catch (Exception e) {
             log.error("Unable to set value for field {} of {}", name, obj.getClass().getName(), e);
@@ -145,7 +164,9 @@ public abstract class Reflection {
     public static <T> T getFieldValue(Class cls, Object obj, String name) {
         try {
             var field = findField(cls, name);
-            field.trySetAccessible();
+            if (!field.trySetAccessible()) {
+                setAccessible(field);
+            }
             return (T) field.get(obj);
         } catch (Exception e) {
             log.error("Unable to get value for field {} of {}", name, obj.getClass().getName(), e);
@@ -157,7 +178,9 @@ public abstract class Reflection {
     public static <T> T getStaticFieldValue(Class cls, String name) {
         try {
             var field = findField(cls, name);
-            field.trySetAccessible();
+            if (!field.trySetAccessible()) {
+                setAccessible(field);
+            }
             return (T) field.get(null);
         } catch (Exception e) {
             log.error("Unable to get value for field {} of {}", name, cls.getName(), e);
@@ -205,7 +228,9 @@ public abstract class Reflection {
 
     public static Object invoke(Method m, Object instance, Object... args) {
         try {
-            m.trySetAccessible();
+            if (!m.trySetAccessible()) {
+                setAccessible(m);
+            }
             return m.invoke(instance, args);
         } catch (Exception e) {
             return null;
@@ -258,6 +283,30 @@ public abstract class Reflection {
             return (Unsafe) theUnsafe.get(null);
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    public static void setAccessible(Member m) {
+        try {
+            unsafe.putBooleanVolatile(m, offset, true);
+        } catch (Exception e) {
+        }
+    }
+
+    private static long getFirstFieldOffset() {
+        try {
+            return unsafe.objectFieldOffset(Parent.class.getDeclaredField("first"));
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        } catch (SecurityException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static class Parent {
+        boolean first;
+
+        private Parent() {
         }
     }
 
