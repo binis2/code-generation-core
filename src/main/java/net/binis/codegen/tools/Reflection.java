@@ -124,6 +124,9 @@ public abstract class Reflection {
                         return field;
                     }
                 }
+                if (nonNull(cls.getSuperclass())) {
+                    return findField(cls.getSuperclass(), name);
+                }
             }
         }
         return null;
