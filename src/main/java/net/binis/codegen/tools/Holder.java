@@ -27,7 +27,6 @@ import java.util.function.Supplier;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-@ToString
 public class Holder<T> {
 
     private T object;

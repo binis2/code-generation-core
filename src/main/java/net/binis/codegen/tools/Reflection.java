@@ -163,10 +163,13 @@ public abstract class Reflection {
         setFieldValue(obj.getClass(), obj, name, value);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> T getFieldValue(Class cls, Object obj, String name) {
+        return getFieldValue(findField(cls, name), obj, name);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected static <T> T getFieldValue(Field field, Object obj, String name) {
         try {
-            var field = findField(cls, name);
             if (!field.trySetAccessible()) {
                 setAccessible(field);
             }
@@ -175,6 +178,10 @@ public abstract class Reflection {
             log.error("Unable to get value for field {} of {}", name, obj.getClass().getName(), e);
             return null;
         }
+    }
+
+    public static <T> T getFieldValue(Field field, Object obj) {
+        return getFieldValue(field, obj, field.getName());
     }
 
     @SuppressWarnings("unchecked")
