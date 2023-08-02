@@ -8,5 +8,4 @@ public enum AugmentTargetType {
     CLASS,
     INTERFACE,
     ENUM
-
 }

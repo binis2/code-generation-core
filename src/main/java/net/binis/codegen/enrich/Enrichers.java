@@ -27,6 +27,7 @@ public final class Enrichers {
     }
 
     public static final Class<? extends Enricher> AS = AsEnricher.class;
+    public static final Class<? extends Enricher> LOG = LogEnricher.class;
     public static final Class<? extends Enricher> CLONE = CloneEnricher.class;
     public static final Class<? extends Enricher> CREATOR = CreatorEnricher.class;
     public static final Class<? extends Enricher> CREATOR_MODIFIER = CreatorModifierEnricher.class;
@@ -37,7 +38,6 @@ public final class Enrichers {
     public static final Class<? extends Enricher> VALIDATION = ValidationEnricher.class;
     public static final Class<? extends Enricher> OPENAPI = OpenApiEnricher.class;
     public static final Class<? extends Enricher> JACKSON = JacksonEnricher.class;
-
     public static final Class<? extends Enricher> HIBERNATE = HibernateEnricher.class;
 
 }
