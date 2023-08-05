@@ -30,8 +30,8 @@ import static java.lang.reflect.Modifier.*;
 @CodeAugment(
         adds = AugmentType.FIELD,
         name = "log",
-        type = "java.util.logging.Logger",
-        modifier = PROTECTED | STATIC | FINAL,
+        type = "org.slf4j.Logger",
+        modifier = PRIVATE | STATIC | FINAL,
         targets = AugmentTargetType.CLASS,
         severity = AugmentTargetTypeSeverity.NOTE)
 public interface LogEnricher extends Enricher {
