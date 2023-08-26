@@ -32,4 +32,6 @@ public @interface CodeAugmentParameters {
 
         String filter() default "";
 
+        String suppresses() default "";
+
 }

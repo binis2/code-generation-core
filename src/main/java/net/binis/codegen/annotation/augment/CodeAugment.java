@@ -32,7 +32,7 @@ import java.util.Set;
 public @interface CodeAugment {
 
     AugmentType adds();
-    AugmentTargetType targets() default AugmentTargetType.EVERYTHING;
+    AugmentTargetType[] targets() default AugmentTargetType.EVERYTHING;
     AugmentTargetTypeSeverity severity() default AugmentTargetTypeSeverity.ERROR;
     String name() default "";
     String type() default "";
