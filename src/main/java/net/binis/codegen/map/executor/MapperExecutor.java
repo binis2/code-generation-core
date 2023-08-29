@@ -74,7 +74,7 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
 
     protected void build() {
 
-        var accessors = new HashMap<String, TriFunction>();
+        var accessors = new LinkedHashMap<String, TriFunction>();
         List<TriFunction> list;
 
         if (convert) {
