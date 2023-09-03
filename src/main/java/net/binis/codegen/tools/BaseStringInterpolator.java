@@ -20,8 +20,11 @@ package net.binis.codegen.tools;
  * #L%
  */
 
+import net.binis.codegen.objects.Pair;
+
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.Objects.isNull;
@@ -31,6 +34,11 @@ public abstract class BaseStringInterpolator<T> {
 
     protected static final String INVALID_EXPRESSION = "Invalid expression!";
     protected Character identifier;
+    protected List<Pair<SegmentType, String>> segments = new ArrayList<>();
+
+    public List<Pair<SegmentType, String>> getSegments() {
+        return Collections.unmodifiableList(segments);
+    }
 
     protected T buildExpression(String exp) {
         var list = new ArrayList<T>();
@@ -44,8 +52,8 @@ public abstract class BaseStringInterpolator<T> {
 
                 if (start < i) {
                     var constant = exp.substring(start, i);
-                    if (constant.length() != 0) {
-                        list.add(buildConstantExpression(constant));
+                    if (!constant.isEmpty()) {
+                        list.add(internalBuildConstantExpression(constant));
                     }
                 }
 
@@ -66,7 +74,7 @@ public abstract class BaseStringInterpolator<T> {
 
                 if (start < i) {
                     var e = exp.substring(start, i);
-                    list.add(buildParamExpression(e));
+                    list.add(internalBuildParamExpression(e));
                 }
 
                 start = i + 1;
@@ -81,7 +89,7 @@ public abstract class BaseStringInterpolator<T> {
         }
 
         if (start < exp.length()) {
-            list.add(buildConstantExpression(exp.substring(start)));
+            list.add(internalBuildConstantExpression(exp.substring(start)));
         }
 
         return complexExpression(list);
@@ -100,5 +108,20 @@ public abstract class BaseStringInterpolator<T> {
     }
 
     protected abstract T buildParamExpression(String exp);
+
+    protected T internalBuildConstantExpression(String exp) {
+        segments.add(Pair.of(SegmentType.CONSTANT, exp));
+        return buildConstantExpression(exp);
+    }
+
+    protected T internalBuildParamExpression(String exp) {
+        segments.add(Pair.of(SegmentType.PARAM, exp));
+        return buildParamExpression(exp);
+    }
+
+    public enum SegmentType {
+        CONSTANT,
+        PARAM
+    }
 
 }
