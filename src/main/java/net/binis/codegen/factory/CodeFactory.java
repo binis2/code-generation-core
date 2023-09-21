@@ -52,8 +52,8 @@ public class CodeFactory {
     protected static final Set<Class<?>> customProxyClassesRegistry = new HashSet<>();
     protected static final List<Pair<Class<?>, ProjectionProvider>> customProxyClasses = new ArrayList<>();
     protected static final Map<Class<?>, Map<Class<?>, ProjectionInstantiation>> projectionsCache = new HashMap<>();
+    protected static final List<ForeignObjectFactory> foreignFactories = new ArrayList<>();
     protected static ProjectionProvider projections = initProjectionProvider();
-
     protected static final Map<Class<?>, EnumEntry> enumRegistry = new HashMap<>();
 
     protected CodeFactory() {
@@ -79,7 +79,11 @@ public class CodeFactory {
                 return null;
             }
         } else {
-            var result = defaultCreate(cls, cls, params);
+            var result = createWithFactories(cls, params);
+            if (nonNull(result)) {
+                return result;
+            }
+            result = defaultCreate(cls, cls, params);
             if (isNull(result)) {
                 var parent = cls.getDeclaringClass();
                 if (nonNull(parent)) {
@@ -107,6 +111,18 @@ public class CodeFactory {
             }
             return result;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected static <T> T createWithFactories(Class<T> cls, Object[] params) {
+        for (var factory : foreignFactories) {
+            var result = factory.create(cls, params);
+            if (nonNull(result)) {
+                registerType(cls, par -> factory.create(cls, par));
+                return (T) result;
+            }
+        }
+        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -164,6 +180,10 @@ public class CodeFactory {
 
     public static IdDescription lookupId(Class<?> intf) {
         return idRegistry.get(intf);
+    }
+
+    public static void registerForeignFactory(ForeignObjectFactory factory) {
+        foreignFactories.add(factory);
     }
 
     public static void registerId(Class<?> cls, String fieldName, Class<?> fieldType) {
