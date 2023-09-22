@@ -116,10 +116,14 @@ public class CodeFactory {
     @SuppressWarnings("unchecked")
     protected static <T> T createWithFactories(Class<T> cls, Object[] params) {
         for (var factory : foreignFactories) {
-            var result = factory.create(cls, params);
-            if (nonNull(result)) {
-                registerType(cls, par -> factory.create(cls, par));
-                return (T) result;
+            try {
+                var result = factory.create(cls, params);
+                if (nonNull(result)) {
+                    registerType(cls, par -> factory.create(cls, par));
+                    return (T) result;
+                }
+            } catch (Exception e) {
+                //Do nothing
             }
         }
         return null;
