@@ -26,7 +26,9 @@ import sun.misc.Unsafe;
 
 import java.lang.reflect.*;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -34,15 +36,15 @@ import static java.util.Objects.nonNull;
 @Slf4j
 public abstract class Reflection {
 
-    private static ClassLoader loader;
+    protected static ClassLoader loader;
 
-    private static final Unsafe unsafe = getUnsafe();
+    protected static final Unsafe unsafe = getUnsafe();
 
-    private static final Method declaredFields = findMethod("getDeclaredFields0", Class.class, boolean.class);
+    protected static final Method declaredFields = findMethod("getDeclaredFields0", Class.class, boolean.class);
 
-    private static final Long offset = getFirstFieldOffset();
+    protected static final Long offset = getFirstFieldOffset();
 
-    private Reflection() {
+    protected Reflection() {
         //Do nothing
     }
 
@@ -286,6 +288,12 @@ public abstract class Reflection {
         }
     }
 
+    public static List<Method> findMethods(Class cls, Predicate<? super Method> filter) {
+        return Arrays.stream(cls.getMethods())
+                .filter(filter)
+                .toList();
+    }
+
     public static Unsafe getUnsafe() {
         try {
             var theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
@@ -303,7 +311,7 @@ public abstract class Reflection {
         }
     }
 
-    private static long getFirstFieldOffset() {
+    protected static long getFirstFieldOffset() {
         try {
             return unsafe.objectFieldOffset(Parent.class.getDeclaredField("first"));
         } catch (NoSuchFieldException e) {

@@ -20,8 +20,7 @@ package net.binis.codegen.factory;
  * #L%
  */
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import net.binis.codegen.annotation.type.GenerationStrategy;
 import net.binis.codegen.map.Mapper;
@@ -31,6 +30,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.*;
 import java.time.temporal.*;
+import java.util.Map;
 
 import static java.time.temporal.ChronoField.*;
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -135,6 +135,25 @@ class MapperTest {
     }
 
     @Test
+    void testCreation() {
+        TestMap.instanceCount = 0;
+        var result = Mapper.map(TestMap2.builder().int2(1).build(), new TestMap());
+        assertNotNull(result);
+        assertEquals(1, result.getInt2());
+        assertEquals(1, TestMap.instanceCount);
+    }
+
+    @Test
+    void testCreationClass() {
+        TestMap.instanceCount = 0;
+        var result = Mapper.map(TestMap2.builder().int2(1).build(), TestMap.class);
+        assertNotNull(result);
+        assertEquals(1, result.getInt2());
+        assertEquals(1, TestMap.instanceCount);
+    }
+
+
+    @Test
     void testDates() {
         CodeFactory.registerType(LocalDate.class, () -> LocalDate.now());
         CodeFactory.registerType(LocalDateTime.class, () -> LocalDateTime.now());
@@ -151,6 +170,52 @@ class MapperTest {
         assertEquals(OffsetDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZoneOffset.ofTotalSeconds(getOffset())), Mapper.convert(LocalDate.of(2020, 1, 1), OffsetDateTime.class));
         assertEquals(ZonedDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZoneId.of("Europe/Sofia")), Mapper.convert(LocalDate.of(2020, 1, 1), ZonedDateTime.class));
         assertEquals(ZonedDateTime.of(2020, 1, 1, 2, 15, 0, 0, ZoneId.of("Europe/Sofia")), Mapper.convert(OffsetDateTime.of(2020, 1, 1, 2, 15, 0, 0, ZoneOffset.UTC), ZonedDateTime.class));
+    }
+
+    @Test
+    void testToMap() {
+        var test = new TestMap();
+        test.setBaseString("base");
+        test.setString1("test");
+        test.setLong1(1L);
+        test.setInt1(2);
+        test.setConvert1(3);
+        test.setConvert2(true);
+        test.setMap(TestMap2.builder().string1("sub").long1(1L).int1(2).build());
+        var map = Mapper.map(test, Map.class);
+        assertEquals(8, map.size());
+        assertEquals("base", map.get("baseString"));
+        assertEquals("test", map.get("string1"));
+        assertEquals(1L, map.get("long1"));
+        assertEquals(2, map.get("int1"));
+        assertEquals(3, map.get("convert1"));
+        assertEquals(true, map.get("convert2"));
+        assertNull(map.get("int2"));
+        assertNotNull(map.get("map"));
+        assertTrue(Map.class.isAssignableFrom(map.get("map").getClass()));
+        var sub = (Map) map.get("map");
+        assertEquals("sub", sub.get("string1"));
+        assertEquals(1L, sub.get("long1"));
+        assertEquals(2, sub.get("int1"));
+    }
+
+    @Test
+    void testToMapSubNull() {
+        var test = new TestMap();
+        var map = Mapper.map(test, Map.class);
+        assertEquals(8, map.size());
+        assertNull(map.get("map"));
+    }
+
+    @Test
+    void testNull() {
+        assertNull(Mapper.map(null, TestMap.class));
+        assertEquals(0, Mapper.map(null, int.class));
+        assertNull(Mapper.convert(null, TestMap.class));
+        assertEquals(0, Mapper.convert(null, int.class));
+
+        assertThrows(NullPointerException.class, () -> Mapper.map(1, null));
+        assertThrows(NullPointerException.class, () -> Mapper.convert(1, null));
     }
 
     private int getOffset() {
@@ -198,6 +263,13 @@ class MapperTest {
     @Data
     @EqualsAndHashCode(callSuper = true)
     private static class TestMap extends BaseMap {
+
+        private static int instanceCount = 0;
+
+        private TestMap() {
+            instanceCount++;
+        }
+
         private String string1;
         private Long long1;
         private int int1;
@@ -205,9 +277,14 @@ class MapperTest {
 
         private int convert1;
         private boolean convert2;
+
+        private TestMap2 map;
     }
 
     @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @EqualsAndHashCode(callSuper = true)
     private static class TestMap2 extends BaseMap {
         private String string1;

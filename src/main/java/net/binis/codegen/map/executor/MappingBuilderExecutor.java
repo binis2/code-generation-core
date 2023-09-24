@@ -25,19 +25,22 @@ import net.binis.codegen.map.MapperFactory;
 import net.binis.codegen.map.Mapping;
 import net.binis.codegen.map.builder.CustomMappingBuilder;
 import net.binis.codegen.map.builder.DestinationMappingBuilder;
+import net.binis.codegen.map.builder.ProducerMappingBuilder;
 import net.binis.codegen.map.builder.SourceMappingBuilder;
 
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 @SuppressWarnings("unchecked")
-public class MappingBuilderExecutor implements SourceMappingBuilder, DestinationMappingBuilder, CustomMappingBuilder {
+public class MappingBuilderExecutor implements SourceMappingBuilder, DestinationMappingBuilder, ProducerMappingBuilder {
 
     protected Class source;
     protected Mapping mapping;
+    protected boolean producer;
 
     @Override
     public void custom(BiConsumer mapping) {
-        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, this.mapping.getDestination(), false, (source, destination) -> {
+        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, this.mapping.getDestination(), false, producer, (source, destination) -> {
             var result = this.mapping.map(source, destination);
             mapping.accept(source, destination);
             return result;
@@ -53,6 +56,12 @@ public class MappingBuilderExecutor implements SourceMappingBuilder, Destination
     @Override
     public DestinationMappingBuilder source(Class source) {
         this.source = source;
+        return this;
+    }
+
+    @Override
+    public CustomMappingBuilder producer() {
+        producer = true;
         return this;
     }
 }

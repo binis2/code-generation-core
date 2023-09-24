@@ -32,31 +32,46 @@ import static java.util.Objects.nonNull;
 
 public class DefaultMapperExecutor implements MapperFactory {
 
+    protected static final String DESTINATION_CANNOT_BE_NULL = "Destination cannot be null";
     protected final Map<String, Mapping> mappers = new ConcurrentHashMap<>();
 
     @Override
     public <T> T map(Object source, Class<T> destination) {
-        return map(source, CodeFactory.create(destination), destination);
+        return mapClass(source, destination);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T map(Object source, T destination) {
-        var mapper = mappers.get(calcMapperName(source.getClass(), destination.getClass()));
-        if (isNull(mapper)) {
-            mapper = buildMapper(source, destination, false);
-        }
-        return (T) mapper.map(source, destination);
+        Objects.requireNonNull(destination, DESTINATION_CANNOT_BE_NULL);
+        return (T) map(source, destination, (Class) destination.getClass());
     }
 
     @SuppressWarnings("unchecked")
     protected <T> T map(Object source, T destination, Class<T> cls) {
+        if (isNull(source)) {
+            return handleNullSource(destination, cls);
+        }
         var mapper = mappers.get(calcMapperName(source.getClass(), cls));
         if (isNull(mapper)) {
             mapper = buildMapper(source, destination, false);
         }
         return (T) mapper.map(source, destination);
     }
+
+    @SuppressWarnings("unchecked")
+    protected <T> T mapClass(Object source, Class<T> cls) {
+        Objects.requireNonNull(cls, DESTINATION_CANNOT_BE_NULL);
+        if (isNull(source)) {
+            return handleNullSource(null, cls);
+        }
+        var mapper = mappers.get(calcMapperName(source.getClass(), cls));
+        if (isNull(mapper)) {
+            mapper = buildMapperClass(source.getClass(), cls, false, true);
+        }
+        return (T) mapper.map(source, null);
+    }
+
 
     @Override
     public Mapping mapping(Class source, Class destination) {
@@ -65,6 +80,9 @@ public class DefaultMapperExecutor implements MapperFactory {
 
     @Override
     public <T> T convert(Object source, Class<T> destination) {
+        if (isNull(source)) {
+            return handleNullSource(null, destination);
+        }
         return convert(source, CodeFactory.create(destination), destination);
     }
 
@@ -77,6 +95,10 @@ public class DefaultMapperExecutor implements MapperFactory {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T convert(Object source, T destination) {
+        Objects.requireNonNull(destination, DESTINATION_CANNOT_BE_NULL);
+        if (isNull(source)) {
+            return handleNullSource(destination, null);
+        }
         var mapper = mappers.get(calcMapperName(source.getClass(), destination.getClass()));
         if (isNull(mapper)) {
             mapper = buildMapper(source, destination, true);
@@ -86,11 +108,23 @@ public class DefaultMapperExecutor implements MapperFactory {
 
     @SuppressWarnings("unchecked")
     protected <T> T convert(Object source, T destination, Class<T> cls) {
+        if (isNull(source)) {
+            return handleNullSource(destination, cls);
+        }
         var mapper = mappers.get(calcMapperName(source.getClass(), cls));
         if (isNull(mapper)) {
             mapper = buildMapperClass(source.getClass(), cls, true, true);
         }
         return (T) mapper.map(source, destination);
+    }
+
+    protected <T> T handleNullSource(T destination, Class<T> cls) {
+        if (nonNull(destination)) {
+            return destination;
+        } else if (nonNull(cls) && cls.isPrimitive()) {
+            return CodeFactory.create(cls);
+        }
+        return null;
     }
 
 
@@ -211,7 +245,7 @@ public class DefaultMapperExecutor implements MapperFactory {
 
     @SuppressWarnings("unchecked")
     protected <T> MapperExecutor buildMapperClass(Class source, Class destination, boolean convert, boolean register) {
-        var result = new MapperExecutor(source, destination, convert);
+        var result = new MapperExecutor(source, destination, convert, false);
         if (register) {
             mappers.put(calcMapperName(source, destination), result);
         }

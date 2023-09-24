@@ -43,18 +43,21 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
     protected final Class<?> source;
     protected final Class<T> destination;
     protected final boolean convert;
+    protected final boolean producer;
 
-    public MapperExecutor(Object source, T destination, boolean convert) {
+    public MapperExecutor(Object source, T destination, boolean convert, boolean producer) {
         this.source = source.getClass();
         this.destination = (Class) destination.getClass();
         this.convert = convert;
+        this.producer = producer;
         build();
     }
 
-    public MapperExecutor(Class<?> source, Class<T> destination, boolean convert) {
+    public MapperExecutor(Class<?> source, Class<T> destination, boolean convert, boolean producer) {
         this.source = source;
         this.destination = destination;
         this.convert = convert;
+        this.producer = producer;
         build();
     }
 
@@ -98,7 +101,7 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
 
             mapper = (s, d) -> {
                 Object wither = null;
-                Object result = d;
+                Object result = nonNull(d) ? d : CodeFactory.create(destination);
                 for (var accessor : list) {
                     var res = accessor.apply(s, result, wither);
                     if (res instanceof WitherHolder holder) {
@@ -186,7 +189,7 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
                             } else if (isNullableToNonNullable(srcType, destType)) {
                                 addNullProtectedGetterSetterMapping(accessors, destination, getter, setter, name);
                             } else {
-                                addConverter(accessors, source, destination, getter, setter, name);
+                                addConverter(accessors, destination, getter, setter, name);
                             }
                         }
                     } catch (Exception e) {
@@ -232,7 +235,7 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
                                 } else if (isNullableToNonNullable(srcType, destType)) {
                                     addNullProtectedGetterWitherMapping(accessors, destination, getter, setter, name);
                                 } else {
-                                    addConverterWither(accessors, source, destination, getter, setter, name);
+                                    addConverterWither(accessors, destination, getter, setter, name);
                                 }
                             }
                         } catch (Exception e) {
@@ -273,7 +276,7 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
                                 } else if (isNullableToNonNullable(srcType, destType)) {
                                     addNullProtectedGetterSetterMapping(accessors, destination, getter, setter, name);
                                 } else {
-                                    addConverter(accessors, source, destination, getter, setter, name);
+                                    addConverter(accessors, destination, getter, setter, name);
                                 }
                             }
                         } catch (Exception e) {
@@ -284,17 +287,19 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
             }
     }
 
-    protected void addConverter(Map<String, TriFunction> accessors, Class<?> source, Class<?> destination, Method getter, Method setter, String name) {
+    protected void addConverter(Map<String, TriFunction> accessors, Class<?> destination, Method getter, Method setter, String name) {
         try {
             setter.setAccessible(true);
             var type = setter.getParameterTypes()[0];
             accessors.put(name, (s, d, w) -> {
                 try {
                     var value = getter.invoke(s);
-                    if (convert) {
-                        setter.invoke(d, CodeFactory.create(MapperFactory.class).convert(value, type));
-                    } else {
-                        setter.invoke(d, CodeFactory.create(MapperFactory.class).map(value, type));
+                    if (nonNull(value)) {
+                        if (convert) {
+                            setter.invoke(d, CodeFactory.create(MapperFactory.class).convert(value, type));
+                        } else {
+                            setter.invoke(d, CodeFactory.create(MapperFactory.class).map(value, type));
+                        }
                     }
                     return d;
                 } catch (Exception e) {
@@ -306,7 +311,7 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
         }
     }
 
-    protected void addConverterWither(Map<String, TriFunction> accessors, Class<?> source, Class<?> destination, Method getter, Method setter, String name) {
+    protected void addConverterWither(Map<String, TriFunction> accessors, Class<?> destination, Method getter, Method setter, String name) {
         try {
             setter.setAccessible(true);
             var type = setter.getParameterTypes()[0];
