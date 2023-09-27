@@ -1,4 +1,4 @@
-package net.binis.codegen.enrich;
+package net.binis.codegen.enrich.constructor;
 
 /*-
  * #%L
@@ -20,15 +20,18 @@ package net.binis.codegen.enrich;
  * #L%
  */
 
+import net.binis.codegen.annotation.Default;
 import net.binis.codegen.annotation.augment.*;
+import net.binis.codegen.enrich.Enricher;
 
 @CodeAugment(
         adds = AugmentType.CONSTRUCTOR,
         targets = AugmentTargetType.CLASS,
         severity = AugmentTargetTypeSeverity.WARNING,
         parameters = @CodeAugmentParameters(
-                filter = "FIELDS|FINAL|!STATIC|!INITIALIZED",
+                filter = "FIELDS|!STATIC|!INITIALIZED",
                 suppresses = "Variable '{name}' might not have been initialized"
         ))
-public interface InjectionEnricher extends Enricher {
+@Default("net.binis.codegen.enrich.handler.constructor.NotInitializedArgsConstructorEnricherHandler")
+public interface NotInitializedArgsConstructorEnricher extends Enricher {
 }
