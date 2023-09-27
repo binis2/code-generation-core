@@ -40,8 +40,7 @@ import java.util.function.Supplier;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static net.binis.codegen.tools.Reflection.findConstructor;
-import static net.binis.codegen.tools.Reflection.initialize;
+import static net.binis.codegen.tools.Reflection.*;
 
 @Slf4j
 public class CodeFactory {
@@ -505,6 +504,9 @@ public class CodeFactory {
         if (entry != null) {
             entry.setImplClass(impl);
             return (T) entry.getImplFactory().create(params);
+        } else if (nonNull(impl)) {
+            registerType(cls, par -> instantiate(impl, par));
+            return (T) instantiate(impl, params);
         }
         return null;
     }
