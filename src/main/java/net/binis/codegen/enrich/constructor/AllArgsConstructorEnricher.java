@@ -29,7 +29,7 @@ import net.binis.codegen.enrich.Enricher;
         targets = AugmentTargetType.CLASS,
         severity = AugmentTargetTypeSeverity.WARNING,
         parameters = @CodeAugmentParameters(
-                filter = "FIELDS|FINAL|!STATIC",
+                filter = "FIELDS|!STATIC",
                 suppresses = "Variable '{name}' might not have been initialized"
         ))
 @Default("net.binis.codegen.enrich.handler.constructor.AllArgsConstructorEnricherHandler")
