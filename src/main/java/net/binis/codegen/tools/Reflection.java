@@ -97,7 +97,11 @@ public abstract class Reflection {
 
     public static boolean compatible(Class<?> type, Object obj) {
         if (nonNull(obj)) {
-            var aClass = obj instanceof Class<?> c ? c : obj.getClass();
+            if (obj instanceof Class<?> c) {
+                return type.isInstance(c);
+            }
+
+            var aClass = obj.getClass();
             if (type.isPrimitive()) {
                 return type.equals(TypeUtils.getPrimitiveType(aClass));
             } else {
