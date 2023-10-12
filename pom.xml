@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>dev.binis</groupId>
     <artifactId>code-generator-core</artifactId>
-    <version>1.1.10</version>
+    <version>1.1.11</version>
     <name>code-generator-core</name>
     <description>Binis Code Generation Core Classes</description>
     <url>https://github.com/binis2/code-generation</url>
@@ -93,7 +93,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.5.0</version>
+            <version>5.6.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
