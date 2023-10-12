@@ -26,12 +26,15 @@ public final class Options {
         //Do nothing
     }
 
+    //Creation options
+    public static final Class<? extends CodeOption> HIDDEN_CREATE_METHOD = HiddenCreateMethodOption.class;
+
+    //Modifier options
+    public static final Class<? extends CodeOption> SUPPRESS_SPOTBUGS_WARNINGS = SuppressSpotBugsWarningOption.class;
+
     //Validation options
     public static final Class<? extends CodeOption> VALIDATION_FORM = ValidationFormOption.class;
     public static final Class<? extends CodeOption> EXPOSE_VALIDATE_METHOD = ExposeValidateMethodOption.class;
-
-    //Creation options
-    public static final Class<? extends CodeOption> HIDDEN_CREATE_METHOD = HiddenCreateMethodOption.class;
 
     //OpenApi
     public static final Class<? extends CodeOption> GENERATE_OPENAPI_ALWAYS = GenerateOpenApiAlwaysOption.class;
