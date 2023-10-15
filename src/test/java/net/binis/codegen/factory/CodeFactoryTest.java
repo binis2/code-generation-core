@@ -36,6 +36,14 @@ class CodeFactoryTest {
         assertEquals("test", inst.getParam());
     }
 
+    @Test
+    void testMultiConstructor() {
+        var inst = CodeFactory.create(TestMulti.class);
+        assertEquals("none", inst.param);
+        inst = CodeFactory.create(TestMulti.class, "param");
+        assertEquals("param", inst.param);
+    }
+
     @Default("net.binis.codegen.factory.CodeFactoryTest$TestImpl")
     public interface TestIntf {
         String getParam();
@@ -54,5 +62,20 @@ class CodeFactoryTest {
         }
 
     }
+
+    public static class TestMulti {
+
+        private final String param;
+
+        protected TestMulti(String param) {
+            this.param = param;
+        }
+
+        protected TestMulti() {
+            this.param = "none";
+        }
+
+    }
+
 
 }

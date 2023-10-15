@@ -33,6 +33,7 @@ import net.binis.codegen.tools.Holder;
 import net.binis.codegen.tools.Reflection;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -94,9 +95,12 @@ public class CodeFactory {
                     try {
                         var ctor = findConstructor(cls, params);
                         result = (T) ctor.newInstance(params);
+                        var ctorMap = new HashMap<Integer, Constructor>();
+                        ctorMap.put(params.length, ctor);
+
                         registerType(cls, p -> {
                             try {
-                                return ctor.newInstance(p);
+                                return ctorMap.computeIfAbsent(p.length, k -> findConstructor(cls, p)).newInstance(p);
                             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                                 return null;
                             }
