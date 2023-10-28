@@ -239,18 +239,18 @@ public abstract class Reflection {
         return result;
     }
 
-    public static Object invoke(Method m, Object instance, Object... args) {
+    public static <T> T invoke(Method m, Object instance, Object... args) {
         try {
             if (!m.trySetAccessible()) {
                 setAccessible(m);
             }
-            return m.invoke(instance, args);
+            return (T) m.invoke(instance, args);
         } catch (Exception e) {
             return null;
         }
     }
 
-    public static Object invoke(String name, Object instance, Object... args) {
+    public static <T> T invoke(String name, Object instance, Object... args) {
         try {
             var m = findMethod(name, instance.getClass(), Arrays.stream(args).map(Object::getClass).toArray(Class[]::new));
             if (nonNull(m)) {
@@ -262,18 +262,18 @@ public abstract class Reflection {
         return null;
     }
 
-    public static Object invokeStatic(Method m, Object... args) {
+    public static <T> T invokeStatic(Method m, Object... args) {
         try {
-            return m.invoke(null, args);
+            return (T) m.invoke(null, args);
         } catch (Exception e) {
             return null;
         }
     }
 
     @SneakyThrows
-    public static Object invokeStaticWithException(Method m, Object... args) {
+    public static <T> T invokeStaticWithException(Method m, Object... args) {
         try {
-            return m.invoke(null, args);
+            return (T) m.invoke(null, args);
         } catch (InvocationTargetException e) {
             throw e.getTargetException();
         } catch (Exception e) {
@@ -281,9 +281,9 @@ public abstract class Reflection {
         }
     }
 
-    public static Object invokeStatic(String name, Class cls, Object... args) {
+    public static <T> T invokeStatic(String name, Class cls, Object... args) {
         try {
-            return findMethod(name, cls, Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)).invoke(null, args);
+            return (T) findMethod(name, cls, Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)).invoke(null, args);
         } catch (Exception e) {
             return null;
         }
