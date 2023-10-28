@@ -30,7 +30,8 @@ import net.binis.codegen.enrich.Enricher;
 @CodeAugment(
         adds = AugmentType.CONSTRUCTOR,
         targets = AugmentTargetType.CLASS,
-        severity = AugmentTargetTypeSeverity.WARNING)
+        severity = AugmentTargetTypeSeverity.WARNING,
+        description = "Adds parameterless <b>constructor</b>")
 @Default("net.binis.codegen.enrich.handler.constructor.NoArgsConstructorEnricherHandler")
 public interface NoArgsConstructorEnricher extends Enricher {
 }

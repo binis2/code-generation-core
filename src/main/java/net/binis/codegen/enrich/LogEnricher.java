@@ -33,6 +33,7 @@ import static java.lang.reflect.Modifier.*;
         type = "org.slf4j.Logger",
         modifier = PRIVATE | STATIC | FINAL,
         targets = AugmentTargetType.CLASS,
-        severity = AugmentTargetTypeSeverity.NOTE)
+        severity = AugmentTargetTypeSeverity.NOTE,
+        description = "Adds field: Logger log")
 public interface LogEnricher extends Enricher {
 }

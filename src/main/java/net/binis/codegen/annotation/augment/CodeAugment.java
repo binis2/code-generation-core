@@ -39,4 +39,6 @@ public @interface CodeAugment {
     long modifier() default Modifier.PUBLIC;
     CodeAugmentParameters parameters() default @CodeAugmentParameters;
 
+    String description();
+
 }

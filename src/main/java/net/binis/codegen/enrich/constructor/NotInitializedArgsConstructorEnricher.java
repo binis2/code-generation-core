@@ -31,7 +31,9 @@ import net.binis.codegen.enrich.Enricher;
         parameters = @CodeAugmentParameters(
                 filter = "FIELDS|!STATIC|!INITIALIZED",
                 suppresses = "Variable '{name}' might not have been initialized"
-        ))
+        ),
+        description = "Adds <b>constructor</b> with all <u>non static</u>, <u>not initialized</u> fields as parameters")
+
 @Default("net.binis.codegen.enrich.handler.constructor.NotInitializedArgsConstructorEnricherHandler")
 public interface NotInitializedArgsConstructorEnricher extends Enricher {
 }
