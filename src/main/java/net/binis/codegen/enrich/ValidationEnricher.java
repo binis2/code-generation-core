@@ -20,5 +20,8 @@ package net.binis.codegen.enrich;
  * #L%
  */
 
+import net.binis.codegen.annotation.Default;
+
+@Default("net.binis.codegen.enrich.handler.ValidationEnricherHandler")
 public interface ValidationEnricher extends Enricher {
 }

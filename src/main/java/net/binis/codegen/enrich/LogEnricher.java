@@ -20,6 +20,7 @@ package net.binis.codegen.enrich;
  * #L%
  */
 
+import net.binis.codegen.annotation.Default;
 import net.binis.codegen.annotation.augment.AugmentTargetType;
 import net.binis.codegen.annotation.augment.AugmentTargetTypeSeverity;
 import net.binis.codegen.annotation.augment.AugmentType;
@@ -35,5 +36,6 @@ import static java.lang.reflect.Modifier.*;
         targets = AugmentTargetType.CLASS,
         severity = AugmentTargetTypeSeverity.NOTE,
         description = "Adds field: Logger log")
+@Default("net.binis.codegen.enrich.handler.LogEnricherHandler")
 public interface LogEnricher extends Enricher {
 }
