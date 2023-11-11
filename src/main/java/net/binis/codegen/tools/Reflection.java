@@ -239,6 +239,7 @@ public abstract class Reflection {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T invoke(Method m, Object instance, Object... args) {
         try {
             if (!m.trySetAccessible()) {
@@ -262,6 +263,7 @@ public abstract class Reflection {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T invokeStatic(Method m, Object... args) {
         try {
             return (T) m.invoke(null, args);
@@ -270,6 +272,7 @@ public abstract class Reflection {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @SneakyThrows
     public static <T> T invokeStaticWithException(Method m, Object... args) {
         try {
@@ -281,6 +284,7 @@ public abstract class Reflection {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T invokeStatic(String name, Class cls, Object... args) {
         try {
             return (T) findMethod(name, cls, Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)).invoke(null, args);
