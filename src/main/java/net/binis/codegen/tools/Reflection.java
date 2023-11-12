@@ -56,6 +56,24 @@ public abstract class Reflection {
         }
     }
 
+    public static Class<?> loadNestedClass(String className) {
+        var result = loadClass(className);
+        if (isNull(result)) {
+            var builder = new StringBuilder(className);
+            var idx = builder.lastIndexOf(".");
+            while (idx >= 0) {
+                builder.setCharAt(idx, '$');
+                result = loadClass(builder.toString());
+                if (nonNull(result)) {
+                    return result;
+                }
+                idx = builder.lastIndexOf(".");
+            }
+        }
+        return result;
+    }
+
+
     public static Class<?> loadClass(String className, ClassLoader loader) {
         try {
             return loader.loadClass(className);
