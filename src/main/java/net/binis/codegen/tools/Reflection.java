@@ -127,7 +127,6 @@ public abstract class Reflection {
         }
     }
 
-    @SneakyThrows
     public static Class<?> initialize(String cls, Object... params) {
         return instantiate(loadClass(cls), params).getClass();
     }

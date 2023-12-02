@@ -22,9 +22,11 @@ package net.binis.codegen.factory;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.binis.codegen.annotation.Default;
 import net.binis.codegen.discovery.Discoverer;
+import net.binis.codegen.exception.CodeFactoryExeception;
 import net.binis.codegen.exception.GenericCodeGenException;
 import net.binis.codegen.objects.Pair;
 import net.binis.codegen.objects.base.enumeration.CodeEnum;
@@ -69,12 +71,17 @@ public class CodeFactory {
         });
     }
 
+    @SneakyThrows
     @SuppressWarnings("unchecked")
     public static <T> T create(Class<T> cls, Object... params) {
         var entry = registry.get(cls);
         if (entry != null) {
             if (nonNull(entry.getImplFactory())) {
-                return internalEnvelop((T) entry.getImplFactory().create(params));
+                try {
+                    return internalEnvelop((T) entry.getImplFactory().create(params));
+                } catch (CodeFactoryExeception e) {
+                    throw e.getCause();
+                }
             } else {
                 return null;
             }
@@ -132,6 +139,7 @@ public class CodeFactory {
         return null;
     }
 
+    @SneakyThrows
     @SuppressWarnings("unchecked")
     public static <T> T createDefault(Class<T> cls, String defaultClass, Object... params) {
         var entry = registry.get(cls);
@@ -146,7 +154,11 @@ public class CodeFactory {
             try {
                 obj = internalCreate(cls, initialize(defaultClass, params), params);
             } catch (Exception e) {
-                log.error("Can't find class: {}", defaultClass);
+                if (e instanceof InvocationTargetException ex && ex.getTargetException() instanceof CodeFactoryExeception cfe) {
+                    throw cfe.getCause();
+                }
+
+                log.error("Can't instantiate class: {}", defaultClass);
             }
         }
 
@@ -411,6 +423,17 @@ public class CodeFactory {
         return (T[]) Array.newInstance(cls, 0);
     }
 
+    public static CodeFactoryExeception exception(String message, Object... params) {
+        return new CodeFactoryExeception(String.format(message, params));
+    }
+
+    public static CodeFactoryExeception exception(String message, Throwable cause, Object... params) {
+        return new CodeFactoryExeception(String.format(message, params), cause);
+    }
+
+    public static CodeFactoryExeception exception(Throwable cause) {
+        return new CodeFactoryExeception(cause);
+    }
 
     @SuppressWarnings("unchecked")
     protected static <T extends CodeEnum> EnumInitializer buildEnumInitializer(Class<T> cls) {
