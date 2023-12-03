@@ -34,10 +34,7 @@ import net.binis.codegen.objects.base.enumeration.CodeEnumImpl;
 import net.binis.codegen.tools.Holder;
 import net.binis.codegen.tools.Reflection;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -56,6 +53,8 @@ public class CodeFactory {
     protected static final Map<Class<?>, Map<Class<?>, ProjectionInstantiation>> projectionsCache = new HashMap<>();
     protected static final List<ForeignObjectFactory> foreignFactories = new ArrayList<>();
     protected static ProjectionProvider projections = initProjectionProvider();
+    protected static ProxyProvider proxies = initProxyProvider();
+
     protected static final Map<Class<?>, EnumEntry> enumRegistry = new HashMap<>();
 
     protected CodeFactory() {
@@ -314,6 +313,11 @@ public class CodeFactory {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> T proxy(Class<T> cls, InvocationHandler handler) {
+        return (T) proxies.proxy(cls, handler);
+    }
+
     public static Object projections(Object object, Class<?>... projections) {
         if (nonNull(object) && projections.length > 0) {
             return projection(object, projections[0]);
@@ -505,6 +509,17 @@ public class CodeFactory {
             //Do nothing
         }
         return null;
+    }
+
+    protected static ProxyProvider initProxyProvider() {
+        if (projections instanceof ProxyProvider) {
+            return (ProxyProvider) projections;
+        } else {
+            return (cls, handler) -> Proxy.newProxyInstance(
+                    CodeFactory.class.getClassLoader(),
+                    new Class[] { cls },
+                    handler);
+        }
     }
 
     protected static Optional<ProjectionProvider> checkForCustomClass(Class<?> cls) {

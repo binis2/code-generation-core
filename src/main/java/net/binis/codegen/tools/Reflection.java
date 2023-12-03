@@ -179,8 +179,9 @@ public abstract class Reflection {
         }
     }
 
-    public static void setFieldValue(Object obj, String name, Object value) {
+    public static <T> T setFieldValue(T obj, String name, Object value) {
         setFieldValue(obj.getClass(), obj, name, value);
+        return obj;
     }
 
     public static <T> T getFieldValue(Class cls, Object obj, String name) {
