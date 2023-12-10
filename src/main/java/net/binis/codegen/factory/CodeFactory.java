@@ -62,6 +62,7 @@ public class CodeFactory {
     }
 
     static {
+        registerType(Object.class, Object::new);
         Discoverer.findAnnotations().stream().filter(Discoverer.DiscoveredService::isConfig).forEach(config -> {
             var method = Reflection.findMethod("initialize", config.getCls());
             if (nonNull(method) && Modifier.isStatic(method.getModifiers())) {
@@ -189,7 +190,10 @@ public class CodeFactory {
 
         if (entry != null) {
             if (entry.getImplClass() == null && entry.getImplFactory() != null) {
-                entry.setImplClass(entry.getImplFactory().create().getClass());
+                var inst = entry.getImplFactory().create();
+                if (nonNull(inst)) {
+                    entry.setImplClass(inst.getClass());
+                }
             }
             return entry.getImplClass();
         }
