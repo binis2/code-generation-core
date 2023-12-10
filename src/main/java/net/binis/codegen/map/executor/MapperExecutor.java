@@ -167,11 +167,11 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
         var getters = Arrays.stream(source.getMethods())
                 .filter(Reflection::isGetter)
                 .filter(m -> Modifier.isPublic(m.getModifiers()))
-                .collect(Collectors.toMap(k -> getFieldName(k.getName()), v -> v));
+                .collect(Collectors.toMap(k -> getFieldName(k.getName()), v -> v, (n1, n2) -> n1));
         var setters = Arrays.stream(destination.getMethods())
                 .filter(Reflection::isSetter)
                 .filter(m -> Modifier.isPublic(m.getModifiers()))
-                .collect(Collectors.toMap(k -> getFieldName(k.getName()), v -> v));
+                .collect(Collectors.toMap(k -> getFieldName(k.getName()), v -> v, (n1, n2) -> n1));
 
         if (!setters.isEmpty()) {
             for (var entry : getters.entrySet()) {
