@@ -73,7 +73,6 @@ public abstract class Reflection {
         return result;
     }
 
-
     public static Class<?> loadClass(String className, ClassLoader loader) {
         try {
             return loader.loadClass(className);
@@ -81,7 +80,6 @@ public abstract class Reflection {
             return null;
         }
     }
-
 
     @SuppressWarnings("unchecked")
     @SneakyThrows
@@ -181,6 +179,18 @@ public abstract class Reflection {
 
     public static <T> T setFieldValue(T obj, String name, Object value) {
         setFieldValue(obj.getClass(), obj, name, value);
+        return obj;
+    }
+
+    public static <T> T setFieldValue(Field field, T obj, Object value) {
+        try {
+            if (!field.trySetAccessible()) {
+                setAccessible(field);
+            }
+            field.set(obj, value);
+        } catch (Exception e) {
+            log.error("Unable to set value for field {} of {}", field.getName(), obj.getClass().getName(), e);
+        }
         return obj;
     }
 
