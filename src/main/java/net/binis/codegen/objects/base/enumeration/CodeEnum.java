@@ -20,7 +20,9 @@ package net.binis.codegen.objects.base.enumeration;
  * #L%
  */
 
-public interface CodeEnum {
+import java.io.Serializable;
+
+public interface CodeEnum extends Serializable {
 
     int ordinal();
     String name();

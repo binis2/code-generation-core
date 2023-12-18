@@ -31,6 +31,11 @@ public class CodeEnumImpl implements CodeEnum {
         this.name = name;
     }
 
+    protected CodeEnumImpl() {
+        this.ordinal = -1;
+        this.name = "";
+    }
+
     @Override
     public int ordinal() {
         return ordinal;
