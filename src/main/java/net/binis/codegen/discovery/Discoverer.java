@@ -24,6 +24,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.binis.codegen.annotation.CodeConfiguration;
+import net.binis.codegen.tools.Reflection;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
@@ -42,6 +43,7 @@ public abstract class Discoverer {
 
     public static final String TEMPLATE = "template";
     public static final String CONFIG = "config";
+    public static final String INIT = "init";
     protected static final String RESOURCE_PATH = "binis/annotations";
 
     protected static List<InputStream> loadResources(
@@ -80,7 +82,6 @@ public abstract class Discoverer {
         processResource(new BufferedReader(new InputStreamReader(stream)), services, true, !(stream instanceof BufferedInputStream));
     }
 
-    @SuppressWarnings("unchecked")
     protected static void processResource(BufferedReader reader, List<DiscoveredService> services, boolean tryLoad, boolean showWarning) {
         try {
             while (reader.ready()) {
@@ -118,8 +119,24 @@ public abstract class Discoverer {
                         } else {
                             services.add(DiscoveredService.builder().type(parts[0]).name(parts[1]).cls(null).build());
                         }
+                    } else if (INIT.equals(parts[0])) {
+                        if (tryLoad) {
+                            var cls = loadClass(parts[1]);
+                            if (nonNull(cls)) {
+                                Reflection.instantiate(cls);
+                                services.add(DiscoveredService.builder().type(parts[0]).name(parts[1]).cls(cls).build());
+                            } else {
+                                log.warn("Can't load class: {}!", parts[1]);
+                            }
+                        } else {
+                            services.add(DiscoveredService.builder().type(parts[0]).name(parts[1]).cls(null).build());
+                        }
                     } else {
-                        log.warn("Invalid descriptor type: {}!", parts[0]);
+                        Class cls = null;
+                        if (tryLoad) {
+                            cls = loadClass(parts[1]);
+                        }
+                        services.add(DiscoveredService.builder().type(parts[0]).name(parts[1]).cls(cls).build());
                     }
                 } else {
                     log.warn("Invalid descriptor line: {}!", line);
