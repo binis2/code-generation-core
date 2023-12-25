@@ -24,7 +24,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.binis.codegen.annotation.CodeConfiguration;
-import net.binis.codegen.tools.Reflection;
+import net.binis.codegen.factory.CodeFactory;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
@@ -69,7 +69,7 @@ public abstract class Discoverer {
         try {
             loadResources(RESOURCE_PATH, Discoverer.class.getClassLoader()).forEach(s -> Discoverer.processResource(s, result));
         } catch (Exception e) {
-            log.error("Unable to discover services!");
+            log.error("Unable to discover services!", e);
         }
         return result;
     }
@@ -123,7 +123,7 @@ public abstract class Discoverer {
                         if (tryLoad) {
                             var cls = loadClass(parts[1]);
                             if (nonNull(cls)) {
-                                Reflection.instantiate(cls);
+                                CodeFactory.create(cls);
                                 services.add(DiscoveredService.builder().type(parts[0]).name(parts[1]).cls(cls).build());
                             } else {
                                 log.warn("Can't load class: {}!", parts[1]);
