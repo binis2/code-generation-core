@@ -151,14 +151,19 @@ public class CodeFactory {
                 return null;
             }
         } else {
-            try {
-                obj = internalCreate(cls, initialize(defaultClass, params), params);
-            } catch (Exception e) {
-                if (e instanceof InvocationTargetException ex && ex.getTargetException() instanceof CodeFactoryExeception cfe) {
-                    throw cfe.getCause();
-                }
+            obj = createWithFactories(cls, params);
+            if (isNull(obj)) {
+                try {
+                    obj = internalCreate(cls, initialize(defaultClass, params), params);
+                } catch (Exception e) {
+                    if (e instanceof InvocationTargetException ex && ex.getTargetException() instanceof CodeFactoryExeception cfe) {
+                        throw cfe.getCause();
+                    }
 
-                log.error("Can't instantiate class: {}", defaultClass);
+                    log.error("Can't instantiate class: {}", defaultClass);
+                }
+            } else {
+                return (T) obj;
             }
         }
 
