@@ -26,10 +26,16 @@ public interface MapperFactory {
 
     <T> T map(Object source, Class<T> destination);
     <T> T map(Object source, T destination);
+    <T> T map(Object source, Class<T> destination, MappingStrategy strategy);
+    <T> T map(Object source, T destination, MappingStrategy strategy);
     Mapping mapping(Class source, Class destination);
+    Mapping mapping(Class source, Class destination, MappingStrategy strategy);
     <T> T convert(Object source, Class<T> destination);
     <T> T convert(Object source, Class<T> destination, Object... params);
     <T> T convert(Object source, T destination);
+    <T> T convert(Object source, Class<T> destination, MappingStrategy strategy);
+    <T> T convert(Object source, Class<T> destination, MappingStrategy strategy, Object... params);
+    <T> T convert(Object source, T destination, MappingStrategy strategy);
     boolean canMap(Class<?> source, Class<?> destination);
     boolean canMapExactly(Class<?> source, Class<?> destination);
     <S, D> Mapping<S, D> getMap(Class<S> source, Class<D> destination);

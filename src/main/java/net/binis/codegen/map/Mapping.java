@@ -25,5 +25,6 @@ public interface Mapping<S, D> {
     Class<S> getSource();
     Class<D> getDestination();
     D map(S source, D destination);
+    MappingStrategy getStrategy();
 
 }

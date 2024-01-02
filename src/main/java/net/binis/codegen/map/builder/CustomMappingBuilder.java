@@ -20,6 +20,8 @@ package net.binis.codegen.map.builder;
  * #L%
  */
 
+import net.binis.codegen.map.MappingStrategy;
+
 import java.util.function.BiConsumer;
 
 public interface CustomMappingBuilder<S, D> {

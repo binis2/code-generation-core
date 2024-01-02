@@ -20,8 +20,12 @@ package net.binis.codegen.map.builder;
  * #L%
  */
 
+import net.binis.codegen.map.MappingStrategy;
+
 public interface SourceMappingBuilder {
 
     <S> DestinationMappingBuilder<S> source(Class<S> source);
+
+    SourceMappingBuilder strategy(MappingStrategy strategy);
 
 }

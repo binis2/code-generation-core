@@ -23,6 +23,7 @@ package net.binis.codegen.map.executor;
 import net.binis.codegen.factory.CodeFactory;
 import net.binis.codegen.map.MapperFactory;
 import net.binis.codegen.map.Mapping;
+import net.binis.codegen.map.MappingStrategy;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,37 +38,47 @@ public class DefaultMapperExecutor implements MapperFactory {
 
     @Override
     public <T> T map(Object source, Class<T> destination) {
-        return mapClass(source, destination);
+        return mapClass(source, destination, MappingStrategy.GETTERS_SETTERS);
+    }
+
+    @Override
+    public <T> T map(Object source, T destination) {
+        return map(source, destination, MappingStrategy.GETTERS_SETTERS);
+    }
+
+    @Override
+    public <T> T map(Object source, Class<T> destination, MappingStrategy strategy) {
+        return mapClass(source, destination, strategy);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T map(Object source, T destination) {
+    public <T> T map(Object source, T destination, MappingStrategy strategy) {
         Objects.requireNonNull(destination, DESTINATION_CANNOT_BE_NULL);
-        return (T) map(source, destination, (Class) destination.getClass());
+        return (T) map(source, destination, (Class) destination.getClass(), strategy);
     }
 
     @SuppressWarnings("unchecked")
-    protected <T> T map(Object source, T destination, Class<T> cls) {
+    protected <T> T map(Object source, T destination, Class<T> cls, MappingStrategy strategy) {
         if (isNull(source)) {
             return handleNullSource(destination, cls);
         }
         var mapper = mappers.get(calcMapperName(source.getClass(), cls));
         if (isNull(mapper)) {
-            mapper = buildMapper(source, destination, false);
+            mapper = buildMapper(source, destination, false, strategy);
         }
         return (T) mapper.map(source, destination);
     }
 
     @SuppressWarnings("unchecked")
-    protected <T> T mapClass(Object source, Class<T> cls) {
+    protected <T> T mapClass(Object source, Class<T> cls, MappingStrategy strategy) {
         Objects.requireNonNull(cls, DESTINATION_CANNOT_BE_NULL);
         if (isNull(source)) {
             return handleNullSource(null, cls);
         }
         var mapper = mappers.get(calcMapperName(source.getClass(), cls));
         if (isNull(mapper)) {
-            mapper = buildMapperClass(source.getClass(), cls, false, true);
+            mapper = buildMapperClass(source.getClass(), cls, false, true, strategy);
         }
         return (T) mapper.map(source, null);
     }
@@ -75,45 +86,64 @@ public class DefaultMapperExecutor implements MapperFactory {
 
     @Override
     public Mapping mapping(Class source, Class destination) {
-        return buildMapperClass(source, destination, false, false);
+        return buildMapperClass(source, destination, false, false, MappingStrategy.GETTERS_SETTERS);
+    }
+
+    @Override
+    public Mapping mapping(Class source, Class destination, MappingStrategy strategy) {
+        return buildMapperClass(source, destination, false, false, strategy);
     }
 
     @Override
     public <T> T convert(Object source, Class<T> destination) {
-        if (isNull(source)) {
-            return handleNullSource(null, destination);
-        }
-        return convert(source, CodeFactory.create(destination), destination);
+        return convert(source, destination, MappingStrategy.GETTERS_SETTERS);
     }
 
     @Override
     public <T> T convert(Object source, Class<T> destination, Object... params) {
-        return convert(source, CodeFactory.create(destination, params), destination);
+        return convert(source, CodeFactory.create(destination, params), destination, MappingStrategy.GETTERS_SETTERS);
     }
 
+    @Override
+    public <T> T convert(Object source, T destination) {
+        return convert(source, destination, MappingStrategy.GETTERS_SETTERS);
+    }
+
+    @Override
+    public <T> T convert(Object source, Class<T> destination, MappingStrategy strategy) {
+        if (isNull(source)) {
+            return handleNullSource(null, destination);
+        }
+        return convert(source, CodeFactory.create(destination), destination, strategy);
+    }
+
+    @Override
+    public <T> T convert(Object source, Class<T> destination, MappingStrategy strategy, Object... params) {
+        return convert(source, CodeFactory.create(destination, params), destination, strategy);
+    }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T convert(Object source, T destination) {
+    public <T> T convert(Object source, T destination, MappingStrategy strategy) {
         Objects.requireNonNull(destination, DESTINATION_CANNOT_BE_NULL);
         if (isNull(source)) {
             return handleNullSource(destination, null);
         }
         var mapper = mappers.get(calcMapperName(source.getClass(), destination.getClass()));
         if (isNull(mapper)) {
-            mapper = buildMapper(source, destination, true);
+            mapper = buildMapper(source, destination, true, strategy);
         }
         return (T) mapper.map(source, destination);
     }
 
     @SuppressWarnings("unchecked")
-    protected <T> T convert(Object source, T destination, Class<T> cls) {
+    protected <T> T convert(Object source, T destination, Class<T> cls, MappingStrategy strategy) {
         if (isNull(source)) {
             return handleNullSource(destination, cls);
         }
         var mapper = mappers.get(calcMapperName(source.getClass(), cls));
         if (isNull(mapper)) {
-            mapper = buildMapperClass(source.getClass(), cls, true, true);
+            mapper = buildMapperClass(source.getClass(), cls, true, true, strategy);
         }
         return (T) mapper.map(source, destination);
     }
@@ -239,13 +269,13 @@ public class DefaultMapperExecutor implements MapperFactory {
     }
 
 
-    protected <T> MapperExecutor buildMapper(Object source, T destination, boolean convert) {
-        return buildMapperClass(source.getClass(), destination.getClass(), convert, true);
+    protected <T> MapperExecutor buildMapper(Object source, T destination, boolean convert, MappingStrategy strategy) {
+        return buildMapperClass(source.getClass(), destination.getClass(), convert, true, strategy);
     }
 
     @SuppressWarnings("unchecked")
-    protected <T> MapperExecutor buildMapperClass(Class source, Class destination, boolean convert, boolean register) {
-        var result = new MapperExecutor(source, destination, convert, false);
+    protected <T> MapperExecutor buildMapperClass(Class source, Class destination, boolean convert, boolean register, MappingStrategy strategy) {
+        var result = new MapperExecutor(source, destination, convert, false, strategy);
         if (register) {
             mappers.put(calcMapperName(source, destination), result);
         }

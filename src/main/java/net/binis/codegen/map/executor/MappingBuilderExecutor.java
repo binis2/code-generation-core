@@ -23,6 +23,7 @@ package net.binis.codegen.map.executor;
 import net.binis.codegen.factory.CodeFactory;
 import net.binis.codegen.map.MapperFactory;
 import net.binis.codegen.map.Mapping;
+import net.binis.codegen.map.MappingStrategy;
 import net.binis.codegen.map.builder.CustomMappingBuilder;
 import net.binis.codegen.map.builder.DestinationMappingBuilder;
 import net.binis.codegen.map.builder.ProducerMappingBuilder;
@@ -38,9 +39,17 @@ public class MappingBuilderExecutor implements SourceMappingBuilder, Destination
     protected Mapping mapping;
     protected boolean producer;
 
+    protected MappingStrategy strategy = MappingStrategy.GETTERS_SETTERS;
+
+    @Override
+    public SourceMappingBuilder strategy(MappingStrategy strategy) {
+        this.strategy = strategy;
+        return this;
+    }
+
     @Override
     public void custom(BiConsumer mapping) {
-        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, this.mapping.getDestination(), false, producer, (source, destination) -> {
+        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, this.mapping.getDestination(), false, producer, strategy, (source, destination) -> {
             var result = this.mapping.map(source, destination);
             mapping.accept(source, destination);
             return result;
@@ -49,7 +58,7 @@ public class MappingBuilderExecutor implements SourceMappingBuilder, Destination
 
     @Override
     public CustomMappingBuilder destination(Class destination) {
-        mapping = CodeFactory.create(MapperFactory.class).mapping(source, destination);
+        mapping = CodeFactory.create(MapperFactory.class).mapping(source, destination, strategy);
         return this;
     }
 

@@ -22,6 +22,7 @@ package net.binis.codegen.map.executor;
 
 import net.binis.codegen.factory.CodeFactory;
 import net.binis.codegen.map.Mapping;
+import net.binis.codegen.map.MappingStrategy;
 
 import java.util.function.BiFunction;
 
@@ -34,13 +35,15 @@ public class LambdaMapperExecutor implements Mapping, ClassMapping {
     private final BiFunction lambda;
     private final boolean cls;
     private final boolean producer;
+    private final MappingStrategy strategy;
 
-    public LambdaMapperExecutor(Class<?> source, Class<?> destination, boolean isClass, boolean producer, BiFunction lambda) {
+    public LambdaMapperExecutor(Class<?> source, Class<?> destination, boolean isClass, boolean producer, MappingStrategy strategy, BiFunction lambda) {
         this.source = source;
         this.destination = destination;
         this.lambda = lambda;
         this.cls = isClass;
         this.producer = producer;
+        this.strategy = strategy;
     }
 
     @Override
@@ -65,5 +68,10 @@ public class LambdaMapperExecutor implements Mapping, ClassMapping {
             destination = CodeFactory.create(this.destination);
         }
         return lambda.apply(source, destination);
+    }
+
+    @Override
+    public MappingStrategy getStrategy() {
+        return strategy;
     }
 }
