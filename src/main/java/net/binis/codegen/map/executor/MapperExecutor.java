@@ -35,6 +35,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Slf4j
@@ -106,7 +107,8 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
         }
 
         if (accessors.isEmpty()) {
-            mapper = (s, d) -> d;
+            mapper = (s, d) ->
+                (isNull(d) && destination.isInstance(s)) ? destination.cast(s) : d;
         } else {
             list = accessors.values().stream().toList();
 
