@@ -24,24 +24,35 @@ import java.util.List;
 
 public interface MapperFactory {
 
+    Object DEFAULT = new Object();
+
     <T> T map(Object source, Class<T> destination);
     <T> T map(Object source, T destination);
+    <T, K> T map(Object source, Class<T> destination, K key);
+    <T, K> T map(Object source, T destination, K key);
     <T> T map(Object source, Class<T> destination, MappingStrategy strategy);
     <T> T map(Object source, T destination, MappingStrategy strategy);
     Mapping mapping(Class source, Class destination);
     Mapping mapping(Class source, Class destination, MappingStrategy strategy);
     <T> T convert(Object source, Class<T> destination);
+    <T, K> T convert(Object source, Class<T> destination, K key);
     <T> T convert(Object source, Class<T> destination, Object... params);
     <T> T convert(Object source, T destination);
+    <T, K> T convert(Object source, T destination, K key);
     <T> T convert(Object source, Class<T> destination, MappingStrategy strategy);
+    <T, K> T convert(Object source, Class<T> destination, MappingStrategy strategy, K key);
     <T> T convert(Object source, Class<T> destination, MappingStrategy strategy, Object... params);
     <T> T convert(Object source, T destination, MappingStrategy strategy);
+    <T, K> T convert(Object source, T destination, MappingStrategy strategy, K key);
     boolean canMap(Class<?> source, Class<?> destination);
     boolean canMapExactly(Class<?> source, Class<?> destination);
     <S, D> Mapping<S, D> getMap(Class<S> source, Class<D> destination);
     <S, D> Mapping<S, D> getExactMap(Class<S> source, Class<D> destination);
+    <S, D, K> Mapping<S, D> getExactMap(Class<S> source, Class<D> destination, K key);
     void registerMapper(Mapping<?, ?> mapping);
+    <K> void registerMapper(Mapping<?, ?> mapping, K key);
     <S, D> List<Mapping<S, D>> findMappings(Class<S> source, Class<D> destination);
+    <S, D, K> List<Mapping<S, D>> findMappings(Class<S> source, Class<D> destination, K key);
     <S, D> Mapping<S, D> clearMapping(Class<S> source, Class<D> destination);
     void clearAllMappings();
 

@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.binis.codegen.annotation.type.GenerationStrategy;
 import net.binis.codegen.map.Mapper;
 import net.binis.codegen.map.MapperFactory;
+import net.binis.codegen.map.MappingStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -97,7 +98,7 @@ class MapperTest {
         test.setString1("test");
         test.setLong1(1L);
         test.setInt1(2);
-        Mapper.map().source(TestMap.class).destination(TestMap2.class);
+        Mapper.map().source(TestMap.class).destination(TestMap2.class).register();
         var resultTest = Mapper.map(test, TestMap2.class);
         assertEquals(test.getString1(), resultTest.getString1());
         assertEquals((long) test.getLong1(), resultTest.getLong1());
@@ -127,6 +128,60 @@ class MapperTest {
         assertEquals("true", resultTest.getConvert2());
         assertEquals("3test", resultTest.getBuilder());
     }
+
+    @Test
+    void testCustomBuilderKey() {
+        var key = new Object();
+        var test = new TestMap();
+        test.setBaseString("base");
+        test.setString1("test");
+        test.setLong1(1L);
+        test.setInt1(2);
+        test.setConvert1(3);
+        test.setConvert2(true);
+        Mapper.map().source(TestMap.class).destination(TestMap2.class).custom((s, d) ->
+                d.setBuilder(s.getConvert1() + s.getString1()));
+        Mapper.map().key(key).source(TestMap.class).destination(TestMap2.class).register();
+
+        var resultTest = Mapper.map(test, TestMap2.class);
+        assertEquals(test.getString1(), resultTest.getString1());
+        assertEquals((long) test.getLong1(), resultTest.getLong1());
+        assertEquals(test.getInt1(), (int) resultTest.getInt1());
+        assertNull(test.getInt2());
+        assertEquals(0, resultTest.getInt2());
+        assertEquals(3L, resultTest.getConvert1());
+        assertEquals("true", resultTest.getConvert2());
+        assertEquals("3test", resultTest.getBuilder());
+
+        resultTest = Mapper.map(test, TestMap2.class, key);
+        assertEquals(test.getString1(), resultTest.getString1());
+        assertEquals((long) test.getLong1(), resultTest.getLong1());
+        assertEquals(test.getInt1(), (int) resultTest.getInt1());
+        assertNull(test.getInt2());
+        assertEquals(0, resultTest.getInt2());
+        assertEquals(3L, resultTest.getConvert1());
+        assertEquals("true", resultTest.getConvert2());
+        assertNull(resultTest.getBuilder());
+    }
+
+    @Test
+    void testKey() {
+        var key = new Object();
+        var test = new TestMap();
+        test.setString1("test");
+
+        Mapper.registerMapperKey(Object.class, String.class, key, (s, d) -> "test");
+
+        assertEquals("test", Mapper.convert(test, String.class, key));
+        assertEquals("MapperTest.TestMap(string1=test, long1=null, int1=0, int2=null, convert1=0, convert2=false, map=null)", Mapper.convert(test, String.class));
+        assertEquals("test", Mapper.convert(test, String.class, key));
+        assertEquals("MapperTest.TestMap(string1=test, long1=null, int1=0, int2=null, convert1=0, convert2=false, map=null)", Mapper.convert(test, String.class));
+        assertEquals("test", Mapper.convert(test, String.class, key));
+        assertEquals("MapperTest.TestMap(string1=test, long1=null, int1=0, int2=null, convert1=0, convert2=false, map=null)", Mapper.convert(test, String.class));
+        assertEquals("test", Mapper.convert(test, String.class, key));
+        assertEquals("MapperTest.TestMap(string1=test, long1=null, int1=0, int2=null, convert1=0, convert2=false, map=null)", Mapper.convert(test, String.class));
+    }
+
 
     @Test
     void testEnum() {

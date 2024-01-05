@@ -51,6 +51,14 @@ public class Mapper {
         return CodeFactory.create(MapperFactory.class).map(source, destination, strategy);
     }
 
+    public static <T, K> T map(Object source, Class<T> destination, K key) {
+        return CodeFactory.create(MapperFactory.class).map(source, destination, key);
+    }
+
+    public static <T, K> T map(Object source, T destination, K key) {
+        return CodeFactory.create(MapperFactory.class).map(source, destination, key);
+    }
+
     public static <T> T convert(Object source, Class<T> destination, MappingStrategy strategy) {
         return CodeFactory.create(MapperFactory.class).convert(source, destination, strategy);
     }
@@ -59,9 +67,18 @@ public class Mapper {
         return CodeFactory.create(MapperFactory.class).convert(source, destination, strategy, params);
     }
 
-    public static <T> T convert(Object source, T destination, MappingStrategy strategy) {
+    public static <T, K> T convert(Object source, T destination, MappingStrategy strategy) {
         return CodeFactory.create(MapperFactory.class).convert(source, destination, strategy);
     }
+
+    public static <T, K> T convert(Object source, Class<T> destination, K key) {
+        return CodeFactory.create(MapperFactory.class).convert(source, destination, key);
+    }
+
+    public static <T, K> T convert(Object source, T destination, K key) {
+        return CodeFactory.create(MapperFactory.class).convert(source, destination, key);
+    }
+
 
     public static <T> T convert(Object source, Class<T> destination) {
         return CodeFactory.create(MapperFactory.class).convert(source, destination);
@@ -80,6 +97,22 @@ public class Mapper {
         CodeFactory.create(MapperFactory.class).registerMapper(mapping);
     }
 
+    public static <S, D, K> void registerMapper(Class<S> source, Class<D> destination, MappingStrategy strategy, K key, BiFunction<S, D, D> func) {
+        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, destination, false, false, strategy, func), key);
+    }
+
+    public static <S, D, K> void registerMapperClass(Class<S> source, Class<D> destination, MappingStrategy strategy, K key, BiFunction<S, Class<D>, D> func) {
+        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, destination, true, false, strategy, func), key);
+    }
+
+    public static <S, D, K> void registerProducerMapper(Class<S> source, Class<D> destination, MappingStrategy strategy, K key, BiFunction<S, D, D> func) {
+        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, destination, false, true, strategy, func), key);
+    }
+
+    public static <S, D, K> void registerProducerMapperClass(Class<S> source, Class<D> destination, MappingStrategy strategy, K key, BiFunction<S, Class<D>, D> func) {
+        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, destination, true, true, strategy, func), key);
+    }
+
     public static <S, D> void registerMapper(Class<S> source, Class<D> destination, MappingStrategy strategy, BiFunction<S, D, D> func) {
         CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, destination, false, false, strategy, func));
     }
@@ -94,6 +127,22 @@ public class Mapper {
 
     public static <S, D> void registerProducerMapperClass(Class<S> source, Class<D> destination, MappingStrategy strategy, BiFunction<S, Class<D>, D> func) {
         CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, destination, true, true, strategy, func));
+    }
+
+    public static <S, D, K> void registerMapperKey(Class<S> source, Class<D> destination, K key, BiFunction<S, D, D> func) {
+        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, destination, false, false, MappingStrategy.GETTERS_SETTERS, func), key);
+    }
+
+    public static <S, D, K> void registerMapperClassKey(Class<S> source, Class<D> destination, K key, BiFunction<S, Class<D>, D> func) {
+        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, destination, true, false, MappingStrategy.GETTERS_SETTERS, func), key);
+    }
+
+    public static <S, D, K> void registerProducerMapperKey(Class<S> source, Class<D> destination, K key, BiFunction<S, D, D> func) {
+        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, destination, false, true, MappingStrategy.GETTERS_SETTERS, func), key);
+    }
+
+    public static <S, D, K> void registerProducerMapperClassKey(Class<S> source, Class<D> destination, K key, BiFunction<S, Class<D>, D> func) {
+        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, destination, true, true, MappingStrategy.GETTERS_SETTERS, func), key);
     }
 
     public static <S, D> void registerMapper(Class<S> source, Class<D> destination, BiFunction<S, D, D> func) {
@@ -111,8 +160,6 @@ public class Mapper {
     public static <S, D> void registerProducerMapperClass(Class<S> source, Class<D> destination, BiFunction<S, Class<D>, D> func) {
         registerProducerMapperClass(source, destination, MappingStrategy.GETTERS_SETTERS, func);
     }
-
-
 
     public static <S, D> List<Mapping<S, D>> findMappings(Class<S> source, Class<D> destination) {
         return CodeFactory.create(MapperFactory.class).findMappings(source, destination);

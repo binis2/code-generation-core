@@ -87,7 +87,7 @@ class MapperFieldsTest {
         test.setString1("test");
         test.setLong1(1L);
         test.setInt1(2);
-        Mapper.map().strategy(MappingStrategy.FIELDS).source(TestMap.class).destination(TestMap2.class);
+        Mapper.map().strategy(MappingStrategy.FIELDS).source(TestMap.class).destination(TestMap2.class).register();
         var resultTest = Mapper.map(test, TestMap2.class);
         assertEquals(test.getString1(), resultTest.getString1());
         assertEquals((long) test.getLong1(), resultTest.getLong1());

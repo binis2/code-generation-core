@@ -28,4 +28,6 @@ public interface CustomMappingBuilder<S, D> {
 
     void custom(BiConsumer<S, D> mapping);
 
+    void register();
+
 }

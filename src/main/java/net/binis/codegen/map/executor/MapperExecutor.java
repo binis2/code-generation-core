@@ -49,22 +49,25 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
     protected final boolean producer;
 
     protected final MappingStrategy strategy;
+    protected final Object key;
 
-    public MapperExecutor(Object source, T destination, boolean convert, boolean producer, MappingStrategy strategy) {
+    public MapperExecutor(Object source, T destination, boolean convert, boolean producer, MappingStrategy strategy, Object key) {
         this.source = source.getClass();
         this.destination = (Class) destination.getClass();
         this.convert = convert;
         this.producer = producer;
         this.strategy = strategy;
+        this.key = key;
         build();
     }
 
-    public MapperExecutor(Class<?> source, Class<T> destination, boolean convert, boolean producer, MappingStrategy strategy) {
+    public MapperExecutor(Class<?> source, Class<T> destination, boolean convert, boolean producer, MappingStrategy strategy, Object key) {
         this.source = source;
         this.destination = destination;
         this.convert = convert;
         this.producer = producer;
         this.strategy = strategy;
+        this.key = key;
         build();
     }
 
@@ -190,7 +193,7 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
     }
 
     protected void buildConverter(HashMap<String, TriFunction> accessors) {
-        List<Mapping> mappings = (List) CodeFactory.create(MapperFactory.class).findMappings(source, destination);
+        List<Mapping> mappings = (List) CodeFactory.create(MapperFactory.class).findMappings(source, destination, key);
 
         if (!mappings.isEmpty()) {
             var first = mappings.get(0);

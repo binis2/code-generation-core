@@ -41,9 +41,17 @@ public class MappingBuilderExecutor implements SourceMappingBuilder, Destination
 
     protected MappingStrategy strategy = MappingStrategy.GETTERS_SETTERS;
 
+    protected Object key = MapperFactory.DEFAULT;
+
     @Override
     public SourceMappingBuilder strategy(MappingStrategy strategy) {
         this.strategy = strategy;
+        return this;
+    }
+
+    @Override
+    public <K> SourceMappingBuilder key(K key) {
+        this.key = key;
         return this;
     }
 
@@ -53,7 +61,12 @@ public class MappingBuilderExecutor implements SourceMappingBuilder, Destination
             var result = this.mapping.map(source, destination);
             mapping.accept(source, destination);
             return result;
-        }));
+        }), key);
+    }
+
+    @Override
+    public void register() {
+        CodeFactory.create(MapperFactory.class).registerMapper(mapping, key);
     }
 
     @Override

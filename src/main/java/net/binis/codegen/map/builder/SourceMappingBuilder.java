@@ -28,4 +28,6 @@ public interface SourceMappingBuilder {
 
     SourceMappingBuilder strategy(MappingStrategy strategy);
 
+    <K> SourceMappingBuilder key(K key);
+
 }
