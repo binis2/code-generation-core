@@ -455,7 +455,7 @@ public class CodeFactory {
             throw new GenericCodeGenException("Can't find implementation pointer for " + cls.getCanonicalName());
         }
         try {
-            var c = Class.forName(a.value());
+            var c = loadClass(a.value());
             var constructor = c.getDeclaredConstructors()[0];
             return ((ordinal, name, params) -> {
                 var list = new ArrayList<>(params.length + 2);
@@ -474,7 +474,7 @@ public class CodeFactory {
                     throw new GenericCodeGenException("Unable to initialize enum value!", e);
                 }
             });
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             throw new GenericCodeGenException("Can't find implementation class for " + cls.getCanonicalName());
         }
     }

@@ -48,9 +48,19 @@ public abstract class Reflection {
         //Do nothing
     }
 
-    public static Class<?> loadClass(String className) {
+    @SuppressWarnings("unchecked")
+    public static <T> Class<T> loadClass(String className) {
         try {
-            return Objects.nonNull(loader) ? loader.loadClass(className) : Class.forName(className);
+            return Objects.nonNull(loader) ? (Class) loader.loadClass(className) : (Class) Class.forName(className);
+        } catch (Throwable e) {
+            return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Class<T> loadClass(ClassLoader loader, String className) {
+        try {
+            return (Class) loader.loadClass(className);
         } catch (Throwable e) {
             return null;
         }
