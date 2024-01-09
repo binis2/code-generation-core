@@ -210,15 +210,17 @@ public abstract class Reflection {
 
     @SuppressWarnings("unchecked")
     protected static <T> T getFieldValue(Field field, Object obj, String name) {
-        try {
-            if (!field.trySetAccessible()) {
-                setAccessible(field);
+        if (nonNull(field)) {
+            try {
+                if (!field.trySetAccessible()) {
+                    setAccessible(field);
+                }
+                return (T) field.get(obj);
+            } catch (Exception e) {
+                log.error("Unable to get value for field {} of {}", name, obj.getClass().getName(), e);
             }
-            return (T) field.get(obj);
-        } catch (Exception e) {
-            log.error("Unable to get value for field {} of {}", name, obj.getClass().getName(), e);
-            return null;
         }
+        return null;
     }
 
     public static <T> T getFieldValue(Field field, Object obj) {
