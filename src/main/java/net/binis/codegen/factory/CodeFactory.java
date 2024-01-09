@@ -43,6 +43,7 @@ import static java.util.Objects.nonNull;
 import static net.binis.codegen.tools.Reflection.*;
 
 @Slf4j
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class CodeFactory {
 
     protected static final Map<Class<?>, RegistryEntry> registry = new HashMap<>();
@@ -72,7 +73,6 @@ public class CodeFactory {
     }
 
     @SneakyThrows
-    @SuppressWarnings("unchecked")
     public static <T> T create(Class<T> cls, Object... params) {
         var entry = registry.get(cls);
         if (entry != null) {
@@ -123,7 +123,6 @@ public class CodeFactory {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected static <T> T createWithFactories(Class<T> cls, Object[] params) {
         for (var factory : foreignFactories) {
             try {
@@ -140,10 +139,9 @@ public class CodeFactory {
     }
 
     @SneakyThrows
-    @SuppressWarnings("unchecked")
     public static <T> T createDefault(Class<T> cls, String defaultClass, Object... params) {
         var entry = registry.get(cls);
-        Object obj = null;
+        Object obj;
         if (entry != null) {
             if (entry.getImplFactory() != null) {
                 obj = entry.getImplFactory().create(params);
@@ -170,8 +168,6 @@ public class CodeFactory {
         return internalEnvelop((T) obj);
     }
 
-
-    @SuppressWarnings("unchecked")
     public static <M, T, P> M modify(P parent, T value, Class cls) {
         var entry = registry.get(cls);
         if (entry != null) {
@@ -244,7 +240,6 @@ public class CodeFactory {
         return nonNull(registry.remove(cls));
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> void envelopType(Class<T> intf, EnvelopFactory<T> impl, EmbeddedEnvelopFactory modifier) {
         var reg = registry.get(intf);
         var implFactory = reg.getImplFactory();
@@ -281,7 +276,6 @@ public class CodeFactory {
         return params -> object;
     }
 
-    @SuppressWarnings("unchecked")
     public static ObjectFactory lazy(Supplier supplier) {
         var inst = Holder.lazy(supplier);
         return params -> inst.get();
@@ -300,7 +294,6 @@ public class CodeFactory {
         registry.forEach((key, value) -> log.info("- {}: {}", key, value));
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> T projection(Object object, Class<T> projection) {
         if (nonNull(object)) {
             if (nonNull(projections)) {
@@ -322,7 +315,6 @@ public class CodeFactory {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> T proxy(Class<T> cls, InvocationHandler handler) {
         return (T) proxies.proxy(cls, handler);
     }
@@ -351,7 +343,6 @@ public class CodeFactory {
         return customProxyClassesRegistry.contains(cls);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends CodeEnum> T initializeEnumValue(Class<T> cls, String name, int ordinal, Object... params) {
         if (CodeEnum.class.isAssignableFrom(cls)) {
             var registry = enumRegistry.computeIfAbsent(cls, c -> EnumEntry.builder().initializer(buildEnumInitializer(cls)).build());
@@ -393,7 +384,6 @@ public class CodeFactory {
     }
 
 
-    @SuppressWarnings("unchecked")
     public static <T extends CodeEnum> T enumValueOf(Class<T> cls, String name) {
         var registry = enumRegistry.get(cls);
         if (nonNull(registry)) {
@@ -402,7 +392,6 @@ public class CodeFactory {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends CodeEnum> T enumValueOf(Class<T> cls, int ordinal) {
         var registry = enumRegistry.get(cls);
         if (nonNull(registry)) {
@@ -411,16 +400,14 @@ public class CodeFactory {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends CodeEnum> Map<Integer, T> enumValuesMap(Class<T> cls) {
         var registry = enumRegistry.get(cls);
         if (nonNull(registry)) {
-            return (Map) registry.ordinals;
+            return (Map) Collections.unmodifiableMap(registry.ordinals);
         }
         return Collections.emptyMap();
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends CodeEnum> T[] enumValues(Class<T> cls) {
         var registry = enumRegistry.get(cls);
         if (nonNull(registry)) {
@@ -436,6 +423,10 @@ public class CodeFactory {
         return (T[]) Array.newInstance(cls, 0);
     }
 
+    public static List<Class<? extends CodeEnum>> registeredEnums() {
+        return (List) enumRegistry.keySet().stream().toList();
+    }
+
     public static CodeFactoryExeception exception(String message, Object... params) {
         return new CodeFactoryExeception(String.format(message, params));
     }
@@ -448,7 +439,6 @@ public class CodeFactory {
         return new CodeFactoryExeception(cause);
     }
 
-    @SuppressWarnings("unchecked")
     protected static <T extends CodeEnum> EnumInitializer buildEnumInitializer(Class<T> cls) {
         var a = cls.getAnnotation(Default.class);
         if (isNull(a)) {
@@ -540,7 +530,6 @@ public class CodeFactory {
         return Optional.empty();
     }
 
-    @SuppressWarnings("unchecked")
     protected static <T> T defaultCreate(Class<?> impl, Class<T> cls, Object... params) {
         var ann = cls.getDeclaredAnnotation(Default.class);
         if (nonNull(ann)) {
@@ -549,7 +538,6 @@ public class CodeFactory {
         return internalEnvelop(null);
     }
 
-    @SuppressWarnings("unchecked")
     protected static <T> T internalCreate(Class<T> cls, Class<?> impl, Object... params) {
         var entry = registry.get(cls);
         if (entry != null) {
@@ -562,7 +550,6 @@ public class CodeFactory {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     protected static <T> T internalEnvelop(T instance) {
         if (nonNull(envelopingFactory)) {
             return (T) envelopingFactory.envelop(instance);
