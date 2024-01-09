@@ -26,6 +26,7 @@ import net.binis.codegen.factory.CodeFactory;
 import net.binis.codegen.map.MapperFactory;
 import net.binis.codegen.map.Mapping;
 import net.binis.codegen.map.MappingStrategy;
+import net.binis.codegen.map.annotation.CodeMapping;
 import net.binis.codegen.tools.Reflection;
 
 import java.lang.reflect.Field;
@@ -144,14 +145,15 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
 
     protected void discoverFields(Map<String, Field> fields, Class<?> cls) {
         Arrays.stream(cls.getDeclaredFields())
+                .filter(this::shouldNotSkip)
                 .forEach(field -> fields.computeIfAbsent(field.getName(), k -> field));
         Arrays.stream(cls.getDeclaredFields())
+                .filter(this::shouldNotSkip)
                 .forEach(field -> fields.computeIfAbsent(field.getName(), k -> field));
         if (nonNull(cls.getSuperclass()) && !Object.class.equals(cls.getSuperclass())) {
             discoverFields(fields, cls.getSuperclass());
         }
     }
-
 
     protected void buildMatcherFields(HashMap<String, TriFunction> accessors) {
         var get = new HashMap<String, Field>();
@@ -235,10 +237,12 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
         var getters = Arrays.stream(source.getMethods())
                 .filter(Reflection::isGetter)
                 .filter(m -> Modifier.isPublic(m.getModifiers()))
+                .filter(this::shouldNotSkip)
                 .collect(Collectors.toMap(k -> getFieldName(k.getName()), v -> v, (n1, n2) -> n1));
         var setters = Arrays.stream(destination.getMethods())
                 .filter(Reflection::isSetter)
                 .filter(m -> Modifier.isPublic(m.getModifiers()))
+                .filter(this::shouldNotSkip)
                 .collect(Collectors.toMap(k -> getFieldName(k.getName()), v -> v, (n1, n2) -> n1));
 
         if (!setters.isEmpty()) {
@@ -277,10 +281,12 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
             var getters = Arrays.stream(source.getMethods())
                     .filter(Reflection::isGetter)
                     .filter(m -> Modifier.isPublic(m.getModifiers()))
+                    .filter(this::shouldNotSkip)
                     .collect(Collectors.toMap(k -> getFieldName(k.getName()), v -> v));
             var withers = Arrays.stream(wither.getReturnType().getMethods())
                     .filter(m -> Modifier.isPublic(m.getModifiers()))
                     .filter(m -> m.getParameterCount() == 1)
+                    .filter(this::shouldNotSkip)
                     .collect(Collectors.toMap(Method::getName, v -> v));
 
             if (!withers.isEmpty()) {
@@ -321,11 +327,13 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
         var getters = Arrays.stream(source.getMethods())
                 .filter(Reflection::isGetter)
                 .filter(m -> Modifier.isPublic(m.getModifiers()))
+                .filter(this::shouldNotSkip)
                 .collect(Collectors.toMap(k -> getFieldName(k.getName()), v -> v));
         var withers = Arrays.stream(destination.getMethods())
                 .filter(m -> m.getParameterCount() == 1)
                 .filter(m -> m.getReturnType().isInterface())
                 .filter(m -> m.getReturnType().isAssignableFrom(destination))
+                .filter(this::shouldNotSkip)
                 .collect(Collectors.toMap(Method::getName, v -> v));
 
         if (!withers.isEmpty()) {
@@ -354,6 +362,23 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
             }
         }
     }
+
+    protected boolean shouldNotSkip(Method m) {
+        var ann = m.getAnnotation(CodeMapping.class);
+        if (nonNull(ann)) {
+            return !ann.ignore();
+        }
+        return true;
+    }
+
+    protected boolean shouldNotSkip(Field f) {
+        var ann = f.getAnnotation(CodeMapping.class);
+        if (nonNull(ann)) {
+            return !ann.ignore();
+        }
+        return true;
+    }
+
 
     protected void addConverter(Map<String, TriFunction> accessors, Class<?> destination, Method getter, Method setter, String name) {
         try {
