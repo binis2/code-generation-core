@@ -36,6 +36,7 @@ import net.binis.codegen.tools.Reflection;
 
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import static java.util.Objects.isNull;
@@ -298,7 +299,7 @@ public class CodeFactory {
         if (nonNull(object)) {
             if (nonNull(projections)) {
                 return (T) projectionsCache.computeIfAbsent(projection, k ->
-                                new ConcurentHashMap<>())
+                                new ConcurrentHashMap<>())
                         .computeIfAbsent(object.getClass(), k ->
                                 checkForCustomClass(k).orElse(projections)
                                         .create(k, projection))
