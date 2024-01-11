@@ -298,7 +298,7 @@ public class CodeFactory {
         if (nonNull(object)) {
             if (nonNull(projections)) {
                 return (T) projectionsCache.computeIfAbsent(projection, k ->
-                                new HashMap<>())
+                                new ConcurentHashMap<>())
                         .computeIfAbsent(object.getClass(), k ->
                                 checkForCustomClass(k).orElse(projections)
                                         .create(k, projection))
