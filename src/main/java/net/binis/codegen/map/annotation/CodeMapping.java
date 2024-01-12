@@ -21,11 +21,14 @@ package net.binis.codegen.map.annotation;
  */
 
 
+import net.binis.codegen.annotation.CodeAnnotation;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+@CodeAnnotation
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CodeMapping {

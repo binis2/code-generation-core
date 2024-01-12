@@ -35,5 +35,8 @@ public @interface Ignore {
     boolean forInterface() default false;
     boolean forModifier() default false;
     boolean forQuery() default false;
+    boolean forMapper() default false;
+    boolean forProjection() default false;
+    boolean forToString() default false;
 
 }
