@@ -27,6 +27,7 @@ import java.util.Map;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.joining;
 
 public class CollectionUtils {
 
@@ -52,6 +53,26 @@ public class CollectionUtils {
 
     public static boolean isNotEmpty(Map map) {
         return nonNull(map) && !map.isEmpty();
+    }
+
+    public static String printInfo(Object object, boolean full) {
+        if (isNull(object)) {
+            return "null";
+        } else {
+            if (object instanceof Collection<?> collection) {
+                if (full) {
+                    return collection.getClass().getSimpleName() + "[" + collection.stream().map(o -> isNull(o) ? "null" : o.toString()).collect(joining(", ")) + "]";
+                }
+                return collection.getClass().getSimpleName() + "[" + collection.size() + "]";
+            } else if (object instanceof Map<?, ?> map) {
+                if (full) {
+                    return map.getClass().getSimpleName() + "[" + map.entrySet().stream().map(e -> "{" + e.getKey().toString() + ": " + printInfo(e.getValue(), true) + "}").collect(joining(", ")) + "]";
+                }
+                return map.getClass().getSimpleName() + "[" + map.size() + "]";
+            } else {
+                return object.toString();
+            }
+        }
     }
 
 }

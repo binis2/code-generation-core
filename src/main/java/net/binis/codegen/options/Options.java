@@ -44,4 +44,8 @@ public final class Options {
     public static final Class<? extends CodeOption> HANDLE_JACKSON_ALWAYS = HandleJacksonAlwaysOption.class;
     public static final Class<? extends CodeOption> HANDLE_JACKSON_IF_AVAILABLE = HandleJacksonIfAvailableOption.class;
 
+    //ToString
+    public static final Class<? extends CodeOption> TO_STRING_ONLY_EXPLICITLY_INCLUDED = ToStringOnlyExplicitlyIncludedOption.class;
+    public static final Class<? extends CodeOption> TO_STRING_FULL_COLLECTION_INFO = ToStringFullCollectionInfoOption.class;
+
 }

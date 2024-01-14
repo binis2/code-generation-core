@@ -1,10 +1,10 @@
-package net.binis.codegen.exception;
+package net.binis.codegen.options;
 
 /*-
  * #%L
  * code-generator-core
  * %%
- * Copyright (C) 2021 Binis Belev
+ * Copyright (C) 2021 - 2022 Binis Belev
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,27 +20,5 @@ package net.binis.codegen.exception;
  * #L%
  */
 
-import lombok.Getter;
-import lombok.ToString;
-
-import java.util.List;
-import java.util.Map;
-
-@ToString
-public class ValidationFormException extends RuntimeException {
-
-    @Getter
-    private final Map<String, List<String>> errors;
-    private final Class<?> cls;
-
-    public ValidationFormException(Class<?> cls, Map<String, List<String>> errors) {
-        super();
-        this.errors = errors;
-        this.cls = cls;
-    }
-
-    public Class<?> getFormClass() {
-        return cls;
-    }
-
+public interface ToStringFullCollectionInfoOption extends CodeOption {
 }

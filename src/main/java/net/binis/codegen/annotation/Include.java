@@ -20,10 +20,6 @@ package net.binis.codegen.annotation;
  * #L%
  */
 
-import net.binis.codegen.enrich.Enricher;
-import net.binis.codegen.enrich.constructor.RequiredArgsConstructorEnricher;
-import net.binis.codegen.options.CodeOption;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -31,15 +27,16 @@ import java.lang.annotation.Target;
 
 @CodeAnnotation
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
-public @interface EnumPrototype {
+@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+public @interface Include {
 
-    String name() default "";
-    Class<?> mixIn() default void.class;
-    int ordinalOffset() default 0;
-
-    Class<? extends Enricher>[] enrichers() default {RequiredArgsConstructorEnricher.class};
-
-    Class<? extends CodeOption>[] options() default {};
+    boolean forField() default false;
+    boolean forClass() default false;
+    boolean forInterface() default false;
+    boolean forModifier() default false;
+    boolean forQuery() default false;
+    boolean forMapper() default false;
+    boolean forProjection() default false;
+    boolean forToString() default false;
 
 }
