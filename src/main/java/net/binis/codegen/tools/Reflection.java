@@ -4,7 +4,7 @@ package net.binis.codegen.tools;
  * #%L
  * code-generator-core
  * %%
- * Copyright (C) 2021 Binis Belev
+ * Copyright (C) 2021 - 2024 Binis Belev
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -301,6 +301,18 @@ public abstract class Reflection {
             //Do nothing
         }
         return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    @SneakyThrows
+    public static <T> T invokeWithException(Method m, Object instance, Object... args) {
+        try {
+            return (T) m.invoke(instance, args);
+        } catch (InvocationTargetException e) {
+            throw e.getTargetException();
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     @SuppressWarnings("unchecked")
