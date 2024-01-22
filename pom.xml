@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>dev.binis</groupId>
     <artifactId>code-generator-core</artifactId>
-    <version>1.2.3</version>
+    <version>1.2.4</version>
     <name>code-generator-core</name>
     <description>Binis Code Generation Core Classes</description>
     <url>https://github.com/binis2/code-generation</url>
@@ -93,7 +93,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.8.0</version>
+            <version>5.9.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -114,7 +114,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.2.3</version>
+                    <version>3.2.5</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
