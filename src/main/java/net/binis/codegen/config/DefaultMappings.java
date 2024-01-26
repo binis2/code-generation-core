@@ -91,6 +91,8 @@ public abstract class DefaultMappings {
         Mapper.registerMapperClass(String.class, Enum.class, (s, d) -> Enum.valueOf(d, s));
         Mapper.registerMapperClass(String.class, CodeEnum.class, (s, d) -> CodeFactory.enumValueOf(d, s));
         Mapper.registerMapperClass(Number.class, CodeEnum.class, (s, d) -> CodeFactory.enumValueOf(d, s.intValue()));
+        //UUID
+        Mapper.registerMapperClass(String.class, UUID.class, (s, d) -> UUID.fromString(s));
         //Java Serialization
         Mapper.registerProducerMapperClass(byte[].class, Serializable.class, (s, d) -> {
             try (ObjectInputStream is = new ObjectInputStream(new ByteArrayInputStream(s))) {
