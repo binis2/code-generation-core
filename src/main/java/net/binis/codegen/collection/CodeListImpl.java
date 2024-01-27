@@ -20,17 +20,20 @@ package net.binis.codegen.collection;
  * #L%
  */
 
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 import static java.util.Objects.nonNull;
 
 public class CodeListImpl<T, R> implements CodeList<T, R> {
 
-    private final R parent;
-    private final List<T> list;
-    private final Consumer<T> validator;
+    protected final R parent;
+    protected final List<T> list;
+    protected final Consumer<T> validator;
 
     public CodeListImpl(R parent, List<T> list) {
         this.parent = parent;
@@ -48,6 +51,99 @@ public class CodeListImpl<T, R> implements CodeList<T, R> {
     public CodeList<T, R> add(T value) {
         validate(value);
         list.add(value);
+        return this;
+    }
+
+    @Override
+    public CodeList<T, R> add(int index, T value) {
+        validate(value);
+        list.add(index, value);
+        return this;
+    }
+
+    @Override
+    public CodeList<T, R> addAll(Collection<? extends T> collection) {
+        collection.forEach(this::validate);
+        list.addAll(collection);
+        return this;
+    }
+
+    @Override
+    public CodeList<T, R> addAll(int index, Collection<? extends T> collection) {
+        collection.forEach(this::validate);
+        list.addAll(index, collection);
+        return this;
+    }
+
+    @Override
+    public CodeList<T, R> remove(T value) {
+        list.remove(value);
+        return this;
+    }
+
+    @Override
+    public CodeList<T, R> remove(int index) {
+        list.remove(index);
+        return this;
+    }
+
+    @Override
+    public CodeList<T, R> removeAll(Collection<?> collection) {
+        list.removeAll(collection);
+        return this;
+    }
+
+    @Override
+    public CodeList<T, R> retainAll(Collection<?> collection) {
+        list.retainAll(collection);
+        return this;
+    }
+
+    @Override
+    public CodeList<T, R> replaceAll(UnaryOperator<T> operator) {
+        list.replaceAll(o -> {
+            var value = operator.apply(o);
+            validate(value);
+            return value;
+        });
+        return this;
+    }
+
+    @Override
+    public CodeList<T, R> sort(Comparator<? super T> c) {
+        list.sort(c);
+        return this;
+    }
+
+    @Override
+    public CodeList<T, R> clear() {
+        list.clear();
+        return this;
+    }
+
+    @Override
+    public CodeList<T, R> set(int index, T value) {
+        validate(value);
+        list.set(index, value);
+        return this;
+    }
+
+    @Override
+    public CodeList<T, R> addFirst(T value) {
+        validate(value);
+        list.add(0, value);
+        return this;
+    }
+
+    @Override
+    public CodeList<T, R> removeFirst() {
+        list.remove(0);
+        return this;
+    }
+
+    @Override
+    public CodeList<T, R> removeLast() {
+        list.remove(list.size() - 1);
         return this;
     }
 
