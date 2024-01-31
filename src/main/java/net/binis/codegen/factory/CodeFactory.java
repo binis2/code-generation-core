@@ -182,6 +182,10 @@ public class CodeFactory {
         return null;
     }
 
+    public static boolean isRegisteredType(Class<?> intf) {
+        return registry.containsKey(intf);
+    }
+
     public static Class<?> lookup(Class<?> intf) {
         var entry = registry.get(intf);
 
