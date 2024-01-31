@@ -241,14 +241,22 @@ public class CodeFactory {
         return nonNull(registry.remove(cls));
     }
 
-    public static <T> void envelopType(Class<T> intf, EnvelopFactory<T> impl, EmbeddedEnvelopFactory modifier) {
+    public static <T> boolean envelopType(Class<T> intf, EnvelopFactory<T> impl, EmbeddedEnvelopFactory modifier) {
         var reg = registry.get(intf);
-        var implFactory = reg.getImplFactory();
+        if (nonNull(reg)) {
+            var implFactory = reg.getImplFactory();
 
-        reg.setImplFactory((params) -> impl.envelop(implFactory));
-        if (nonNull(reg.getModifierFactory()) && nonNull(modifier)) {
-            reg.setModifierFactory((parent, value, params) -> modifier.envelop(reg.getModifierFactory(), parent, value, params));
+            reg.setImplFactory((params) -> impl.envelop(implFactory));
+            if (nonNull(reg.getModifierFactory()) && nonNull(modifier)) {
+                reg.setModifierFactory((parent, value, params) -> modifier.envelop(reg.getModifierFactory(), parent, value, params));
+            }
+            return true;
         }
+        return false;
+    }
+
+    public static <T> void envelopType(Class<T> intf, EnvelopFactory<T> impl) {
+        envelopType(intf, impl, null);
     }
 
     public static void cleanEnvelopedType(Class<?> intf) {
