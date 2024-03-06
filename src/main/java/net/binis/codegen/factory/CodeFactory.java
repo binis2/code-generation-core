@@ -527,10 +527,23 @@ public class CodeFactory {
         if (projections instanceof ProxyProvider) {
             return (ProxyProvider) projections;
         } else {
-            return (cls, handler) -> Proxy.newProxyInstance(
-                    CodeFactory.class.getClassLoader(),
-                    new Class[] { cls },
-                    handler);
+            return new ProxyProvider() {
+                @Override
+                public Object proxy(Class cls, InvocationHandler handler) {
+                    return Proxy.newProxyInstance(
+                            CodeFactory.class.getClassLoader(),
+                            new Class[]{cls},
+                            handler);
+                }
+
+                @Override
+                public Object multiple(InvocationHandler handler, Class... cls) {
+                    return Proxy.newProxyInstance(
+                            CodeFactory.class.getClassLoader(),
+                            cls,
+                            handler);
+                }
+            };
         }
     }
 

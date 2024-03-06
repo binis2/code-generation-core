@@ -22,9 +22,10 @@ package net.binis.codegen.factory;
 
 import java.lang.reflect.InvocationHandler;
 
-@FunctionalInterface
 public interface ProxyProvider {
 
     Object proxy(Class cls, InvocationHandler handler);
+
+    Object multiple(InvocationHandler handler, Class... cls);
 
 }
