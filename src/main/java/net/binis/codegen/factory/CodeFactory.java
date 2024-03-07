@@ -332,6 +332,10 @@ public class CodeFactory {
         return (T) proxies.proxy(cls, handler);
     }
 
+    public static <T> T proxy(InvocationHandler handler, Class... classes) {
+        return (T) proxies.multiple(handler, classes);
+    }
+
     public static Object projections(Object object, Class<?>... projections) {
         if (nonNull(object) && projections.length > 0) {
             return projection(object, projections[0]);
