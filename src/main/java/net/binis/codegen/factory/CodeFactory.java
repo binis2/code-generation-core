@@ -47,13 +47,13 @@ import static net.binis.codegen.tools.Reflection.*;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class CodeFactory {
 
-    protected static final Map<Class<?>, RegistryEntry> registry = new HashMap<>();
-    protected static final Map<Class<?>, IdRegistryEntry> idRegistry = new HashMap<>();
+    protected static final Map<Class<?>, RegistryEntry> registry = new ConcurrentHashMap<>();
+    protected static final Map<Class<?>, IdRegistryEntry> idRegistry = new ConcurrentHashMap<>();
     protected static EnvelopingObjectFactory envelopingFactory;
-    protected static final Set<Class<?>> customProxyClassesRegistry = new HashSet<>();
-    protected static final List<Pair<Class<?>, ProjectionProvider>> customProxyClasses = new ArrayList<>();
-    protected static final Map<Class<?>, Map<Class<?>, ProjectionInstantiation>> projectionsCache = new HashMap<>();
-    protected static final List<ForeignObjectFactory> foreignFactories = new ArrayList<>();
+    protected static final Set<Class<?>> customProxyClassesRegistry = Collections.synchronizedSet(new HashSet<>());
+    protected static final List<Pair<Class<?>, ProjectionProvider>> customProxyClasses = Collections.synchronizedList(new ArrayList<>());
+    protected static final Map<Class<?>, Map<Class<?>, ProjectionInstantiation>> projectionsCache = new ConcurrentHashMap<>();
+    protected static final List<ForeignObjectFactory> foreignFactories = Collections.synchronizedList(new ArrayList<>());
     protected static ProjectionProvider projections = initProjectionProvider();
     protected static ProxyProvider proxies = initProxyProvider();
 
