@@ -38,5 +38,6 @@ public @interface Ignore {
     boolean forMapper() default false;
     boolean forProjection() default false;
     boolean forToString() default false;
+    boolean forSerialization() default false;
 
 }
