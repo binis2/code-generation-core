@@ -21,12 +21,12 @@ package net.binis.codegen.map.executor;
  */
 
 import lombok.extern.slf4j.Slf4j;
+import net.binis.codegen.annotation.Ignore;
 import net.binis.codegen.exception.MapperException;
 import net.binis.codegen.factory.CodeFactory;
 import net.binis.codegen.map.MapperFactory;
 import net.binis.codegen.map.Mapping;
 import net.binis.codegen.map.MappingStrategy;
-import net.binis.codegen.map.annotation.CodeMapping;
 import net.binis.codegen.tools.Reflection;
 
 import java.lang.reflect.Field;
@@ -112,7 +112,7 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
 
         if (accessors.isEmpty()) {
             mapper = (s, d) ->
-                (isNull(d) && destination.isInstance(s)) ? destination.cast(s) : d;
+                    (isNull(d) && destination.isInstance(s)) ? destination.cast(s) : d;
         } else {
             list = accessors.values().stream().toList();
 
@@ -364,17 +364,17 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
     }
 
     protected boolean shouldNotSkip(Method m) {
-        var ann = m.getAnnotation(CodeMapping.class);
+        var ann = m.getAnnotation(Ignore.class);
         if (nonNull(ann)) {
-            return !ann.ignore();
+            return !ann.forMapper();
         }
         return true;
     }
 
     protected boolean shouldNotSkip(Field f) {
-        var ann = f.getAnnotation(CodeMapping.class);
+        var ann = f.getAnnotation(Ignore.class);
         if (nonNull(ann)) {
-            return !ann.ignore();
+            return !ann.forMapper();
         }
         return true;
     }

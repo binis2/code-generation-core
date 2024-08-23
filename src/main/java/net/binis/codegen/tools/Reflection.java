@@ -318,6 +318,9 @@ public abstract class Reflection {
     @SuppressWarnings("unchecked")
     public static <T> T invokeStatic(Method m, Object... args) {
         try {
+            if (!m.trySetAccessible()) {
+                setAccessible(m);
+            }
             return (T) m.invoke(null, args);
         } catch (Exception e) {
             return null;
@@ -336,13 +339,16 @@ public abstract class Reflection {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> T invokeStatic(String name, Class cls, Object... args) {
         try {
-            return (T) findMethod(name, cls, Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)).invoke(null, args);
+            var m = findMethod(name, cls, Arrays.stream(args).map(Object::getClass).toArray(Class[]::new));
+            if (nonNull(m)) {
+                return invokeStatic(m, args);
+            }
         } catch (Exception e) {
-            return null;
+            //Do nothing
         }
+        return null;
     }
 
     public static List<Method> findMethods(Class cls, Predicate<? super Method> filter) {

@@ -1,5 +1,6 @@
 template:net.binis.codegen.annotation.CodePrototype
 template:net.binis.codegen.annotation.EnumPrototype
+template:net.binis.codegen.annotation.CodeSnippet
 template:net.binis.codegen.annotation.builder.CodeBuilder
 template:net.binis.codegen.annotation.builder.CodeValidationBuilder
 template:net.binis.codegen.annotation.builder.CodeRequest
