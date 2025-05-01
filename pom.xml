@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>dev.binis</groupId>
     <artifactId>code-generator-core</artifactId>
-    <version>1.2.23</version>
+    <version>1.2.24</version>
     <name>code-generator-core</name>
     <description>Binis Code Generation Core Classes</description>
     <url>https://github.com/binis2/code-generation</url>
