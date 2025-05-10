@@ -43,6 +43,7 @@ class MapperTest {
     @BeforeEach
     void setup() {
         CodeFactory.create(MapperFactory.class).clearMapping(TestMap.class, TestMap2.class);
+        CodeFactory.create(MapperFactory.class).clearMapping(BaseMap.class, BaseMap.class);
     }
 
     @Test
@@ -108,6 +109,24 @@ class MapperTest {
     }
 
     @Test
+    void testMappingInterface() {
+        var test = new TestMap();
+        test.setBaseString("base");
+        test.setString1("test");
+        test.setLong1(1L);
+        test.setInt1(2);
+        Mapper.map().source(BaseMap.class).destination(BaseMap.class).custom((in, out) -> out.setBaseString("changed"));
+        var resultTest = Mapper.map(test, TestMap2.class);
+        assertEquals(test.getString1(), resultTest.getString1());
+        assertEquals((long) test.getLong1(), resultTest.getLong1());
+        assertEquals(test.getInt1(), (int) resultTest.getInt1());
+        assertNull(test.getInt2());
+        assertEquals(0, resultTest.getInt2());
+        assertEquals("changed", resultTest.getBaseString());
+    }
+
+
+    @Test
     void testCustomBuilder() {
         var test = new TestMap();
         test.setBaseString("base");
@@ -131,8 +150,8 @@ class MapperTest {
 
     @Test
     void testCustomBuilderKey() {
-        var key = new Object();
         var test = new TestMap();
+        var key = this;
         test.setBaseString("base");
         test.setString1("test");
         test.setLong1(1L);

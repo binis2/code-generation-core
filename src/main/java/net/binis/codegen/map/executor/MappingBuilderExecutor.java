@@ -71,7 +71,7 @@ public class MappingBuilderExecutor implements SourceMappingBuilder, Destination
 
     @Override
     public CustomMappingBuilder destination(Class destination) {
-        mapping = CodeFactory.create(MapperFactory.class).mapping(source, destination, strategy);
+        mapping = CodeFactory.create(MapperFactory.class).mapping(source, destination, strategy, key);
         return this;
     }
 

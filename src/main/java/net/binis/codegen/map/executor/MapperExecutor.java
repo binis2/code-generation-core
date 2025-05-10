@@ -92,7 +92,6 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
     }
 
     protected void build() {
-
         var accessors = new LinkedHashMap<String, TriFunction>();
         List<TriFunction> list;
 
@@ -104,10 +103,6 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
             }
         } else {
             buildMatcher(accessors);
-
-            if (accessors.isEmpty()) {
-                buildConverter(accessors);
-            }
         }
 
         if (accessors.isEmpty()) {
@@ -141,6 +136,8 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
                 buildMatcherGettersSetters(accessors);
             }
         }
+
+        buildConverter(accessors);
     }
 
     protected void discoverFields(Map<String, Field> fields, Class<?> cls) {

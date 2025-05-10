@@ -106,6 +106,11 @@ public class DefaultMapperExecutor implements MapperFactory {
     }
 
     @Override
+    public Mapping mapping(Class source, Class destination, MappingStrategy strategy, Object key) {
+        return buildMapperClass(source, destination, false, false, strategy, key);
+    }
+
+    @Override
     public <T> T convert(Object source, Class<T> destination) {
         return convert(source, destination, MappingStrategy.GETTERS_SETTERS);
     }

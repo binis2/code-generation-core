@@ -34,6 +34,7 @@ public interface MapperFactory {
     <T> T map(Object source, T destination, MappingStrategy strategy);
     Mapping mapping(Class source, Class destination);
     Mapping mapping(Class source, Class destination, MappingStrategy strategy);
+    Mapping mapping(Class source, Class destination, MappingStrategy strategy, Object key);
     <T> T convert(Object source, Class<T> destination);
     <T, K> T convert(Object source, Class<T> destination, K key);
     <T> T convert(Object source, Class<T> destination, Object... params);
