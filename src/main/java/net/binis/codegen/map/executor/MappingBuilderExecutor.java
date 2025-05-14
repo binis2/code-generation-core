@@ -26,14 +26,13 @@ import net.binis.codegen.map.Mapping;
 import net.binis.codegen.map.MappingStrategy;
 import net.binis.codegen.map.builder.CustomMappingBuilder;
 import net.binis.codegen.map.builder.DestinationMappingBuilder;
-import net.binis.codegen.map.builder.ProducerMappingBuilder;
 import net.binis.codegen.map.builder.SourceMappingBuilder;
 
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
-public class MappingBuilderExecutor implements SourceMappingBuilder, DestinationMappingBuilder, ProducerMappingBuilder {
+public class MappingBuilderExecutor implements SourceMappingBuilder, DestinationMappingBuilder, CustomMappingBuilder {
 
     protected Class source;
     protected Mapping mapping;
@@ -65,6 +64,15 @@ public class MappingBuilderExecutor implements SourceMappingBuilder, Destination
     }
 
     @Override
+    public void producer(Function produce) {
+        producer = true;
+        CodeFactory.create(MapperFactory.class).registerMapper(new LambdaMapperExecutor(source, this.mapping.getDestination(), false, producer, strategy, (source, destination) -> {
+            return produce.apply(source);
+        }), key);
+
+    }
+
+    @Override
     public void register() {
         CodeFactory.create(MapperFactory.class).registerMapper(mapping, key);
     }
@@ -81,9 +89,4 @@ public class MappingBuilderExecutor implements SourceMappingBuilder, Destination
         return this;
     }
 
-    @Override
-    public CustomMappingBuilder producer() {
-        producer = true;
-        return this;
-    }
 }

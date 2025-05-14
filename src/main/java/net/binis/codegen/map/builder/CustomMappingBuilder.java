@@ -23,10 +23,13 @@ package net.binis.codegen.map.builder;
 import net.binis.codegen.map.MappingStrategy;
 
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public interface CustomMappingBuilder<S, D> {
 
     void custom(BiConsumer<S, D> mapping);
+
+    void producer(Function<S, D> produce);
 
     void register();
 
