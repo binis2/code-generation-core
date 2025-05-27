@@ -28,6 +28,7 @@ import net.binis.codegen.factory.CodeFactory;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -40,6 +41,7 @@ public class BaseAsyncExecutorImpl<A, R> {
     protected String flow = CodeExecutor.DEFAULT;
     protected long delay;
     protected TimeUnit unit;
+    protected Object lock;
 
     public A flow(String flow) {
         this.flow = flow;
@@ -58,8 +60,20 @@ public class BaseAsyncExecutorImpl<A, R> {
         return (A) this;
     }
 
+    public A lock(Object lock) {
+        this.lock = lock;
+        return (A) this;
+    }
+
     protected CompletableFuture<R> internalExecute(Supplier<R> supplier) {
-        var executor = CodeFactory.create(AsyncDispatcher.class).flow(flow);
+        var actual = CodeFactory.create(AsyncDispatcher.class).flow(flow);
+        var actualLock = lock;
+        var executor = nonNull(lock) ?
+                (Executor) (command) -> {
+                    synchronized (actualLock) {
+                        actual.execute(command);
+                    }
+                } : actual;
 
         if (delay > 0 && nonNull(unit)) {
             executor = CompletableFuture.delayedExecutor(delay, unit, executor);

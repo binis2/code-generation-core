@@ -30,6 +30,7 @@ public interface AsyncExecutor<R> {
     AsyncExecutor<R> flow(String flow);
     AsyncExecutor<R> delay(long delay, TimeUnit unit);
     AsyncExecutor<R> delay(Duration duration);
+    AsyncExecutor<R> lock(Object lock);
     CompletableFuture<R> execute(Runnable task);
     CompletableFuture<R> collect(Supplier<R> supplier);
 
