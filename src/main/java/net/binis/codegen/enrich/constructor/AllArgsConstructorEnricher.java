@@ -30,7 +30,7 @@ import net.binis.codegen.enrich.Enricher;
         severity = AugmentTargetTypeSeverity.WARNING,
         parameters = @CodeAugmentParameters(
                 filter = "FIELDS|!STATIC",
-                suppresses = "Variable '{name}' might not have been initialized"
+                suppresses = "Field '{name}' might not have been initialized"
         ),
         description = "Adds <b>constructor</b> with all <u>non static</u> fields as parameters")
 @Default("net.binis.codegen.enrich.handler.constructor.AllArgsConstructorEnricherHandler")
