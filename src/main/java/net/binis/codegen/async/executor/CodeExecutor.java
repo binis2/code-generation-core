@@ -23,6 +23,7 @@ package net.binis.codegen.async.executor;
 import lombok.extern.slf4j.Slf4j;
 import net.binis.codegen.async.AsyncDispatcher;
 import net.binis.codegen.async.monitoring.DispatcherMonitor;
+import net.binis.codegen.exception.AsyncException;
 import net.binis.codegen.factory.CodeFactory;
 
 import java.util.Map;
@@ -34,12 +35,18 @@ import java.util.concurrent.Executor;
 public class CodeExecutor {
 
     public static final String DEFAULT = "default";
+    public static final String VIRTUAL = "virtual";
 
     private static final Dispatcher dispatcher = new Dispatcher();
 
     static {
         CodeFactory.registerType(AsyncDispatcher.class, CodeFactory.singleton(CodeExecutor.defaultDispatcher()), null);
         registerDefaultExecutor(Executors.defaultExecutor(DEFAULT));
+        try {
+            registerExecutor(VIRTUAL, Executors.newVirtualThreadPerTaskExecutor());
+        } catch (AsyncException e) {
+            registerExecutor(VIRTUAL, Executors.defaultExecutor(VIRTUAL));
+        }
     }
 
     public CodeExecutor() {

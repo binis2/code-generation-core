@@ -22,15 +22,22 @@ package net.binis.codegen.async.executor;
 
 import lombok.extern.slf4j.Slf4j;
 import net.binis.codegen.async.executor.impl.CodeGenThreadPoolExecutor;
+import net.binis.codegen.exception.AsyncException;
+import net.binis.codegen.tools.Reflection;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static java.util.Objects.nonNull;
 
 @Slf4j
 public abstract class Executors {
 
-    private static final RejectedExecutionHandler defaultHandler =
+    protected static final RejectedExecutionHandler defaultHandler =
             new ThreadPoolExecutor.AbortPolicy();
+
+    protected static final Method newVirtualThreadPerTaskExecutor = Reflection.findMethod("newVirtualThreadPerTaskExecutor", java.util.concurrent.Executors.class);
 
     public static Executor wrappedExecutor(String flow, Executor task) {
         BlockingQueue<Runnable> queue = new LinkedTransferQueue<>() {
@@ -76,6 +83,14 @@ public abstract class Executors {
                 new DefaultThreadFactory(flow),
                 defaultHandler,
                 defaultTask(flow));
+    }
+
+    public static Executor newVirtualThreadPerTaskExecutor() {
+        if (nonNull(newVirtualThreadPerTaskExecutor)) {
+            return Reflection.invokeStatic(newVirtualThreadPerTaskExecutor);
+        } else {
+            throw new AsyncException("Virtual threads are supported in Java 21 or later!");
+        }
     }
 
     public static Executor singleThreadedExecutor(String flow) {

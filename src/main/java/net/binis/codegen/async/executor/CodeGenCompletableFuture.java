@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 
 public class CodeGenCompletableFuture<T> extends CompletableFuture<T> {
 
-    private final Executor executor;
+    protected final Executor executor;
 
     public CodeGenCompletableFuture(Executor executor) {
         this.executor = executor;

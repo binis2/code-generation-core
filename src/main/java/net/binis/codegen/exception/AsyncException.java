@@ -1,4 +1,4 @@
-package net.binis.codegen.factory;
+package net.binis.codegen.exception;
 
 /*-
  * #%L
@@ -20,26 +20,18 @@ package net.binis.codegen.factory;
  * #L%
  */
 
-import net.binis.codegen.async.Async;
-import org.junit.jupiter.api.Test;
+public class AsyncException extends RuntimeException {
 
-import java.util.concurrent.ExecutionException;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-class AsyncTest {
-
-    @Test
-    void test() throws ExecutionException, InterruptedException {
-        var f = Async.start().collect(() -> 5);
-        var r = f.get();
-        assertEquals(5, r);
+    public AsyncException(String s) {
+        super(s);
     }
 
-    @Test
-    void testVirtual() throws ExecutionException, InterruptedException {
-        var f = Async.virtual().collect(() -> 5);
-        var r = f.get();
-        assertEquals(5, r);
+    public AsyncException(Exception e) {
+        super(e);
     }
+
+    public AsyncException(String s, Exception e) {
+        super(s, e);
+    }
+
 }
