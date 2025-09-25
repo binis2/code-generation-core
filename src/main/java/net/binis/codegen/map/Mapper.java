@@ -149,6 +149,10 @@ public class Mapper {
         registerMapper(source, destination, MappingStrategy.GETTERS_SETTERS, func);
     }
 
+    public static <S, D, K> void registerMapper(Class<S> source, Class<D> destination, K key, BiFunction<S, D, D> func) {
+        registerMapper(source, destination, MappingStrategy.GETTERS_SETTERS, key, func);
+    }
+
     public static <S, D> void registerMapperClass(Class<S> source, Class<D> destination, BiFunction<S, Class<D>, D> func) {
         registerMapperClass(source, destination, MappingStrategy.GETTERS_SETTERS, func);
     }
