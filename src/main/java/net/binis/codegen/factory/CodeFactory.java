@@ -400,9 +400,12 @@ public class CodeFactory {
         return result;
     }
 
-
     public static <T extends CodeEnum> T enumValueOf(Class<T> cls, String name) {
         var registry = enumRegistry.get(cls);
+        if (isNull(registry) && CodeEnum.class.isAssignableFrom(cls)) {
+            Reflection.invokeStatic("values", cls);
+            registry = enumRegistry.get(cls);
+        }
         if (nonNull(registry)) {
             return (T) registry.values.get(name);
         }
@@ -411,6 +414,10 @@ public class CodeFactory {
 
     public static <T extends CodeEnum> T enumValueOf(Class<T> cls, int ordinal) {
         var registry = enumRegistry.get(cls);
+        if (isNull(registry) && CodeEnum.class.isAssignableFrom(cls)) {
+            Reflection.invokeStatic("values", cls);
+            registry = enumRegistry.get(cls);
+        }
         if (nonNull(registry)) {
             return (T) registry.ordinals.get(ordinal);
         }
