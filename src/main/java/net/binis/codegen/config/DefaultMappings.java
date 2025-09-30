@@ -85,6 +85,23 @@ public abstract class DefaultMappings {
         Mapper.registerProducerMapper(Number.class, Float.class, (s, d) -> s.floatValue());
         Mapper.registerProducerMapper(Number.class, double.class, (s, d) -> s.doubleValue());
         Mapper.registerProducerMapper(Number.class, Double.class, (s, d) -> s.doubleValue());
+        //Boolean conversion
+        Mapper.registerProducerMapper(Boolean.class, boolean.class, (s, d) -> s);
+        Mapper.registerProducerMapper(boolean.class, Boolean.class, (s, d) -> s);
+        Mapper.registerProducerMapper(Boolean.class, int.class, (s, d) -> s ? 1 : 0);
+        Mapper.registerProducerMapper(Boolean.class, Integer.class, (s, d) -> s ? 1 : 0);
+        Mapper.registerProducerMapper(Boolean.class, long.class, (s, d) -> s ? 1L : 0);
+        Mapper.registerProducerMapper(Boolean.class, Long.class, (s, d) -> s ? 1L : 0);
+        Mapper.registerProducerMapper(Boolean.class, byte.class, (s, d) -> s ? (byte) 1 : 0);
+        Mapper.registerProducerMapper(Boolean.class, Byte.class, (s, d) -> s ? (byte) 1 : 0);
+        Mapper.registerProducerMapper(Boolean.class, short.class, (s, d) -> s ? (short) 1 : 0);
+        Mapper.registerProducerMapper(Boolean.class, Short.class, (s, d) -> s ? (short) 1 : 0);
+        Mapper.registerProducerMapper(Boolean.class, char.class, (s, d) -> s ? (char) 1 : 0);
+        Mapper.registerProducerMapper(Boolean.class, Character.class, (s, d) -> s ? (char) 1 : 0);
+        Mapper.registerProducerMapper(Boolean.class, float.class, (s, d) -> s ? 1.0f : 0);
+        Mapper.registerProducerMapper(Boolean.class, Float.class, (s, d) -> s ? 1.0f : 0);
+        Mapper.registerProducerMapper(Boolean.class, double.class, (s, d) -> s ? 1.0 : 0);
+        Mapper.registerProducerMapper(Boolean.class, Double.class, (s, d) -> s ? 1.0 : 0);
         //String conversion
         Mapper.registerProducerMapper(Object.class, String.class, (s, d) -> s.toString());
         //Enum conversion
@@ -93,6 +110,139 @@ public abstract class DefaultMappings {
         Mapper.registerMapperClass(Number.class, CodeEnum.class, (s, d) -> CodeFactory.enumValueOf(d, s.intValue()));
         //UUID
         Mapper.registerMapperClass(String.class, UUID.class, (s, d) -> UUID.fromString(s));
+        //Collections
+        Mapper.registerMapper(Collection.class, List.class, (s, d) -> {
+            d.addAll(s);;
+            return d;
+        });
+        Mapper.registerMapper(Collection.class, Set.class, (s, d) -> {
+            d.addAll(s);;
+            return d;
+        });
+        Mapper.registerMapper(Object.class, List.class, (s, d) -> {
+            d.add(s);;
+            return d;
+        });
+        Mapper.registerMapper(Object.class, Set.class, (s, d) -> {
+            d.add(s);;
+            return d;
+        });
+        Mapper.registerMapper(Map.class, Map.class, (s, d) -> {
+            d.putAll(s);
+            return d;
+        });
+        Mapper.registerMapper(int[].class, List.class, (s, d) -> {
+            for (var item : s) {
+                d.add(item);
+            }
+            return d;
+        });
+        Mapper.registerMapper(long[].class, List.class, (s, d) -> {
+            for (var item : s) {
+                d.add(item);
+            }
+            return d;
+        });
+        Mapper.registerMapper(byte[].class, List.class, (s, d) -> {
+            for (var item : s) {
+                d.add(item);
+            }
+            return d;
+        });
+        Mapper.registerMapper(int[].class, List.class, (s, d) -> {
+            for (var item : s) {
+                d.add(item);
+            }
+            return d;
+        });
+        Mapper.registerMapper(short[].class, List.class, (s, d) -> {
+            for (var item : s) {
+                d.add(item);
+            }
+            return d;
+        });
+        Mapper.registerMapper(boolean[].class, List.class, (s, d) -> {
+            for (var item : s) {
+                d.add(item);
+            }
+            return d;
+        });
+        Mapper.registerMapper(char[].class, List.class, (s, d) -> {
+            for (var item : s) {
+                d.add(item);
+            }
+            return d;
+        });
+        Mapper.registerMapper(double[].class, List.class, (s, d) -> {
+            for (var item : s) {
+                d.add(item);
+            }
+            return d;
+        });
+        Mapper.registerProducerMapper(Collection.class, int[].class, (s, d) -> {
+            var result = new int[s.size()];
+            var source = s.toArray();
+            for (var i = 0; i < s.size(); i++) {
+                result[i] = Mapper.convert(source[i], int.class);
+            }
+            return result;
+        });
+        Mapper.registerProducerMapper(Collection.class, long[].class, (s, d) -> {
+            var result = new long[s.size()];
+            var source = s.toArray();
+            for (var i = 0; i < s.size(); i++) {
+                result[i] = Mapper.convert(source[i], long.class);
+            }
+            return result;
+        });
+        Mapper.registerProducerMapper(Collection.class, byte[].class, (s, d) -> {
+            var result = new byte[s.size()];
+            var source = s.toArray();
+            for (var i = 0; i < s.size(); i++) {
+                result[i] = Mapper.convert(source[i], byte.class);
+            }
+            return result;
+        });
+        Mapper.registerProducerMapper(Collection.class, short[].class, (s, d) -> {
+            var result = new short[s.size()];
+            var source = s.toArray();
+            for (var i = 0; i < s.size(); i++) {
+                result[i] = Mapper.convert(source[i], short.class);
+            }
+            return result;
+        });
+        Mapper.registerProducerMapper(Collection.class, boolean[].class, (s, d) -> {
+            var result = new boolean[s.size()];
+            var source = s.toArray();
+            for (var i = 0; i < s.size(); i++) {
+                result[i] = Mapper.convert(source[i], boolean.class);
+            }
+            return result;
+        });
+        Mapper.registerProducerMapper(Collection.class, char[].class, (s, d) -> {
+            var result = new char[s.size()];
+            var source = s.toArray();
+            for (var i = 0; i < s.size(); i++) {
+                result[i] = Mapper.convert(source[i], char.class);
+            }
+            return result;
+        });
+        Mapper.registerProducerMapper(Collection.class, float[].class, (s, d) -> {
+            var result = new float[s.size()];
+            var source = s.toArray();
+            for (var i = 0; i < s.size(); i++) {
+                result[i] = Mapper.convert(source[i], float.class);
+            }
+            return result;
+        });
+        Mapper.registerProducerMapper(Collection.class, double[].class, (s, d) -> {
+            var result = new double[s.size()];
+            var source = s.toArray();
+            for (var i = 0; i < s.size(); i++) {
+                result[i] = Mapper.convert(source[i], double.class);
+            }
+            return result;
+        });
         //Java Serialization
         Mapper.registerProducerMapperClass(byte[].class, Serializable.class, (s, d) -> {
             try (ObjectInputStream is = new ObjectInputStream(new ByteArrayInputStream(s))) {

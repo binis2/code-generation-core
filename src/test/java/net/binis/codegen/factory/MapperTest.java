@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.*;
 import java.time.temporal.*;
+import java.util.List;
 import java.util.Map;
 
 import static java.time.temporal.ChronoField.*;
@@ -290,6 +291,67 @@ class MapperTest {
 
         assertThrows(NullPointerException.class, () -> Mapper.map(1, null));
         assertThrows(NullPointerException.class, () -> Mapper.convert(1, null));
+    }
+
+    @Test
+    void testCollectionToList() {
+        var result = Mapper.convert(List.of(1,2,3), List.class);
+
+        assertNotNull(result);
+        assertEquals(3, result.size());
+    }
+
+    @Test
+    void testArrayToList() {
+        var result = Mapper.convert(new int[] {1,2,3}, List.class);
+
+        assertNotNull(result);
+        assertEquals(3, result.size());
+
+        var result2 = Mapper.convert(new short[] {1,2,3}, List.class);
+
+        assertNotNull(result2);
+        assertEquals(3, result2.size());
+    }
+
+    @Test
+    void testObjectToList() {
+        var result = Mapper.convert(new MapperTest(), List.class);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+
+    }
+
+    @Test
+    void testListToArray() {
+        var result = Mapper.convert(List.of(1,2,3), int[].class);
+
+        assertNotNull(result);
+        assertEquals(3, result.length);
+    }
+
+    @Test
+    void testBooleanListToArray() {
+        var result = Mapper.convert(List.of(true,false,true), boolean[].class);
+
+        assertNotNull(result);
+        assertEquals(3, result.length);
+        assertTrue(result[0]);
+        assertFalse(result[1]);
+        assertTrue(result[2]);
+    }
+
+    @Test
+    void testBooleanToInt() {
+        var result = Mapper.convert(true, int.class);
+
+        assertEquals(1, result);
+
+        var f = Mapper.convert(true, float.class);
+
+        assertEquals(1.0f, f);
+
     }
 
     private int getOffset() {

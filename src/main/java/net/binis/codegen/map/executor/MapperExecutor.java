@@ -195,39 +195,60 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
         List<Mapping> mappings = (List) CodeFactory.create(MapperFactory.class).findMappings(source, destination, key);
 
         if (!mappings.isEmpty()) {
-            var first = mappings.get(0);
-            if (first.getSource().isInterface()) {
-                var list = new ArrayList<Mapping>();
-                for (var item : mappings) {
-                    list.add(item);
-                    if (!item.getSource().isInterface()) {
-                        break;
-                    }
-                }
-                accessors.put(first.getSource().getCanonicalName(), (s, d, w) -> {
-                    Object result = d;
-                    for (var m : list) {
-                        if (m instanceof ClassMapping c && c.isClass()) {
-                            result = m.map(s, destination);
-                        } else {
-                            result = m.map(s, result);
-                        }
-                    }
-                    return result;
+            var mapping = deside(mappings);
+            if (mapping instanceof ClassMapping c && c.isClass()) {
+                accessors.put(mapping.getSource().getCanonicalName(), (s, d, w) -> {
+                    return mapping.map(s, destination);
                 });
-
             } else {
-                if (first instanceof ClassMapping c && c.isClass()) {
-                    accessors.put(first.getSource().getCanonicalName(), (s, d, w) -> {
-                        return first.map(s, destination);
-                    });
-                } else {
-                    accessors.put(first.getSource().getCanonicalName(), (s, d, w) -> {
-                        return first.map(s, d);
-                    });
-                }
+                accessors.put(mapping.getSource().getCanonicalName(), (s, d, w) -> {
+                    return mapping.map(s, d);
+                });
             }
         }
+    }
+
+    private Mapping deside(List<Mapping> mappings) {
+        if (mappings.size() == 1) {
+            return mappings.get(0);
+        }
+        var shortList = new ArrayList<Mapping>();
+        shortList.add(mappings.get(0));
+        var current = shortList.get(0);
+        for (var i = 1; i < mappings.size(); i++) {
+            var mapping = mappings.get(i);
+            if (mapping.getSource().equals(current.getSource())) {
+                shortList.add(mapping);
+            } else if (current.getSource().isAssignableFrom(mapping.getSource())) {
+                shortList.clear();
+                shortList.add(mapping);
+                current = mapping;
+            } else {
+                //Should never happen
+                throw new MapperException("Unable to deside mapping (" + source.getCanonicalName() + "->" + destination.getCanonicalName() + ")!");
+            }
+        }
+        if (shortList.size() == 1) {
+            return shortList.get(0);
+        }
+
+        var shortShortList = new ArrayList<Mapping>();
+        shortShortList.add(shortList.get(0));
+        current = shortShortList.get(0);
+        for (var i = 1; i < shortList.size(); i++) {
+            var mapping = shortList.get(i);
+            if (mapping.getSource().equals(current.getSource())) {
+                shortShortList.add(mapping);
+            } else if (current.getSource().isAssignableFrom(mapping.getSource())) {
+                shortShortList.clear();
+                shortShortList.add(mapping);
+                current = mapping;
+            } else {
+                //Should never happen
+                throw new MapperException("Unable to deside mapping (" + source.getCanonicalName() + "->" + destination.getCanonicalName() + ")!");
+            }
+        }
+        return shortShortList.get(0);
     }
 
     protected void matchGettersSetters(Map<String, TriFunction> accessors, Class<?> source, Class<?> destination) {
