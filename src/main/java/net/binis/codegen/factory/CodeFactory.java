@@ -91,6 +91,11 @@ public class CodeFactory {
             if (nonNull(result)) {
                 return result;
             }
+
+            if (CodeEnum.class.isAssignableFrom(cls) && params.length == 0) {
+                params = new Object[]{-1, ""};
+            }
+
             result = defaultCreate(cls, cls, params);
             if (isNull(result)) {
                 var parent = cls.getDeclaringClass();
@@ -583,6 +588,7 @@ public class CodeFactory {
         } else if (nonNull(impl)) {
             registerType(cls, par -> instantiate(impl, par));
             return (T) instantiate(impl, params);
+
         }
         return null;
     }
