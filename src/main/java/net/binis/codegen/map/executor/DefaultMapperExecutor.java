@@ -309,10 +309,18 @@ public class DefaultMapperExecutor implements MapperFactory {
         if (nonNull(mapping)) {
             map.putIfAbsent(source, mapping);
         } else {
-            for (var intf : destination.getInterfaces()) {
+            if (source.getInterfaces().length > 0) {
+                for (var intf : source.getInterfaces()) {
+                    for (var dIntf : destination.getInterfaces()) {
+                        findMappings(map, intf, dIntf, key);
+                        findReverseMappings((Map) map, intf, dIntf, key);
+                        findReverseMappings((Map) map, source, destination, key);
+                    }
+                    findReverseMappings((Map) map, intf, destination, key);
+                }
+            } else {
                 for (var dIntf : destination.getInterfaces()) {
-                    findMappings(map, intf, dIntf, key);
-                    findReverseMappings((Map) map, intf, dIntf, key);
+                    findReverseMappings((Map) map, source, dIntf, key);
                 }
             }
 
