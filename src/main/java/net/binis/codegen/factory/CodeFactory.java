@@ -102,7 +102,11 @@ public class CodeFactory {
                 if (!cls.isInterface()) {
                     try {
                         var ctor = findConstructor(cls, params);
-                        result = (T) ctor.newInstance(params);
+                        try {
+                            result = (T) ctor.newInstance(params);
+                        } catch (Exception e) {
+                            log.error("Constructor invocation failed:", e);
+                        }
                         var ctorMap = new HashMap<Integer, Constructor>();
                         ctorMap.put(params.length, ctor);
 
