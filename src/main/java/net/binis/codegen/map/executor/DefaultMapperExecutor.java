@@ -315,8 +315,12 @@ public class DefaultMapperExecutor implements MapperFactory {
                         findMappings(map, intf, dIntf, key);
                         findReverseMappings((Map) map, intf, dIntf, key);
                         findReverseMappings((Map) map, source, destination, key);
+                        findJoinMappings(map, intf, dIntf, key);
+                        findJoinMappings(map, source, dIntf, key);
+
                     }
                     findReverseMappings((Map) map, intf, destination, key);
+                    findJoinMappings(map, intf, destination, key);
                 }
             } else {
                 for (var dIntf : destination.getInterfaces()) {

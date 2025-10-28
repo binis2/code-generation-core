@@ -105,6 +105,11 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
             buildMatcher(accessors);
         }
 
+        buildMapper(accessors);
+    }
+
+    protected void buildMapper(Map<String, TriFunction> accessors) {
+        List<TriFunction> list;
         if (accessors.isEmpty()) {
             mapper = (s, d) ->
                     (isNull(d) && destination.isInstance(s)) ? destination.cast(s) : d;
@@ -141,9 +146,6 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
     }
 
     protected void discoverFields(Map<String, Field> fields, Class<?> cls) {
-        Arrays.stream(cls.getDeclaredFields())
-                .filter(this::shouldNotSkip)
-                .forEach(field -> fields.computeIfAbsent(field.getName(), k -> field));
         Arrays.stream(cls.getDeclaredFields())
                 .filter(this::shouldNotSkip)
                 .forEach(field -> fields.computeIfAbsent(field.getName(), k -> field));
@@ -288,6 +290,12 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
                 }
             }
         }
+        if (!Object.class.equals(source) && nonNull(source.getSuperclass()) && !Object.class.equals(source.getSuperclass())) {
+            matchGettersSetters(accessors, source.getSuperclass(), destination);
+        }
+        if (!Object.class.equals(destination) && nonNull(destination.getSuperclass()) && !Object.class.equals(destination.getSuperclass())) {
+            matchGettersSetters(accessors, source, destination.getSuperclass());
+        }
     }
 
     protected void matchGettersWithers(Map<String, TriFunction> accessors, Class<?> source, Class<?> destination) {
@@ -336,6 +344,13 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
                     }
                 }
             }
+
+            if (!Object.class.equals(source) && nonNull(source.getSuperclass()) && !Object.class.equals(source.getSuperclass())) {
+                matchGettersWithers(accessors, source.getSuperclass(), destination);
+            }
+            if (!Object.class.equals(destination) && nonNull(destination.getSuperclass()) && !Object.class.equals(destination.getSuperclass())) {
+                matchGettersWithers(accessors, source, destination.getSuperclass());
+            }
         } catch (Exception e) {
             //Do nothing
         }
@@ -378,6 +393,12 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
                     }
                 }
             }
+        }
+        if (!Object.class.equals(source) && nonNull(source.getSuperclass()) && !Object.class.equals(source.getSuperclass())) {
+            matchGettersModifier(accessors, source.getSuperclass(), destination);
+        }
+        if (!Object.class.equals(destination) && nonNull(destination.getSuperclass()) && !Object.class.equals(destination.getSuperclass())) {
+            matchGettersModifier(accessors, source, destination.getSuperclass());
         }
     }
 
