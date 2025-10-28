@@ -105,7 +105,7 @@ public class CodeFactory {
                         try {
                             result = (T) ctor.newInstance(params);
                         } catch (Exception e) {
-                            log.error("Constructor invocation failed:", e);
+                            //Do nothing
                         }
                         var ctorMap = new HashMap<Integer, Constructor>();
                         ctorMap.put(params.length, ctor);
