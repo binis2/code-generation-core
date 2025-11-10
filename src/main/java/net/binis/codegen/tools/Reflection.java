@@ -51,18 +51,38 @@ public abstract class Reflection {
     @SuppressWarnings("unchecked")
     public static <T> Class<T> loadClass(String className) {
         try {
-            return Objects.nonNull(loader) ? (Class) loader.loadClass(className) : (Class) Class.forName(className);
+            return internalLoadClass(className);
         } catch (Throwable e) {
-            return null;
+            if (isNull(className)) {
+                return null;
+            }
+            var result = checkPrimitive(className);
+            if (isNull(result)) {
+                result = checkArray(className);
+            }
+            return result;
         }
     }
+
+    @SuppressWarnings("unchecked")
+    protected static <T> Class<T> internalLoadClass(String className) throws ClassNotFoundException {
+        return Objects.nonNull(loader) ? (Class) loader.loadClass(className) : (Class) Class.forName(className);
+    }
+
 
     @SuppressWarnings("unchecked")
     public static <T> Class<T> loadClass(ClassLoader loader, String className) {
         try {
             return (Class) loader.loadClass(className);
         } catch (Throwable e) {
-            return null;
+            if (isNull(className)) {
+                return null;
+            }
+            var result = checkPrimitive(className);
+            if (isNull(result)) {
+                result = checkArray(className);
+            }
+            return result;
         }
     }
 
@@ -389,6 +409,70 @@ public abstract class Reflection {
 
         private Parent() {
         }
+    }
+
+    protected static Class checkPrimitive(String className) {
+        return switch (className) {
+            case "int" -> int.class;
+            case "double" -> double.class;
+            case "boolean" -> boolean.class;
+            case "byte" -> byte.class;
+            case "char" -> char.class;
+            case "float" -> float.class;
+            case "long" -> long.class;
+            case "short" -> short.class;
+            default -> null;
+        };
+    }
+
+    protected static Class checkArray(String className) {
+        var arr = className.split("\\[");
+        if (arr.length > 1) {
+            var jvmNotation = new StringBuilder();
+            for (int i = 0; i < arr.length - 1; i++) {
+                jvmNotation.append("[");
+            }
+
+            // Add type code
+            switch (arr[0]) {
+                case "int":
+                    jvmNotation.append("I");
+                    break;
+                case "byte":
+                    jvmNotation.append("B");
+                    break;
+                case "short":
+                    jvmNotation.append("S");
+                    break;
+                case "long":
+                    jvmNotation.append("J");
+                    break;
+                case "float":
+                    jvmNotation.append("F");
+                    break;
+                case "double":
+                    jvmNotation.append("D");
+                    break;
+                case "boolean":
+                    jvmNotation.append("Z");
+                    break;
+                case "char":
+                    jvmNotation.append("C");
+                    break;
+                default:
+                    // Object type
+                    jvmNotation.append("L");
+                    jvmNotation.append(arr[0]);
+                    jvmNotation.append(";");
+            }
+
+            try {
+                return internalLoadClass(jvmNotation.toString());
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return null;
     }
 
 }

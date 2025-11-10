@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
 
 @CodeAnnotation
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE})
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE})
 public @interface Ignore {
 
     boolean forField() default false;
@@ -39,5 +39,6 @@ public @interface Ignore {
     boolean forProjection() default false;
     boolean forToString() default false;
     boolean forSerialization() default false;
+    boolean forValidation() default false;
 
 }

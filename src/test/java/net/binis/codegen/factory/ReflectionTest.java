@@ -53,6 +53,25 @@ class ReflectionTest {
         assertNotNull(Reflection.findConstructor(TestConstructor.class, String.class, Integer.class));
     }
 
+    @Test
+    void testArrays() {
+        var cls = Reflection.loadClass("int");
+        assertNotNull(cls);
+        cls = Reflection.loadClass("int[]");
+        assertNotNull(cls);
+        assertTrue(cls.isArray());
+        cls = Reflection.loadClass("double[][]");
+        assertNotNull(cls);
+        assertTrue(cls.isArray());
+        assertEquals("double[][]", cls.getCanonicalName());
+        cls = Reflection.loadClass( "net.binis.codegen.factory.ReflectionTest$TestInterface[][][]");
+        assertNotNull(cls);
+        assertTrue(cls.isArray());
+        assertEquals("net.binis.codegen.factory.ReflectionTest.TestInterface[][][]", cls.getCanonicalName());
+
+    }
+
+
     private interface TestInterface {
 
         void getNotWorking1();
