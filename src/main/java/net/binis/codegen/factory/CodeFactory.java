@@ -224,7 +224,7 @@ public class CodeFactory {
 
     public static void registerType(Class<?> intf, ObjectFactory impl, EmbeddedObjectFactory modifier) {
         var reg = registry.get(intf);
-        if (isNull(reg) || isNull(reg.getImplClass())) {
+        if (isNull(reg) || (isNull(reg.getImplClass()) && isNull(reg.getImplFactory()))) {
             forceRegisterType(intf, impl, modifier);
         }
     }
