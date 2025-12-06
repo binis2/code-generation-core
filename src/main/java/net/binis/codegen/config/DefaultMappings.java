@@ -24,6 +24,8 @@ import net.binis.codegen.annotation.CodeConfiguration;
 import net.binis.codegen.exception.MapperException;
 import net.binis.codegen.factory.CodeFactory;
 import net.binis.codegen.map.Mapper;
+import net.binis.codegen.map.MapperFactory;
+import net.binis.codegen.map.executor.DefaultMapperExecutor;
 import net.binis.codegen.objects.base.enumeration.CodeEnum;
 import net.binis.codegen.tools.Reflection;
 import net.binis.codegen.tools.TypeUtils;
@@ -31,6 +33,7 @@ import net.binis.codegen.tools.TypeUtils;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
@@ -45,6 +48,7 @@ public abstract class DefaultMappings {
     protected static Map<Class, Function<Object, Map>> objectToMapCache = new ConcurrentHashMap<>();
 
     public static void initialize() {
+        CodeFactory.registerType(MapperFactory.class, CodeFactory.singleton(new DefaultMapperExecutor()));
         //Creation of primitive types and wrappers
         CodeFactory.registerType(int.class, () -> 0);
         CodeFactory.registerType(long.class, () -> 0L);
@@ -260,6 +264,43 @@ public abstract class DefaultMappings {
             }
         });
         Mapper.registerProducerMapperClass(Object.class, Map.class, ObjectToMap());
+
+        //Java Time
+        Mapper.registerProducerMapperClass(String.class, OffsetDateTime.class, (s, d) -> {
+            try {
+                return OffsetDateTime.parse(s);
+            } catch (Exception e) {
+                return null;
+            }
+        });
+        Mapper.registerProducerMapperClass(String.class, OffsetTime.class, (s, d) -> {
+            try {
+                return OffsetTime.parse(s);
+            } catch (Exception e) {
+                return null;
+            }
+        });
+        Mapper.registerProducerMapperClass(String.class, LocalDateTime.class, (s, d) -> {
+            try {
+                return LocalDateTime.parse(s);
+            } catch (Exception e) {
+                return null;
+            }
+        });
+        Mapper.registerProducerMapperClass(String.class, LocalDate.class, (s, d) -> {
+            try {
+                return LocalDate.parse(s);
+            } catch (Exception e) {
+                return null;
+            }
+        });
+        Mapper.registerProducerMapperClass(String.class, LocalTime.class, (s, d) -> {
+            try {
+                return LocalTime.parse(s);
+            } catch (Exception e) {
+                return null;
+            }
+        });
     }
 
     protected static BiFunction<Object, Class<Map>, Map> ObjectToMap() {
