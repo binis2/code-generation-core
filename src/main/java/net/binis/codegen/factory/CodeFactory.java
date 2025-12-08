@@ -241,6 +241,10 @@ public class CodeFactory {
         registerType(intf, params -> impl.get(), modifier);
     }
 
+    public static void forceRegisterType(Class<?> intf, Supplier impl) {
+        forceRegisterType(intf, params -> impl.get(), null);
+    }
+
     public static void forceRegisterType(Class<?> intf, ObjectFactory impl, EmbeddedObjectFactory modifier) {
         registry.put(intf, RegistryEntry.builder().implFactory(impl).orgImplFactory(impl).modifierFactory(modifier).orgModifierFactory(modifier).build());
     }
