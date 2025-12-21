@@ -163,7 +163,9 @@ public class CodeFactory {
                         throw cfe.getCause();
                     }
 
-                    log.error("Can't instantiate class: {}", defaultClass);
+                    if (!CodeEnum.class.isAssignableFrom(cls)) {
+                        log.error("Can't instantiate class: {}", defaultClass);
+                    }
                 }
             } else {
                 return (T) obj;
