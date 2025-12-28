@@ -108,6 +108,22 @@ public abstract class DefaultMappings {
         Mapper.registerProducerMapper(Boolean.class, Double.class, (s, d) -> s ? 1.0 : 0);
         //String conversion
         Mapper.registerProducerMapper(Object.class, String.class, (s, d) -> s.toString());
+        Mapper.registerProducerMapper(String.class, int.class, (s, d) -> Integer.parseInt(s));
+        Mapper.registerProducerMapper(String.class, Integer.class, (s, d) -> Integer.parseInt(s));
+        Mapper.registerProducerMapper(String.class, long.class, (s, d) -> Long.parseLong(s));
+        Mapper.registerProducerMapper(String.class, Long.class, (s, d) -> Long.parseLong(s));
+        Mapper.registerProducerMapper(String.class, float.class, (s, d) -> Float.parseFloat(s));
+        Mapper.registerProducerMapper(String.class, Float.class, (s, d) -> Float.parseFloat(s));
+        Mapper.registerProducerMapper(String.class, double.class, (s, d) -> Double.parseDouble(s));
+        Mapper.registerProducerMapper(String.class, Double.class, (s, d) -> Double.parseDouble(s));
+        Mapper.registerProducerMapper(String.class, short.class, (s, d) -> Short.parseShort(s));
+        Mapper.registerProducerMapper(String.class, Short.class, (s, d) -> Short.parseShort(s));
+        Mapper.registerProducerMapper(String.class, byte.class, (s, d) -> Byte.parseByte(s));
+        Mapper.registerProducerMapper(String.class, Byte.class, (s, d) -> Byte.parseByte(s));
+        Mapper.registerProducerMapper(String.class, boolean.class, (s, d) -> Boolean.parseBoolean(s));
+        Mapper.registerProducerMapper(String.class, Boolean.class, (s, d) -> Boolean.parseBoolean(s));
+        Mapper.registerProducerMapper(String.class, char.class, (s, d) -> s.charAt(0));
+        Mapper.registerProducerMapper(String.class, Character.class, (s, d) -> s.charAt(0));
         //Enum conversion
         Mapper.registerMapperClass(String.class, Enum.class, (s, d) -> Enum.valueOf(d, s));
         Mapper.registerMapperClass(String.class, CodeEnum.class, (s, d) -> CodeFactory.enumValueOf(d, s));
