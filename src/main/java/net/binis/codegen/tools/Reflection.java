@@ -475,4 +475,25 @@ public abstract class Reflection {
         return null;
     }
 
+    public static int getJavaVersion() {
+        String version = System.getProperty("java.version");
+        if (version.startsWith("1.")) {
+            // Java 8 and earlier have format 1.x
+            version = version.substring(2, 3);
+        } else {
+            // Java 9 and later
+            int dot = version.indexOf(".");
+            if (dot != -1) {
+                version = version.substring(0, dot);
+            } else {
+                int dash = version.indexOf("-");
+                if (dash != -1) {
+                    version = version.substring(0, dash);
+                }
+            }
+        }
+        return Integer.parseInt(version);
+    }
+
+
 }
