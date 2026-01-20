@@ -23,9 +23,10 @@ package net.binis.codegen.objects.impl;
 import net.binis.codegen.factory.CodeFactory;
 import net.binis.codegen.objects.Pair;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class PairImpl<K, V> implements Pair<K, V> {
+public class PairImpl<K, V> implements Pair<K, V>, Serializable {
 
     static {
         CodeFactory.registerType(Pair.class, PairImpl::new, null);
