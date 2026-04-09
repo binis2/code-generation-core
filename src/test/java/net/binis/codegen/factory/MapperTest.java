@@ -354,6 +354,15 @@ class MapperTest {
 
     }
 
+    @Test
+    void testBoolean() {
+        assertNull(Mapper.convert(null, Boolean.class));
+        assertTrue(Mapper.convert(true, Boolean.class));
+        assertTrue(Mapper.convert(true, boolean.class));
+        assertTrue(Mapper.convert("true", boolean.class));
+        assertFalse(Mapper.convert(null, boolean.class));
+    }
+
     private int getOffset() {
         return ZoneId.of("Europe/Sofia").getRules().getOffset(LocalDateTime.now()).getTotalSeconds();
     }

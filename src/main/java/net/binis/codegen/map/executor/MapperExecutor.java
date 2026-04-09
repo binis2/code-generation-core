@@ -112,7 +112,7 @@ public class MapperExecutor<T> implements Mapping<Object, T> {
         List<TriFunction> list;
         if (accessors.isEmpty()) {
             mapper = (s, d) ->
-                    (isNull(d) && destination.isInstance(s)) ? destination.cast(s) : d;
+                    destination.isInstance(s) ? destination.cast(s) : d;
         } else {
             list = accessors.values().stream().toList();
 
